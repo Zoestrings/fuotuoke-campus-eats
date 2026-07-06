@@ -14,6 +14,8 @@ export default function OrderManagement({ orders = [], onDelete, onUpdateStatus 
   const [editOrderType, setEditOrderType] = useState("pickup");
   const [editFaculty, setEditFaculty] = useState("");
   const [editStatus, setEditStatus] = useState("Received");
+  const [editRiderName, setEditRiderName] = useState("");
+  const [editRiderPhone, setEditRiderPhone] = useState("");
 
   const filtered = orders.filter(o => {
     const matchesSearch = String(o.id).includes(search) ||
@@ -31,6 +33,8 @@ export default function OrderManagement({ orders = [], onDelete, onUpdateStatus 
     setEditOrderType(order.type || "pickup");
     setEditFaculty(order.faculty || "");
     setEditStatus(order.status || "Received");
+    setEditRiderName(order.assignedRiderName || "");
+    setEditRiderPhone(order.assignedRiderPhone || "");
     setIsEditOpen(true);
   };
 
@@ -48,7 +52,9 @@ export default function OrderManagement({ orders = [], onDelete, onUpdateStatus 
       total: Number(editTotal),
       type: editOrderType,
       faculty: editOrderType === "delivery" ? editFaculty.trim() : null,
-      status: editStatus
+      status: editStatus,
+      assignedRiderName: editOrderType === "delivery" && editRiderName.trim() ? editRiderName.trim() : null,
+      assignedRiderPhone: editOrderType === "delivery" && editRiderPhone.trim() ? editRiderPhone.trim() : null
     };
 
     onUpdateStatus(editOrderId, editStatus, updatedFields);
@@ -121,7 +127,15 @@ export default function OrderManagement({ orders = [], onDelete, onUpdateStatus 
                   <td style={{ padding: "14px 10px", fontSize: ".86rem" }}>{o.outlet?.name}</td>
                   <td style={{ padding: "14px 10px", fontSize: ".82rem" }}>
                     <div>{o.items.map(it => `${it.name} x${it.qty}`).join(", ")}</div>
-                    <div style={{ fontSize: ".72rem", color: "var(--text-muted)" }}>{o.type.toUpperCase()} · {o.time} {o.faculty ? `(${o.faculty})` : ""}</div>
+                    <div style={{ fontSize: ".72rem", color: "var(--text-muted)", display: "flex", gap: 6, flexWrap: "wrap", marginTop: 2 }}>
+                      <span>{o.type.toUpperCase()} · {o.time} {o.faculty ? `(${o.faculty})` : ""}</span>
+                      {o.assignedRiderName && (
+                        <span style={{ color: "var(--primary)", fontWeight: 700 }}>
+                          <i className="bi bi-bicycle" style={{ marginRight: 3 }} />
+                          {o.assignedRiderName} ({o.assignedRiderPhone})
+                        </span>
+                      )}
+                    </div>
                   </td>
                   <td style={{ padding: "14px 10px", fontWeight: 800, color: "var(--green-text)", fontSize: ".88rem" }}>
                     ₦{o.total.toLocaleString()}
@@ -234,15 +248,37 @@ export default function OrderManagement({ orders = [], onDelete, onUpdateStatus 
                 </div>
 
                 {editOrderType === "delivery" && (
-                  <div>
-                    <label className="form-label">Faculty Location</label>
-                    <input
-                      className="form-input"
-                      placeholder="e.g. Science Lecture Theatre"
-                      value={editFaculty}
-                      onChange={e => setEditFaculty(e.target.value)}
-                    />
-                  </div>
+                  <>
+                    <div>
+                      <label className="form-label">Faculty Location</label>
+                      <input
+                        className="form-input"
+                        placeholder="e.g. Science Lecture Theatre"
+                        value={editFaculty}
+                        onChange={e => setEditFaculty(e.target.value)}
+                      />
+                    </div>
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+                      <div>
+                        <label className="form-label">Assigned Rider Name</label>
+                        <input
+                          className="form-input"
+                          placeholder="Rider name"
+                          value={editRiderName}
+                          onChange={e => setEditRiderName(e.target.value)}
+                        />
+                      </div>
+                      <div>
+                        <label className="form-label">Rider Phone</label>
+                        <input
+                          className="form-input"
+                          placeholder="Rider phone"
+                          value={editRiderPhone}
+                          onChange={e => setEditRiderPhone(e.target.value)}
+                        />
+                      </div>
+                    </div>
+                  </>
                 )}
 
                 <div>

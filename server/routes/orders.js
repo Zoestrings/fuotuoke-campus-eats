@@ -22,6 +22,12 @@ router.get("/", authenticate, async (req, res, next) => {
       if (req.user.canteen) {
         filter["outlet.name"] = req.user.canteen;
       }
+    } else if (req.user.role === "rider") {
+      // Riders see delivery orders that are ready/preparing or assigned to them
+      filter.$or = [
+        { type: "delivery", status: { $in: ["Preparing", "Ready"] }, assignedRiderId: null },
+        { assignedRiderId: req.user.userId }
+      ];
     }
     // Admin sees all orders (no filter)
 
@@ -115,6 +121,98 @@ router.delete("/:id", authenticate, requireRole("admin"), async (req, res, next)
     const order = await Order.findByIdAndDelete(req.params.id);
     if (!order) return res.status(404).json({ error: "Order not found." });
     res.json({ success: true, message: "Order deleted." });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// ── PATCH /api/orders/:id/accept-delivery — Rider: accept delivery ──
+router.patch("/:id/accept-delivery", authenticate, requireRole("rider"), async (req, res, next) => {
+  try {
+    const { phone } = req.body;
+    const order = await Order.findById(req.params.id);
+    if (!order) return res.status(404).json({ error: "Order not found." });
+
+    if (order.type !== "delivery") {
+      return res.status(400).json({ error: "This is a pickup order, cannot be delivered." });
+    }
+
+    if (order.assignedRiderId) {
+      return res.status(400).json({ error: "This order has already been accepted by another rider." });
+    }
+
+    order.assignedRiderId = req.user.userId;
+    order.assignedRiderName = req.user.name;
+    order.assignedRiderPhone = phone || "08012345678";
+    order.status = "Out for Delivery";
+    await order.save();
+
+    res.json({ success: true, order });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// ── PATCH /api/orders/:id/complete-delivery — Rider: complete delivery ──
+router.patch("/:id/complete-delivery", authenticate, requireRole("rider"), async (req, res, next) => {
+  try {
+    const order = await Order.findById(req.params.id);
+    if (!order) return res.status(404).json({ error: "Order not found." });
+
+    if (order.assignedRiderId !== req.user.userId) {
+      return res.status(403).json({ error: "Access denied. You are not the assigned rider for this order." });
+    }
+
+    order.status = "Completed";
+    order.deliveryProgress = 100;
+    await order.save();
+
+    res.json({ success: true, order });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// ── PATCH /api/orders/:id/delivery-progress — Rider: update delivery progress ──
+router.patch("/:id/delivery-progress", authenticate, requireRole("rider"), async (req, res, next) => {
+  try {
+    const { progress } = req.body;
+    const order = await Order.findById(req.params.id);
+    if (!order) return res.status(404).json({ error: "Order not found." });
+
+    if (order.assignedRiderId !== req.user.userId) {
+      return res.status(403).json({ error: "Access denied. You are not the assigned rider for this order." });
+    }
+
+    order.deliveryProgress = Number(progress);
+    if (Number(progress) >= 100) {
+      order.status = "Completed";
+    }
+
+    await order.save();
+    res.json({ success: true, order });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// ── PATCH /api/orders/:id/review — Customer: submit order rating and review ──
+router.patch("/:id/review", authenticate, async (req, res, next) => {
+  try {
+    const { rating, review } = req.body;
+    const order = await Order.findById(req.params.id);
+    if (!order) return res.status(404).json({ error: "Order not found." });
+
+    // Ensure this customer placed the order
+    if (order.customerId !== req.user.userId) {
+      return res.status(403).json({ error: "Access denied. You can only review your own orders." });
+    }
+
+    order.rating = Number(rating);
+    order.review = (review || "").trim();
+    
+    await order.save();
+    res.json({ success: true, order });
   } catch (error) {
     next(error);
   }

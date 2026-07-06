@@ -16,17 +16,22 @@ import AdminDashboard from "./admin/views/Dashboard/AdminDashboard";
 import { AuthService as CustomerAuth } from "./customer/services/AuthService";
 import { AuthService as VendorAuth } from "./vendor/services/AuthService";
 import { AuthService as AdminAuth } from "./admin/services/AuthService";
+import RiderLogin from "./rider/views/Authentication/RiderLogin";
+import RiderDashboard from "./rider/views/Dashboard/RiderDashboard";
+import { AuthService as RiderAuth } from "./rider/services/AuthService";
 
 export default function App() {
   // Track individual sessions
   const [, setCustomerSession] = useState(() => CustomerAuth.getSession());
   const [, setVendorSession] = useState(() => VendorAuth.getSession());
   const [, setAdminSession] = useState(() => AdminAuth.getSession());
+  const [, setRiderSession] = useState(() => RiderAuth.getSession());
 
   // Determine initial page route
   const [page, setPage] = useState(() => {
     if (AdminAuth.getSession()) return "admin_dashboard";
     if (VendorAuth.getSession()) return "vendor_dashboard";
+    if (RiderAuth.getSession()) return "rider_dashboard";
     if (CustomerAuth.getSession()) return "customer_dashboard";
     return "home";
   });
@@ -92,6 +97,30 @@ export default function App() {
     setPage("home");
   };
 
+  const handleRiderLogin = async (id, password) => {
+    const res = await RiderAuth.login(id, password);
+    if (res.success) {
+      setRiderSession(res.user);
+      setPage("rider_dashboard");
+    }
+    return res;
+  };
+
+  const handleRiderSignup = async (signupData) => {
+    const res = await RiderAuth.signup(signupData);
+    if (res.success) {
+      setRiderSession(res.user);
+      setPage("rider_dashboard");
+    }
+    return res;
+  };
+
+  const handleRiderLogout = () => {
+    RiderAuth.logout();
+    setRiderSession(null);
+    setPage("home");
+  };
+
   return (
     <>
       {page === "home" && <Homepage goTo={goTo} />}
@@ -109,18 +138,11 @@ export default function App() {
           goHome={() => goTo("home")}
         />
       )}
-      {page === "vendor_login" && (
-        <VendorLogin
-          onLogin={handleVendorLogin}
-          goSignup={() => goTo("vendor_signup")}
-          goHome={() => goTo("home")}
-        />
-      )}
-
-      {page === "admin_login" && (
-        <AdminLogin
-          onLogin={handleAdminLogin}
-          goSignup={() => goTo("admin_signup")}
+      {page === "staff_login" && (
+        <RiderLogin
+          onLogin={handleRiderLogin}
+          onAdminLogin={handleAdminLogin}
+          onVendorLogin={handleVendorLogin}
           goHome={() => goTo("home")}
         />
       )}
@@ -133,6 +155,9 @@ export default function App() {
       )}
       {page === "admin_dashboard" && (
         <AdminDashboard onLogoutSuccess={handleAdminLogout} />
+      )}
+      {page === "rider_dashboard" && (
+        <RiderDashboard onLogoutSuccess={handleRiderLogout} />
       )}
     </>
   );

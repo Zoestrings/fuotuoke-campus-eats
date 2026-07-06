@@ -2,7 +2,7 @@
 // FUOTUOKE Campus Eats — Customer Order Service (API-backed with fallback)
 // ================================================================
 
-import { get, post } from "../../shared/api/apiClient";
+import { get, post, patch } from "../../shared/api/apiClient";
 import { db } from "../../shared/database/db";
 
 export class OrderService {
@@ -48,6 +48,20 @@ export class OrderService {
     } catch (error) {
       console.warn("API getOrderById failed, falling back to local DB:", error.message);
       return db.findOne("orders", { id: orderId });
+    }
+  }
+
+  static async submitOrderReview(orderId, rating, review) {
+    try {
+      const data = await patch(`/orders/${orderId}/review`, { rating, review });
+      try {
+        db.update("orders", { id: orderId }, { rating: Number(rating), review: (review || "").trim() });
+      } catch (e) {}
+      return data;
+    } catch (error) {
+      console.warn("API submitOrderReview failed, falling back to local DB:", error.message);
+      db.update("orders", { id: orderId }, { rating: Number(rating), review: (review || "").trim() });
+      return { success: true };
     }
   }
 }

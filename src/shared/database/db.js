@@ -6,7 +6,7 @@ import { MENU } from "../../data";
 
 class Database {
   constructor() {
-    this.DB_VERSION = "v3"; // bump this whenever seed data changes
+    this.DB_VERSION = "v4"; // bump this whenever seed data changes
     this.init();
   }
 
@@ -44,6 +44,21 @@ class Database {
         name: "Precious Daniel",
         email: "precious.daniel@fuotuoke.edu.ng",
         password: "Password123!",
+        status: "active",
+        createdAt: new Date().toLocaleDateString()
+      });
+      this.saveCollection("users", users);
+    }
+
+    // Ensure the default rider user ZOEHACKZ001 exists in local database
+    const hasRider = users.some(u => u.id.toUpperCase() === "ZOEHACKZ001" && u.role === "rider");
+    if (!hasRider) {
+      users.push({
+        id: "ZOEHACKZ001",
+        role: "rider",
+        name: "Zoe Hackz Rider",
+        email: "rider@fuotuoke.edu.ng",
+        password: "72364231",
         status: "active",
         createdAt: new Date().toLocaleDateString()
       });
@@ -198,6 +213,15 @@ class Database {
         role: "admin",
         name: "System Administrator",
         email: "admin@fuotuoke.edu.ng",
+        password: "72364231",
+        status: "active",
+        createdAt: new Date().toLocaleDateString()
+      },
+      {
+        id: "ZOEHACKZ001",
+        role: "rider",
+        name: "Zoe Hackz Rider",
+        email: "rider@fuotuoke.edu.ng",
         password: "72364231",
         status: "active",
         createdAt: new Date().toLocaleDateString()

@@ -70,6 +70,31 @@ const orderSchema = new mongoose.Schema({
   time: {
     type: String,
     default: () => new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+  },
+  // Rider assignment fields
+  assignedRiderId: {
+    type: String,
+    default: null
+  },
+  assignedRiderName: {
+    type: String,
+    default: null
+  },
+  assignedRiderPhone: {
+    type: String,
+    default: null
+  },
+  deliveryProgress: {
+    type: Number,
+    default: 0
+  },
+  rating: {
+    type: Number,
+    default: 0
+  },
+  review: {
+    type: String,
+    default: ""
   }
 }, {
   timestamps: true

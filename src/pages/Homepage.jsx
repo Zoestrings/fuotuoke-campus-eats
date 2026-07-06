@@ -182,11 +182,8 @@ export default function Homepage({ goTo }) {
             </div>
           </div>
           <div className="hp-footer-links" style={{ display: "flex", gap: 20 }}>
-            <span style={{ cursor: "pointer", color: "rgba(255,255,255,0.6)", fontSize: ".82rem", textDecoration: "underline" }} onClick={() => goTo("vendor_login")}>
-              Canteen Portal
-            </span>
-            <span style={{ cursor: "pointer", color: "rgba(255,255,255,0.6)", fontSize: ".82rem", textDecoration: "underline" }} onClick={() => goTo("admin_login")}>
-              System Control
+            <span style={{ cursor: "pointer", color: "rgba(255,255,255,0.6)", fontSize: ".82rem", textDecoration: "underline" }} onClick={() => goTo("staff_login")}>
+              Staff Portal
             </span>
           </div>
         </div>

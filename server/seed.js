@@ -98,6 +98,14 @@ const USERS = [
     password: "72364231",
     role: "admin",
     status: "active"
+  },
+  {
+    userId: "zoehackz001",
+    name: "Zoe Hackz Rider",
+    email: "rider@fuotuoke.edu.ng",
+    password: "72364231",
+    role: "rider",
+    status: "active"
   }
 ];
 
@@ -139,6 +147,7 @@ async function seed() {
     console.log("Student:  FUO/22/CSI/18843 / Password123!");
     console.log("Staff:    FUO-STAFF-0042   / Password123!");
     console.log("Kitchen:  Zoehackz001      / 72364231");
+    console.log("Rider:    zoehackz001      / 72364231");
     console.log("Admin:    Zoehackz001      / 72364231\n");
 
     process.exit(0);
