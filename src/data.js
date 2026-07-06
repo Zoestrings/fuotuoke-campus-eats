@@ -1,0 +1,517 @@
+export const MENU = [
+  {
+    id: 1,
+    name: "Eba + soup (Egusi/Vegetable)",
+    price: 1500,
+    cat: "Soup",
+    emoji: "",
+    image: "/images/menu/eba_egusi_soup.png",
+    desc: "Fresh garri served with choice of Egusi or Vegetable soup",
+    popular: true,
+    extras: [
+      { name: "Extra Beef", price: 500 },
+      { name: "Extra Eba", price: 200 }
+    ]
+  },
+  {
+    id: 2,
+    name: "Eba + Okra soup",
+    price: 1500,
+    cat: "Soup",
+    emoji: "",
+    image: "/images/menu/eba_okra_soup.png",
+    desc: "Yellow garri paired with draw okra soup and fish",
+    popular: false,
+    extras: [
+      { name: "Extra Fish", price: 500 },
+      { name: "Extra Eba", price: 200 }
+    ]
+  },
+  {
+    id: 3,
+    name: "Amala + Ewedu/Gbegiri",
+    price: 1700,
+    cat: "Soup",
+    emoji: "",
+    image: "/images/menu/amala_ewedu.png",
+    desc: "Soft yam flour with combination of Ewedu and bean soup",
+    popular: true,
+    extras: [
+      { name: "Extra Meat", price: 500 },
+      { name: "Extra Amala", price: 300 }
+    ]
+  },
+  {
+    id: 4,
+    name: "Pounded yam + soup",
+    price: 1700,
+    cat: "Soup",
+    emoji: "",
+    image: "/images/menu/pounded_yam_soup.png",
+    desc: "Smooth pounded yam served with choice of soup",
+    popular: true,
+    extras: [
+      { name: "Extra Meat", price: 500 },
+      { name: "Extra Yam", price: 300 }
+    ]
+  },
+  {
+    id: 5,
+    name: "Pepper soup (fish)",
+    price: 1500,
+    cat: "Soup",
+    emoji: "",
+    image: "/images/menu/pepper_soup_fish.png",
+    desc: "Spicy campus fresh catfish pepper soup",
+    popular: true,
+    extras: [
+      { name: "Extra Fish", price: 500 }
+    ]
+  },
+  {
+    id: 6,
+    name: "Pepper soup (goat meat)",
+    price: 1500,
+    cat: "Soup",
+    emoji: "",
+    image: "/images/menu/pepper_soup_goat.png",
+    desc: "Hot and spicy local goat meat pepper soup",
+    popular: true,
+    extras: [
+      { name: "Extra Goat Meat", price: 600 }
+    ]
+  },
+  {
+    id: 7,
+    name: "Jollof rice + chicken/beef",
+    price: 2500,
+    cat: "Rice",
+    emoji: "",
+    image: "/images/menu/jollof_rice_chicken.png",
+    desc: "Smoky campus jollof rice served with chicken or beef",
+    popular: true,
+    extras: [
+      { name: "Extra Chicken", price: 1500 },
+      { name: "Fried Plantain", price: 500 },
+      { name: "Boiled Egg", price: 400 }
+    ]
+  },
+  {
+    id: 8,
+    name: "Jollof rice + plantain (no meat)",
+    price: 1500,
+    cat: "Rice",
+    emoji: "",
+    image: "/images/menu/jollof_rice_plantain.png",
+    desc: "Nigerian party jollof rice paired with fried plantain",
+    popular: false,
+    extras: [
+      { name: "Boiled Egg", price: 150 }
+    ]
+  },
+  {
+    id: 9,
+    name: "White rice + stew + meat",
+    price: 900,
+    cat: "Rice",
+    emoji: "",
+    image: "/images/menu/white_rice_stew.png",
+    desc: "Steamed white rice served with local tomato stew and meat",
+    popular: false,
+    extras: [
+      { name: "Extra Meat", price: 400 },
+      { name: "Fried Plantain", price: 200 }
+    ]
+  },
+  {
+    id: 10,
+    name: "Fried rice + chicken",
+    price: 2500,
+    cat: "Rice",
+    emoji: "",
+    image: "/images/menu/fried_rice_chicken.png",
+    desc: "Tasty wok-fried rice served with grilled chicken",
+    popular: true,
+    extras: [
+      { name: "Extra Chicken", price: 1500 },
+      { name: "Coleslaw", price: 300 }
+    ]
+  },
+  {
+    id: 11,
+    name: "Rice + beans (combo)",
+    price: 800,
+    cat: "Rice",
+    emoji: "",
+    image: "/images/menu/rice_beans_combo.png",
+    desc: "Combo of white rice and brown beans porridge with stew",
+    popular: false,
+    extras: [
+      { name: "Extra Meat", price: 400 },
+      { name: "Fried Plantain", price: 200 }
+    ]
+  },
+  {
+    id: 12,
+    name: "Beans (porridge)",
+    price: 600,
+    cat: "Mains",
+    emoji: "",
+    image: "/images/menu/beans_porridge.png",
+    desc: "Slow-cooked honey beans porridge",
+    popular: false,
+    extras: [
+      { name: "Fried Fish", price: 500 },
+      { name: "Boiled Egg", price: 150 }
+    ]
+  },
+  {
+    id: 13,
+    name: "Beans + plantain",
+    price: 1500,
+    cat: "Mains",
+    emoji: "",
+    image: "/images/menu/beans_plantain.png",
+    desc: "Slow-cooked honey beans porridge served with sweet plantains",
+    popular: true,
+    extras: [
+      { name: "Fried Fish", price: 500 },
+      { name: "Fried Egg", price: 400 }
+    ]
+  },
+  {
+    id: 14,
+    name: "Fried plantain (dodo) — side",
+    price: 250,
+    cat: "Snacks",
+    emoji: "",
+    image: "/images/menu/fried_plantain.png",
+    desc: "Portion of sweet, golden fried plantain slices",
+    popular: false,
+    extras: []
+  },
+  {
+    id: 15,
+    name: "Spaghetti (jollof/stir-fry) + egg",
+    price: 1500,
+    cat: "Snacks",
+    emoji: "",
+    image: "/images/menu/spaghetti_egg.png",
+    desc: "Stir-fried jollof spaghetti topped with boiled or fried egg",
+    popular: true,
+    extras: [
+      { name: "Sausage", price: 500 }
+    ]
+  },
+  {
+    id: 16,
+    name: "Spaghetti + chicken",
+    price: 2500,
+    cat: "Snacks",
+    emoji: "",
+    image: "/images/menu/spaghetti_chicken.png",
+    desc: "Stir-fried jollof spaghetti served with seasoned chicken",
+    popular: true,
+    extras: [
+      { name: "Fried Plantain", price: 300 }
+    ]
+  },
+  {
+    id: 17,
+    name: "Indomie (plain)",
+    price: 450,
+    cat: "Snacks",
+    emoji: "",
+    image: "https://images.unsplash.com/photo-1612927601601-6638404737ce?auto=format&fit=crop&w=600&q=80",
+    desc: "Quick hot instant noodles prepared with local spices",
+    popular: false,
+    extras: [
+      { name: "Fried Egg", price: 150 },
+      { name: "Sausage", price: 200 }
+    ]
+  },
+  {
+    id: 18,
+    name: "Indomie + Egg",
+    price: 1500,
+    cat: "Snacks",
+    emoji: "",
+    image: "https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?auto=format&fit=crop&w=600&q=80",
+    desc: "Hot instant noodles topped with fried or boiled egg",
+    popular: true,
+    extras: [
+      { name: "Sausage", price: 500 },
+      { name: "Extra Egg", price: 400 }
+    ]
+  },
+  {
+    id: 19,
+    name: "Puff Puff",
+    price: 200,
+    cat: "Snacks",
+    emoji: "",
+    image: "https://images.unsplash.com/photo-1541592106381-b31e9677c0e5?auto=format&fit=crop&w=600&q=80",
+    desc: "Sweet golden deep-fried dough balls — a campus favourite",
+    popular: true,
+    extras: []
+  },
+  {
+    id: 20,
+    name: "Meat Pie",
+    price: 1000,
+    cat: "Snacks",
+    emoji: "",
+    image: "https://images.unsplash.com/photo-1588168333986-5078647ac9ab?auto=format&fit=crop&w=600&q=80",
+    desc: "Flaky pastry filled with seasoned minced meat and vegetables",
+    popular: true,
+    extras: []
+  },
+  {
+    id: 21,
+    name: "Chicken Pie",
+    price: 1500,
+    cat: "Snacks",
+    emoji: "",
+    image: "https://images.unsplash.com/photo-1626132647523-66f5bf380027?auto=format&fit=crop&w=600&q=80",
+    desc: "Crispy golden pastry stuffed with spiced shredded chicken",
+    popular: true,
+    extras: []
+  },
+  {
+    id: 22,
+    name: "Egg Roll",
+    price: 700,
+    cat: "Snacks",
+    emoji: "",
+    image: "https://images.unsplash.com/photo-1587314168485-3236d6710814?auto=format&fit=crop&w=600&q=80",
+    desc: "Boiled egg wrapped in soft dough and deep-fried to perfection",
+    popular: true,
+    extras: []
+  },
+  {
+    id: 23,
+    name: "Samosa (×3)",
+    price: 300,
+    cat: "Snacks",
+    emoji: "",
+    image: "https://images.unsplash.com/photo-1601050690597-df056fb4ce78?auto=format&fit=crop&w=600&q=80",
+    desc: "Crispy triangular pastry filled with spiced minced meat",
+    popular: false,
+    extras: [
+      { name: "Extra 3 pieces", price: 300 }
+    ]
+  },
+  {
+    id: 24,
+    name: "Shawarma",
+    price: 1500,
+    cat: "Snacks",
+    emoji: "",
+    image: "https://images.unsplash.com/photo-1561651823-34fed022540e?auto=format&fit=crop&w=600&q=80",
+    desc: "Grilled chicken wrap with veggies, coleslaw, and creamy sauce",
+    popular: true,
+    extras: [
+      { name: "Extra Chicken", price: 1000 },
+      { name: "Cheese", price: 700 }
+    ]
+  },
+  {
+    id: 25,
+    name: "Popcorn (large)",
+    price: 300,
+    cat: "Snacks",
+    emoji: "",
+    image: "https://images.unsplash.com/photo-1578849278619-e73505e9610f?auto=format&fit=crop&w=600&q=80",
+    desc: "Large bucket of freshly popped buttery popcorn",
+    popular: false,
+    extras: [
+      { name: "Caramel Drizzle", price: 100 }
+    ]
+  },
+  {
+    id: 26,
+    name: "Chin Chin",
+    price: 500,
+    cat: "Snacks",
+    emoji: "",
+    image: "https://images.unsplash.com/photo-1599599810769-bcde5a160d32?auto=format&fit=crop&w=600&q=80",
+    desc: "Crunchy sweet fried dough strips — a classic Nigerian treat",
+    popular: true,
+    extras: []
+  },
+  {
+    id: 27,
+    name: "Akara + Pap",
+    price: 500,
+    cat: "Snacks",
+    emoji: "",
+    image: "https://images.unsplash.com/photo-1626132647523-66f5bf380027?auto=format&fit=crop&w=600&q=80",
+    desc: "Crispy bean cakes paired with smooth warm pap (ogi)",
+    popular: true,
+    extras: [
+      { name: "Extra Akara (3pcs)", price: 500 }
+    ]
+  },
+
+  // ── Drinks ──
+  {
+    id: 28,
+    name: "Zobo Drink",
+    price: 500,
+    cat: "Drinks",
+    emoji: "",
+    image: "https://images.unsplash.com/photo-1551024709-8f23befc6f87?auto=format&fit=crop&w=600&q=80",
+    desc: "Chilled hibiscus flower drink with ginger and pineapple",
+    popular: true,
+    extras: [
+      { name: "Large Cup", price: 900 }
+    ]
+  },
+  {
+    id: 29,
+    name: "Kunu (Millet Drink)",
+    price: 500,
+    cat: "Drinks",
+    emoji: "",
+    image: "https://images.unsplash.com/photo-1563636619-e9143da7973b?auto=format&fit=crop&w=600&q=80",
+    desc: "Refreshing traditional millet-based drink served cold",
+    popular: true,
+    extras: [
+      { name: "Large Cup", price: 900 }
+    ]
+  },
+  {
+    id: 30,
+    name: "Chapman",
+    price: 500,
+    cat: "Drinks",
+    emoji: "",
+    image: "https://images.unsplash.com/photo-1536935338788-846bb9981813?auto=format&fit=crop&w=600&q=80",
+    desc: "Nigeria's signature cocktail — Fanta, Sprite, grenadine, cucumber & lemon",
+    popular: true,
+    extras: [
+      { name: "Extra Large", price: 900 }
+    ]
+  },
+  {
+    id: 31,
+    name: "Chilled Water (75cl)",
+    price: 500,
+    cat: "Drinks",
+    emoji: "",
+    image: "https://images.unsplash.com/photo-1560023907-5f67b3104e94?auto=format&fit=crop&w=600&q=80",
+    desc: "Ice-cold bottled water to stay hydrated on campus",
+    popular: true,
+    extras: []
+  },
+  {
+    id: 32,
+    name: "Coca-Cola (50cl)",
+    price: 750,
+    cat: "Drinks",
+    emoji: "",
+    image: "https://images.unsplash.com/photo-1622483767028-3f66f32aef97?auto=format&fit=crop&w=600&q=80",
+    desc: "Classic chilled Coca-Cola soft drink",
+    popular: true,
+    extras: []
+  },
+  {
+    id: 33,
+    name: "Fanta Orange (50cl)",
+    price: 750,
+    cat: "Drinks",
+    emoji: "",
+    image: "https://images.unsplash.com/photo-1581009137042-c552e4856c7d?auto=format&fit=crop&w=600&q=80",
+    desc: "Bright and bubbly Fanta orange soft drink",
+    popular: true,
+    extras: []
+  },
+  {
+    id: 34,
+    name: "Sprite (50cl)",
+    price: 750,
+    cat: "Drinks",
+    emoji: "",
+    image: "https://images.unsplash.com/photo-1625772291427-f14e5b665390?auto=format&fit=crop&w=600&q=80",
+    desc: "Crisp lemon-lime flavoured Sprite soft drink",
+    popular: true,
+    extras: []
+  },
+  {
+    id: 35,
+    name: "Malt Drink (Maltina/Amstel)",
+    price: 1000,
+    cat: "Drinks",
+    emoji: "",
+    image: "https://images.unsplash.com/photo-1608270586620-248524c67de9?auto=format&fit=crop&w=600&q=80",
+    desc: "Rich, sweet malt beverage — non-alcoholic energy boost",
+    popular: true,
+    extras: []
+  },
+  {
+    id: 36,
+    name: "Hollandia Yoghurt",
+    price: 1500,
+    cat: "Drinks",
+    emoji: "",
+    image: "https://images.unsplash.com/photo-1488477181946-6428a0291777?auto=format&fit=crop&w=600&q=80",
+    desc: "Creamy Hollandia yoghurt drink — strawberry or plain",
+    popular: true,
+    extras: []
+  },
+  {
+    id: 37,
+    name: "Fresh Fruit Juice",
+    price: 1500,
+    cat: "Drinks",
+    emoji: "",
+    image: "https://images.unsplash.com/photo-1600271886742-f049cd451bba?auto=format&fit=crop&w=600&q=80",
+    desc: "Freshly squeezed orange, pineapple, or watermelon juice",
+    popular: true,
+    extras: [
+      { name: "Large Cup", price: 2000 }
+    ]
+  },
+  {
+    id: 38,
+    name: "Smoothie (Mixed Fruit)",
+    price: 1000,
+    cat: "Drinks",
+    emoji: "",
+    image: "https://images.unsplash.com/photo-1553530666-ba11a7da3888?auto=format&fit=crop&w=600&q=80",
+    desc: "Thick blended smoothie with banana, mango, and yoghurt",
+    popular: true,
+    extras: [
+      { name: "Protein Boost", price: 1500 }
+    ]
+  },
+  {
+    id: 39,
+    name: "Iced Tea (Lemon/Peach)",
+    price: 700,
+    cat: "Drinks",
+    emoji: "",
+    image: "https://images.unsplash.com/photo-1556679343-c7306c1976bc?auto=format&fit=crop&w=600&q=80",
+    desc: "Refreshing iced tea with a choice of lemon or peach flavour",
+    popular: false,
+    extras: []
+  }
+];
+
+export const CATS = ["All", "Rice", "Soup", "Snacks", "Drinks"];
+
+export const OUTLETS = [
+  { id: "a", name: "Main Cafeteria", loc: "Admin Block", time: "7am – 8pm", emoji: "", biIcon: "bi-building" },
+  { id: "b", name: "Engineering Canteen", loc: "Engr. Faculty", time: "8am – 6pm", emoji: "", biIcon: "bi-gear-fill" },
+  { id: "c", name: "Student Union Buka", loc: "SUB Complex", time: "6am – 10pm", emoji: "", biIcon: "bi-house-door-fill" },
+  { id: "d", name: "Science Cafeteria", loc: "Science Block", time: "8am – 5pm", emoji: "", biIcon: "bi-eyedropper" },
+];
+
+export const FACULTIES = [
+  "Faculty of Humanities & Social Sciences",
+  "Faculty of Science",
+  "Faculty of Engineering & Technology",
+  "Faculty of Management Sciences",
+  "Faculty of Education",
+  "Faculty of Basic Medical Sciences"
+];
