@@ -1,9 +1,10 @@
 import React, { useState } from "react";
 
-function Field({ label, type = "text", placeholder, value, onChange, hint }) {
+function Field({ label, type = "text", placeholder, value, onChange, hint, autoComplete, ...rest }) {
   const [showPassword, setShowPassword] = useState(false);
   const isPassword = type === "password";
   const inputType = isPassword ? (showPassword ? "text" : "password") : type;
+  const computedAutoComplete = autoComplete || (isPassword ? "new-password" : "one-time-code");
 
   return (
     <div className="form-group">
@@ -16,6 +17,8 @@ function Field({ label, type = "text", placeholder, value, onChange, hint }) {
           onChange={onChange}
           className="form-input"
           style={{ paddingRight: isPassword ? 42 : 13 }}
+          autoComplete={computedAutoComplete}
+          {...rest}
         />
         {isPassword && (
           <button
