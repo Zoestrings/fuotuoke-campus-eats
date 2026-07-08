@@ -1,13 +1,11 @@
-import { db } from "../../shared/database/db";
+// ================================================================
+// FUOTUOKE Campus Eats — Admin Report Service (Memory Statistics Processor)
+// ================================================================
 
 export class ReportService {
-  static getPlatformStats(customOrders, customUsers, customMenuItems) {
-    const orders = customOrders || db.getCollection("orders") || [];
-    const users = customUsers || db.getCollection("users") || [];
-    const menuItems = customMenuItems || db.getCollection("menuItems") || [];
-
-    const totalRevenue = orders.reduce((s, o) => s + o.total, 0);
-    const activeOrders = orders.filter(o => o.status !== "Completed").length;
+  static getPlatformStats(orders = [], users = [], menuItems = []) {
+    const totalRevenue = orders.reduce((s, o) => s + (parseFloat(o.total) || 0), 0);
+    const activeOrders = orders.filter(o => o.status !== "Completed" && o.status !== "Cancelled").length;
     const completedOrders = orders.filter(o => o.status === "Completed").length;
 
     return {

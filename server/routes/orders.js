@@ -20,18 +20,16 @@ router.get("/", authenticate, async (req, res, next) => {
     } else if (req.user.role === "kitchen") {
       // Vendors see orders for their canteen
       if (req.user.canteen) {
-        filter["outlet.name"] = req.user.canteen;
+        filter.outletName = req.user.canteen;
       }
     } else if (req.user.role === "rider") {
       // Riders see delivery orders that are ready/preparing or assigned to them
-      filter.$or = [
-        { type: "delivery", status: { $in: ["Preparing", "Ready"] }, assignedRiderId: null },
-        { assignedRiderId: req.user.userId }
-      ];
+      filter.isRiderQuery = true;
+      filter.riderId = req.user.userId;
     }
     // Admin sees all orders (no filter)
 
-    const orders = await Order.find(filter).sort({ createdAt: -1 });
+    const orders = await Order.find(filter);
     res.json(orders);
   } catch (error) {
     next(error);

@@ -1,137 +1,95 @@
 // ================================================================
-// FUOTUOKE Campus Eats — Centralized API Client
+// FUOTUOKE Campus Eats — Centralized Axios API Client
 // All frontend services use this to communicate with Express backend.
 // ================================================================
 
+import axios from "axios";
+
 const API_BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:5000/api";
 
-/**
- * Get the stored JWT access token.
- */
-function getToken() {
-  return localStorage.getItem("fuo_token");
+const apiClientInstance = axios.create({
+  baseURL: API_BASE_URL,
+  headers: {
+    "Content-Type": "application/json"
+  }
+});
+
+// ── 1. Request Interceptor: Attach JWT Bearer Token ──
+apiClientInstance.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem("accessToken");
+    if (token) {
+      config.headers["Authorization"] = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
+
+// ── 2. Response Interceptor: Handle Token Expired (401) ──
+apiClientInstance.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    const originalRequest = error.config;
+    if (
+      error.response &&
+      error.response.status === 401 &&
+      !originalRequest._retry &&
+      localStorage.getItem("fuo_refresh_token")
+    ) {
+      originalRequest._retry = true;
+      try {
+        const refreshToken = localStorage.getItem("fuo_refresh_token");
+        const res = await axios.post(`${API_BASE_URL}/auth/refresh`, { refreshToken });
+        
+        if (res.status === 200 && res.data.accessToken) {
+          localStorage.setItem("accessToken", res.data.accessToken);
+          apiClientInstance.defaults.headers.common["Authorization"] = `Bearer ${res.data.accessToken}`;
+          originalRequest.headers["Authorization"] = `Bearer ${res.data.accessToken}`;
+          return apiClientInstance(originalRequest);
+        }
+      } catch (err) {
+        // Refresh token failed, perform logout cleanup
+        localStorage.removeItem("accessToken");
+        localStorage.removeItem("fuo_refresh_token");
+      }
+    }
+    return Promise.reject(error);
+  }
+);
+
+// Helper Methods matching original apiClient.js interface to support legacy imports
+export function getToken() {
+  return localStorage.getItem("accessToken");
 }
 
-/**
- * Store JWT tokens after login/signup.
- */
-function setTokens(accessToken, refreshToken) {
-  localStorage.setItem("fuo_token", accessToken);
+export function setTokens(accessToken, refreshToken) {
+  localStorage.setItem("accessToken", accessToken);
   if (refreshToken) {
     localStorage.setItem("fuo_refresh_token", refreshToken);
   }
 }
 
-/**
- * Clear all auth tokens (logout).
- */
-function clearTokens() {
-  localStorage.removeItem("fuo_token");
+export function clearTokens() {
+  localStorage.removeItem("accessToken");
   localStorage.removeItem("fuo_refresh_token");
-  localStorage.removeItem("fuo_session");
-  localStorage.removeItem("fuo_admin_session");
-  localStorage.removeItem("fuo_vendor_session");
 }
 
-/**
- * Attempt to refresh the access token using the refresh token.
- */
-async function refreshAccessToken() {
-  const refreshToken = localStorage.getItem("fuo_refresh_token");
-  if (!refreshToken) return null;
+// REST Convenience Wrappers
+export const get = (endpoint) => apiClientInstance.get(endpoint).then(res => res.data);
+export const post = (endpoint, body) => apiClientInstance.post(endpoint, body).then(res => res.data);
+export const put = (endpoint, body) => apiClientInstance.put(endpoint, body).then(res => res.data);
+export const patch = (endpoint, body) => apiClientInstance.patch(endpoint, body).then(res => res.data);
+export const del = (endpoint) => apiClientInstance.delete(endpoint).then(res => res.data);
 
-  try {
-    const res = await fetch(`${API_BASE_URL}/auth/refresh`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ refreshToken })
-    });
+export const apiRequest = (endpoint, options = {}) => {
+  const method = (options.method || "GET").toLowerCase();
+  return apiClientInstance({
+    url: endpoint,
+    method,
+    data: options.body,
+    headers: options.headers
+  }).then(res => res.data);
+};
 
-    if (res.ok) {
-      const data = await res.json();
-      localStorage.setItem("fuo_token", data.accessToken);
-      return data.accessToken;
-    }
-  } catch (e) {
-    // Refresh failed
-  }
-  return null;
-}
-
-/**
- * Centralized fetch wrapper with JWT authentication.
- * Automatically attaches Bearer token and handles 401 refresh.
- *
- * @param {string} endpoint - API endpoint (e.g., "/auth/login")
- * @param {object} options  - fetch options (method, body, etc.)
- * @returns {Promise<object>} Parsed JSON response
- */
-async function apiRequest(endpoint, options = {}) {
-  const url = `${API_BASE_URL}${endpoint}`;
-  const token = getToken();
-
-  const headers = {
-    "Content-Type": "application/json",
-    ...(options.headers || {})
-  };
-
-  if (token) {
-    headers["Authorization"] = `Bearer ${token}`;
-  }
-
-  const config = {
-    ...options,
-    headers
-  };
-
-  // Stringify body if it's an object
-  if (config.body && typeof config.body === "object") {
-    config.body = JSON.stringify(config.body);
-  }
-
-  let res = await fetch(url, config);
-
-  // If 401, try refreshing the token once
-  if (res.status === 401 && token) {
-    const newToken = await refreshAccessToken();
-    if (newToken) {
-      headers["Authorization"] = `Bearer ${newToken}`;
-      res = await fetch(url, { ...config, headers });
-    }
-  }
-
-  const data = await res.json().catch(() => ({}));
-
-  if (!res.ok) {
-    const error = new Error(data.error || `Request failed with status ${res.status}`);
-    error.status = res.status;
-    error.data = data;
-    throw error;
-  }
-
-  return data;
-}
-
-// ── Convenience Methods ──
-
-function get(endpoint) {
-  return apiRequest(endpoint, { method: "GET" });
-}
-
-function post(endpoint, body) {
-  return apiRequest(endpoint, { method: "POST", body });
-}
-
-function put(endpoint, body) {
-  return apiRequest(endpoint, { method: "PUT", body });
-}
-
-function patch(endpoint, body) {
-  return apiRequest(endpoint, { method: "PATCH", body });
-}
-
-function del(endpoint) {
-  return apiRequest(endpoint, { method: "DELETE" });
-}
-
-export { apiRequest, get, post, put, patch, del, getToken, setTokens, clearTokens };
+export default apiClientInstance;

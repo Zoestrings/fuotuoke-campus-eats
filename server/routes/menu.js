@@ -17,11 +17,14 @@ router.get("/", async (req, res, next) => {
 
     if (cat && cat !== "All") filter.cat = cat;
     if (popular === "true") filter.popular = true;
+
+    let items = await MenuItem.find(filter);
+
     if (search) {
-      filter.name = { $regex: search, $options: "i" };
+      const searchLower = search.toLowerCase();
+      items = items.filter(i => i.name.toLowerCase().includes(searchLower));
     }
 
-    const items = await MenuItem.find(filter).sort({ cat: 1, name: 1 });
     res.json(items);
   } catch (error) {
     next(error);

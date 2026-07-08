@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { AuthService } from "../services/AuthService";
 import { OrderService } from "../services/OrderService";
-import { db } from "../../shared/database/db";
+import { get } from "../../shared/api/apiClient";
 
 export function useCustomerController(onLogoutSuccess) {
   const [user, setUser] = useState(AuthService.getSession());
@@ -20,8 +20,17 @@ export function useCustomerController(onLogoutSuccess) {
   // Fetch initial data
   useEffect(() => {
     if (user) {
-      // Load menu items from db
-      setMenuItems(db.getCollection("menuItems"));
+      // Load menu items from API
+      const fetchMenu = async () => {
+        try {
+          const items = await get("/menu");
+          setMenuItems(items || []);
+        } catch (err) {
+          console.error("Failed to load menu items:", err.message);
+        }
+      };
+      fetchMenu();
+
       // Load customer orders
       const fetchOrders = async () => {
         const fetched = await OrderService.getCustomerOrders(user.id);

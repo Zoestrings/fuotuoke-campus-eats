@@ -21,15 +21,18 @@ router.get("/", async (req, res, next) => {
 
     if (role) filter.role = role;
     if (status) filter.status = status;
+
+    let users = await User.find(filter);
+
     if (search) {
-      filter.$or = [
-        { userId: { $regex: search, $options: "i" } },
-        { name: { $regex: search, $options: "i" } },
-        { email: { $regex: search, $options: "i" } }
-      ];
+      const searchLower = search.toLowerCase();
+      users = users.filter(
+        u => u.userId.toLowerCase().includes(searchLower) ||
+             u.name.toLowerCase().includes(searchLower) ||
+             u.email.toLowerCase().includes(searchLower)
+      );
     }
 
-    const users = await User.find(filter).sort({ createdAt: -1 });
     res.json(users);
   } catch (error) {
     next(error);
@@ -42,17 +45,17 @@ router.patch("/:id/status", async (req, res, next) => {
     const user = await User.findById(req.params.id);
     if (!user) return res.status(404).json({ error: "User not found." });
 
-    user.status = user.status === "active" ? "inactive" : "active";
-    await user.save();
+    const newStatus = user.status === "active" ? "inactive" : "active";
+    const updatedUser = await User.findByIdAndUpdate(req.params.id, { status: newStatus });
 
     // Audit log
     await AuditLog.create({
       user: req.user.userId,
-      action: `Set user ${user.userId} status to ${user.status}`,
+      action: `Set user ${user.userId} status to ${newStatus}`,
       ip: req.ip
     });
 
-    res.json({ success: true, user: user.toJSON(), newStatus: user.status });
+    res.json({ success: true, user: updatedUser.toJSON(), newStatus });
   } catch (error) {
     next(error);
   }

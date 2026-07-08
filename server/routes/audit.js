@@ -15,7 +15,7 @@ router.use(authenticate, requireRole("admin"));
 // ── GET /api/audit — Get all audit logs ──
 router.get("/", async (req, res, next) => {
   try {
-    const logs = await AuditLog.find().sort({ createdAt: -1 }).limit(200);
+    const logs = await AuditLog.find();
     res.json(logs);
   } catch (error) {
     next(error);
