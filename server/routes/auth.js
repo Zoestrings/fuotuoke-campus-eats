@@ -37,17 +37,20 @@ router.post("/signup", async (req, res, next) => {
       return res.status(400).json({ error: "All fields are required." });
     }
 
+    const cleanId = id.trim().toUpperCase();
+    const cleanEmail = email.trim().toLowerCase();
+
     // Check if user already exists
-    const existing = await User.findOne({ userId: id.toUpperCase(), role });
+    const existing = await User.findOne({ userId: cleanId, role });
     if (existing) {
       return res.status(409).json({ error: "An account with this ID and role already exists." });
     }
 
     // Create new user
     const user = await User.create({
-      userId: id.toUpperCase(),
-      name,
-      email,
+      userId: cleanId,
+      name: name.trim(),
+      email: cleanEmail,
       password,
       role: role || "student",
       status: "active",
@@ -87,7 +90,7 @@ router.post("/login", async (req, res, next) => {
     }
 
     // Build query — if role is provided, match it
-    const query = { userId: id.toUpperCase() };
+    const query = { userId: id.trim().toUpperCase() };
     if (role) query.role = role;
 
     const user = await User.findOne(query);

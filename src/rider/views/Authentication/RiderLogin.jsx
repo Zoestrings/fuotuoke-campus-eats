@@ -29,25 +29,26 @@ export default function RiderLogin({ onLogin, onAdminLogin, onVendorLogin, goHom
       return;
     }
 
+    const cleanId = riderId.trim().toUpperCase();
+
     if (activeRole === "rider") {
-      const idUpper = riderId.toUpperCase();
-      if (idUpper !== "ZOEHACKZ001") {
-        if (!idUpper.startsWith("FUO-RIDER-") || idUpper.length < 14) {
+      if (cleanId !== "ZOEHACKZ001") {
+        if (!cleanId.startsWith("FUO-RIDER-") || cleanId.length < 14) {
           setError("Rider ID format: FUO-RIDER-XXXX (e.g. FUO-RIDER-0042)");
           return;
         }
       }
-      const res = await onLogin(idUpper, password);
+      const res = await onLogin(cleanId, password);
       if (res && !res.success) {
         setError(res.error);
       }
     } else if (activeRole === "canteen") {
-      const res = await onVendorLogin(riderId, password);
+      const res = await onVendorLogin(cleanId, password);
       if (res && !res.success) {
         setError(res.error);
       }
     } else {
-      const res = await onAdminLogin(riderId, password);
+      const res = await onAdminLogin(cleanId, password);
       if (res && !res.success) {
         setError(res.error);
       }

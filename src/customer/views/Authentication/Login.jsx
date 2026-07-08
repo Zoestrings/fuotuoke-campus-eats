@@ -21,7 +21,7 @@ export default function Login({ onLogin, goSignup, goHome }) {
       return;
     }
 
-    const idUpper = id.toUpperCase();
+    const idUpper = id.trim().toUpperCase();
     if (role === "student" && !UserModel.validateMatric(idUpper)) {
       setError("Matric format: FUO/YY/DEPT/NNNNN (e.g. FUO/22/CSI/18842)");
       return;

@@ -125,8 +125,8 @@ async function executeMockQuery(sql, params = []) {
       
       results = results.filter(row => {
         return filters.every(f => {
-          if (f.key === "userId") {
-            return String(row.userId).toUpperCase() === String(f.val).toUpperCase();
+          if (f.key === "userId" || f.key === "email") {
+            return String(row[f.key]).trim().toLowerCase() === String(f.val).trim().toLowerCase();
           }
           return String(row[f.key]) === String(f.val);
         });
@@ -142,8 +142,8 @@ async function executeMockQuery(sql, params = []) {
       
       results = results.filter(row => {
         return filters.every(f => {
-          if (f.key === "userId") {
-            return String(row.userId).toUpperCase() === String(f.val).toUpperCase();
+          if (f.key === "userId" || f.key === "email") {
+            return String(row[f.key]).trim().toLowerCase() === String(f.val).trim().toLowerCase();
           }
           return String(row[f.key]) === String(f.val);
         });
