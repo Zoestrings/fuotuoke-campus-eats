@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Badge, Btn } from "../../../shared/ui";
 import { OrderService } from "../../services/OrderService";
+import { useToast } from "../../../context/ToastContext";
 
 const STEPS = [
   {
@@ -52,6 +53,7 @@ function getStatusColor(status) {
 }
 
 export default function TrackOrder({ order, onClose, accent }) {
+  const { showToast } = useToast();
   const isGold = accent === "var(--gold)";
   const isPickup = order.type === "pickup";
   const status = order.status || "Received";
@@ -66,15 +68,16 @@ export default function TrackOrder({ order, onClose, accent }) {
 
   const handleReviewSubmit = async () => {
     if (userRating === 0) {
-      alert("Please select a rating from 1 to 5 stars.");
+      showToast("Please select a rating from 1 to 5 stars.", "warning");
       return;
     }
     setIsSubmitting(true);
     try {
       await OrderService.submitOrderReview(order.id, userRating, reviewText);
       setSuccessMsg("Thank you! Your rating and review has been saved.");
+      showToast("Thank you! Your review has been saved.", "success");
     } catch (e) {
-      alert("Failed to submit review.");
+      showToast("Failed to submit review.", "error");
     } finally {
       setIsSubmitting(false);
     }

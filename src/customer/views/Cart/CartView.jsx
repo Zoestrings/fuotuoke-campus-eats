@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { OUTLETS, FACULTIES } from "../../../data";
 import { Btn } from "../../../shared/ui";
+import { useToast } from "../../../context/ToastContext";
 
 const SectionCard = ({ children }) => (
   <div style={{ background: "#fff", borderRadius: 14, padding: "20px 22px", marginBottom: 14, border: "1px solid var(--border)", boxShadow: "var(--shadow-sm)" }}>
@@ -9,11 +10,12 @@ const SectionCard = ({ children }) => (
 );
 
 export default function CartView({ isStaff, accent, cart, addItem, removeItem, cartCount, cartTotal, outlet, setOutlet, orderType, setOType, placeOrder, setPage }) {
+  const { showToast } = useToast();
   const [faculty, setFaculty] = useState("");
 
   const handlePlaceOrder = () => {
     if (orderType === "delivery" && !faculty) {
-      alert("Please select a Faculty for delivery.");
+      showToast("Please select a Faculty for delivery.", "warning");
       return;
     }
     placeOrder(faculty);
