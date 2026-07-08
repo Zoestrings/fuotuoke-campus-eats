@@ -1,8 +1,10 @@
 import React, { useState } from "react";
 import { Badge, Btn } from "../../../shared/ui";
 import { UserModel } from "../../models/UserModel";
+import { useToast } from "../../../context/ToastContext";
 
 export default function UserManagement({ users = [], onToggleStatus, onDelete, onSave, onAdd }) {
+  const { showToast } = useToast();
   const [search, setSearch] = useState("");
   const [filterRole, setFilterRole] = useState("all");
 
@@ -47,7 +49,7 @@ export default function UserManagement({ users = [], onToggleStatus, onDelete, o
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!userId.trim() || !userName.trim() || !userEmail.trim()) {
-      alert("Please fill in all required fields.");
+      showToast("Please fill in all required fields.", "warning");
       return;
     }
 
@@ -63,14 +65,14 @@ export default function UserManagement({ users = [], onToggleStatus, onDelete, o
     try {
       if (modalMode === "create") {
         await onAdd(userData);
-        alert("✅ User account created successfully!");
+        showToast("User account created successfully!", "success");
       } else {
         await onSave(userId, userData);
-        alert("✅ User details updated successfully!");
+        showToast("User details updated successfully!", "success");
       }
       setIsModalOpen(false);
     } catch (err) {
-      alert(`Error: ${err.message}`);
+      showToast(err.message || "Failed to save user details.", "error");
     }
   };
 

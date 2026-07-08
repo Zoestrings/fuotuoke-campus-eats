@@ -6,8 +6,10 @@ import { ReportService } from "../services/ReportService";
 import { MealModel } from "../models/MealModel";
 import { OrderModel } from "../models/OrderModel";
 import { MENU } from "../../data";
+import { useToast } from "../../context/ToastContext";
 
 export function useVendorController(onLogoutSuccess) {
+  const { showToast } = useToast();
   const [user, setUser] = useState(AuthService.getSession());
   const [selectedOutlet, setSelectedOutlet] = useState("");
   const [activeTab, setActiveTab] = useState("active");
@@ -87,7 +89,7 @@ export function useVendorController(onLogoutSuccess) {
 
     const val = MealModel.validate(tempMeal);
     if (!val.valid) {
-      alert(val.error);
+      showToast(val.error, "error");
       return;
     }
 
@@ -105,7 +107,7 @@ export function useVendorController(onLogoutSuccess) {
     setNewItemEmoji("");
     setNewItemPopular(false);
 
-    alert("✅ Menu item added successfully!");
+    showToast("Menu item added successfully!", "success");
   };
 
   const handleDeleteItem = async (id) => {

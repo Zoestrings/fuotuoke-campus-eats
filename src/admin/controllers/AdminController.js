@@ -7,8 +7,10 @@ import { PaymentService } from "../services/PaymentService";
 import { ReportService } from "../services/ReportService";
 import { SystemSettingsService } from "../services/SystemSettingsService";
 import { AuditLogService } from "../services/AuditLogService";
+import { useToast } from "../../context/ToastContext";
 
 export function useAdminController(onLogoutSuccess) {
+  const { showToast } = useToast();
   const [user, setUser] = useState(AuthService.getSession());
   const [activeTab, setActiveTab] = useState("overview");
   const [users, setUsers] = useState([]);
@@ -132,14 +134,14 @@ export function useAdminController(onLogoutSuccess) {
     await SystemSettingsService.saveSettings(newSettings);
     await AuditLogService.logAction(user.name, "Saved system settings preferences");
     await loadAllData();
-    alert("Settings saved successfully!");
+    showToast("Settings saved successfully!", "success");
   };
 
   const resetPlatform = async () => {
     if (window.confirm("CRITICAL WARNING: This will reset all databases and localStorage variables. Proceed?")) {
       SystemSettingsService.resetDatabase();
       await loadAllData();
-      alert("Platform database reset to seed values successfully!");
+      showToast("Platform database reset to seed values successfully!", "success");
       await logout();
     }
   };

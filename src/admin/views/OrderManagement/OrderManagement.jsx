@@ -1,7 +1,9 @@
 import React, { useState } from "react";
 import { Badge, Btn } from "../../../shared/ui";
+import { useToast } from "../../../context/ToastContext";
 
 export default function OrderManagement({ orders = [], onDelete, onUpdateStatus }) {
+  const { showToast } = useToast();
   const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
 
@@ -41,7 +43,7 @@ export default function OrderManagement({ orders = [], onDelete, onUpdateStatus 
   const handleEditSubmit = (e) => {
     e.preventDefault();
     if (!editCustomerName.trim() || !editTotal || !editOutletName.trim()) {
-      alert("Please fill in all required fields.");
+      showToast("Please fill in all required fields.", "warning");
       return;
     }
 
@@ -59,7 +61,7 @@ export default function OrderManagement({ orders = [], onDelete, onUpdateStatus 
 
     onUpdateStatus(editOrderId, editStatus, updatedFields);
     setIsEditOpen(false);
-    alert("✅ Order details updated successfully!");
+    showToast("Order details updated successfully!", "success");
   };
 
   const getStatusBadgeColor = (status) => {

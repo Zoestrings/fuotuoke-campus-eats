@@ -9,8 +9,10 @@ import ProfileView from "../Profile/ProfileView";
 import NotificationsList from "../Notifications/NotificationsList";
 import { OUTLETS } from "../../../data";
 import { Btn, Badge } from "../../../shared/ui";
+import { useToast } from "../../../context/ToastContext";
 
 export default function CustomerDashboard({ onLogoutSuccess }) {
+  const { showToast } = useToast();
   const controller = useCustomerController(onLogoutSuccess);
   const {
     user,
@@ -54,7 +56,7 @@ export default function CustomerDashboard({ onLogoutSuccess }) {
   const handlePaymentSubmit = () => {
     if (paymentMethod === "card") {
       if (!cardNumber.trim() || !cardName.trim() || !cardExpiry.trim() || !cardCVV.trim()) {
-        alert("Please fill in all card details");
+        showToast("Please fill in all card details", "warning");
         return;
       }
     }
@@ -65,7 +67,7 @@ export default function CustomerDashboard({ onLogoutSuccess }) {
       setCardExpiry("");
       setCardCVV("");
       setPaymentMethod("card");
-      alert("Payment successful! Order placed successfully!");
+      showToast("Payment successful! Order placed successfully!", "success");
     }
   };
 

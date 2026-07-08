@@ -1,7 +1,9 @@
 import React from "react";
 import { Btn } from "../../../shared/ui";
+import { useToast } from "../../../context/ToastContext";
 
 export default function MealsManagement({ menuItems = [], onDelete, onLoadDemo, onSubmitForm, formStates }) {
+  const { showToast } = useToast();
   const {
     newItemName, setNewItemName,
     newItemPrice, setNewItemPrice,
@@ -16,7 +18,7 @@ export default function MealsManagement({ menuItems = [], onDelete, onLoadDemo, 
     const file = e.target.files[0];
     if (file) {
       if (file.size > 1.5 * 1024 * 1024) {
-        alert("Image is too large! Please select an image smaller than 1.5MB.");
+        showToast("Image is too large! Please select an image smaller than 1.5MB.", "error");
         return;
       }
       const reader = new FileReader();

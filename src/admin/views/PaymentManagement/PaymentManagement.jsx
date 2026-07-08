@@ -1,7 +1,9 @@
 import React, { useState } from "react";
 import { Badge, Btn } from "../../../shared/ui";
+import { useToast } from "../../../context/ToastContext";
 
 export default function PaymentManagement({ payments = [], onUpdate, onDelete }) {
+  const { showToast } = useToast();
   const [search, setSearch] = useState("");
 
   // Modal states for editing transaction details
@@ -34,7 +36,7 @@ export default function PaymentManagement({ payments = [], onUpdate, onDelete })
   const handleEditSubmit = (e) => {
     e.preventDefault();
     if (!editCustomer.trim() || !editAmount) {
-      alert("Please fill in all required fields.");
+      showToast("Please fill in all required fields.", "warning");
       return;
     }
 
@@ -48,7 +50,7 @@ export default function PaymentManagement({ payments = [], onUpdate, onDelete })
 
     onUpdate(editTxId, updatedFields);
     setIsEditOpen(false);
-    alert("✅ Transaction details updated successfully!");
+    showToast("Transaction details updated successfully!", "success");
   };
 
   const getStatusBadgeColor = (status) => {
