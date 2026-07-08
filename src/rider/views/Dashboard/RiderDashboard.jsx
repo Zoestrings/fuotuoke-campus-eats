@@ -9,6 +9,7 @@ export default function RiderDashboard({ onLogoutSuccess }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+  const [drawerOpen, setDrawerOpen] = useState(false);
   const [showPhoneModal, setShowPhoneModal] = useState(false);
   const [riderPhone, setRiderPhone] = useState(
     localStorage.getItem("fuo_rider_phone") || ""
@@ -169,7 +170,86 @@ export default function RiderDashboard({ onLogoutSuccess }) {
             )}
           </div>
         </div>
+
+        {/* Mobile hamburger menu */}
+        <button
+          className="nav-hamburger"
+          onClick={() => setDrawerOpen(true)}
+          aria-label="Open navigation menu"
+          style={{ color: "#fff", background: "transparent", border: "none", fontSize: "1.6rem", cursor: "pointer" }}
+        >
+          <i className="bi bi-list" />
+        </button>
       </nav>
+
+      {/* ── Mobile Nav Drawer ──────────────────────────── */}
+      <div
+        className={`nav-drawer-overlay${drawerOpen ? " open" : ""}`}
+        onClick={() => setDrawerOpen(false)}
+        aria-hidden="true"
+      />
+
+      <aside
+        className={`nav-drawer staff${drawerOpen ? " open" : ""}`}
+        aria-label="Rider navigation menu"
+      >
+        {/* Header */}
+        <div className="nav-drawer-header" style={{ background: "var(--primary)" }}>
+          <div className="nav-drawer-brand">
+            <img src="/FUO_Logo.png" alt="Logo" />
+            <span className="nav-drawer-brand-title" style={{ color: "#fff" }}>Rider Hub</span>
+          </div>
+          <button className="nav-drawer-close" onClick={() => setDrawerOpen(false)} aria-label="Close menu" style={{ color: "#fff" }}>
+            <i className="bi bi-x-lg" />
+          </button>
+        </div>
+
+        {/* User info */}
+        <div className="nav-drawer-user">
+          <div className="nav-drawer-user-avatar" style={{ color: "var(--primary)" }}>
+            <i className="bi bi-bicycle" />
+          </div>
+          <div>
+            <div className="nav-drawer-user-name">{user.name}</div>
+            <div className="nav-drawer-user-role">Delivery Personnel</div>
+          </div>
+        </div>
+
+        {/* Navigation links inside drawer */}
+        <div className="nav-drawer-links">
+          <button
+            className={`nav-drawer-item${activeTab === "available" ? " active staff" : ""}`}
+            onClick={() => { setActiveTab("available"); setDrawerOpen(false); }}
+            style={{ borderLeftColor: activeTab === "available" ? "var(--primary)" : "transparent" }}
+          >
+            <i className="bi bi-bicycle" style={{ marginRight: 8 }} />
+            Available Runs ({availableOrders.length})
+          </button>
+          <button
+            className={`nav-drawer-item${activeTab === "active" ? " active staff" : ""}`}
+            onClick={() => { setActiveTab("active"); setDrawerOpen(false); }}
+            style={{ borderLeftColor: activeTab === "active" ? "var(--primary)" : "transparent" }}
+          >
+            <i className="bi bi-lightning-fill" style={{ marginRight: 8 }} />
+            Active Runs ({activeDeliveries.length})
+          </button>
+          <button
+            className={`nav-drawer-item${activeTab === "completed" ? " active staff" : ""}`}
+            onClick={() => { setActiveTab("completed"); setDrawerOpen(false); }}
+            style={{ borderLeftColor: activeTab === "completed" ? "var(--primary)" : "transparent" }}
+          >
+            <i className="bi bi-check-circle" style={{ marginRight: 8 }} />
+            History ({completedDeliveries.length})
+          </button>
+        </div>
+
+        {/* Sign out */}
+        <div className="nav-drawer-footer">
+          <button className="nav-drawer-logout" onClick={() => { setDrawerOpen(false); handleLogout(); }} style={{ color: "var(--red-text)" }}>
+            <i className="bi bi-box-arrow-right" /> Sign Out
+          </button>
+        </div>
+      </aside>
 
       {/* ── Main Container ─────────────────────────────── */}
       <div className="container" style={{ maxWidth: 840, padding: "24px 16px" }}>

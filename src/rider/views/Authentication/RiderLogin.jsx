@@ -3,20 +3,15 @@ import { Btn, Field, AuthShell } from "../../../shared/ui";
 
 export default function RiderLogin({ onLogin, onAdminLogin, onVendorLogin, goHome }) {
   const [activeRole, setActiveRole] = useState("rider");
-  const [riderId, setRiderId] = useState("zoehackz001");
-  const [password, setPassword] = useState("72364231");
+  const [riderId, setRiderId] = useState("");
+  const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
-  // Automatically update default credentials for each tab
+  // Clear credentials and errors when switching tabs to protect security
   useEffect(() => {
-    if (activeRole === "canteen") {
-      setRiderId("Zoehackz001");
-      setPassword("72364231");
-    } else {
-      setRiderId("zoehackz001");
-      setPassword("72364231");
-    }
+    setRiderId("");
+    setPassword("");
     setError("");
     setSuccess("");
   }, [activeRole]);
