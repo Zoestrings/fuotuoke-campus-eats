@@ -161,17 +161,19 @@ router.get("/verify/:reference", authenticate, async (req, res, next) => {
 // ── POST /api/payments/webhook — Paystack Webhook (server-to-server) ──
 router.post("/webhook", async (req, res, next) => {
   try {
-    // Verify webhook signature
+    // Since body-parser processes raw buffers on the webhook path, convert it to utf-8 string
+    const rawBody = Buffer.isBuffer(req.body) ? req.body.toString("utf8") : JSON.stringify(req.body);
+
     const hash = crypto
       .createHmac("sha512", PAYSTACK_SECRET)
-      .update(JSON.stringify(req.body))
+      .update(rawBody)
       .digest("hex");
 
     if (hash !== req.headers["x-paystack-signature"]) {
       return res.status(401).json({ error: "Invalid signature." });
     }
 
-    const event = typeof req.body === "string" ? JSON.parse(req.body) : req.body;
+    const event = typeof rawBody === "string" ? JSON.parse(rawBody) : rawBody;
 
     if (event.event === "charge.success") {
       const { reference, metadata } = event.data;

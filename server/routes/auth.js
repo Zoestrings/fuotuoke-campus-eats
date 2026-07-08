@@ -31,16 +31,16 @@ const generateRefreshToken = (user) => {
 // ── POST /api/auth/signup ──
 router.post("/signup", async (req, res, next) => {
   try {
-    const { id, password, role, name, email } = req.body;
+    const { id, password, role, name, email, canteen } = req.body;
 
     if (!id || !password || !name || !email) {
       return res.status(400).json({ error: "All fields are required." });
     }
 
     // Check if user already exists
-    const existing = await User.findOne({ userId: id.toUpperCase() });
+    const existing = await User.findOne({ userId: id.toUpperCase(), role });
     if (existing) {
-      return res.status(409).json({ error: "An account with this ID already exists." });
+      return res.status(409).json({ error: "An account with this ID and role already exists." });
     }
 
     // Create new user
@@ -50,7 +50,8 @@ router.post("/signup", async (req, res, next) => {
       email,
       password,
       role: role || "student",
-      status: "active"
+      status: "active",
+      canteen: role === "kitchen" ? canteen : null
     });
 
     const accessToken = generateAccessToken(user);
