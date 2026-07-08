@@ -23,6 +23,7 @@ CREATE TABLE IF NOT EXISTS `menu_items` (
   `price` DECIMAL(10, 2) NOT NULL,
   `cat` ENUM('Rice', 'Soup', 'Mains', 'Snacks', 'Drinks') NOT NULL,
   `emoji` VARCHAR(50) DEFAULT '',
+  `image` VARCHAR(255) DEFAULT '',
   `desc` TEXT,
   `popular` TINYINT(1) DEFAULT 0,
   `available` TINYINT(1) DEFAULT 1,
@@ -114,58 +115,58 @@ ON DUPLICATE KEY UPDATE `id` = `id`;
 
 -- ── 9. SEED DEFAULT USERS ──
 INSERT INTO `users` (`userId`, `name`, `email`, `password`, `role`, `status`, `canteen`)
-SELECT 'zoehackz001', 'Zoe Hackz Admin', 'admin@fuotuoke.edu.ng', '$2a$10$i2vtOCakLAxTgHATS0cXxuXvFhhi5k1yShHx8eSY9qVhIfzFEyMsW', 'admin', 'active', NULL
+SELECT 'zoehackz001', 'Zoe Hackz Admin', 'admin@fuotuoke.edu.ng', '$2a$10$WiWN/ZNVEoaBuSzfqIhE4OW9SfcPbBy.k2JpRTfwwSmPcjshk7qJq', 'admin', 'active', NULL
 FROM DUAL
 WHERE NOT EXISTS (SELECT 1 FROM `users` WHERE `userId` = 'zoehackz001' AND `role` = 'admin');
 
 INSERT INTO `users` (`userId`, `name`, `email`, `password`, `role`, `status`, `canteen`)
-SELECT 'FUO/22/CSI/18843', 'Precious Daniel', 'precious.daniel@fuotuoke.edu.ng', '$2a$10$7N2hUS6/4PGNidfyMmjD4Owzerl/95RtjEIYpZY5P7dutVPxUDQLu', 'student', 'active', NULL
+SELECT 'FUO/22/CSI/18843', 'Precious Daniel', 'precious.daniel@fuotuoke.edu.ng', '$2a$10$WiWN/ZNVEoaBuSzfqIhE4OW9SfcPbBy.k2JpRTfwwSmPcjshk7qJq', 'student', 'active', NULL
 FROM DUAL
 WHERE NOT EXISTS (SELECT 1 FROM `users` WHERE `userId` = 'FUO/22/CSI/18843' AND `role` = 'student');
 
 INSERT INTO `users` (`userId`, `name`, `email`, `password`, `role`, `status`, `canteen`)
-SELECT 'ZOEHACKZ001', 'Zoe Hackz Rider', 'rider@fuotuoke.edu.ng', '$2a$10$i2vtOCakLAxTgHATS0cXxuXvFhhi5k1yShHx8eSY9qVhIfzFEyMsW', 'rider', 'active', NULL
+SELECT 'zoehackz001', 'Zoe Hackz Rider', 'rider@fuotuoke.edu.ng', '$2a$10$WiWN/ZNVEoaBuSzfqIhE4OW9SfcPbBy.k2JpRTfwwSmPcjshk7qJq', 'rider', 'active', NULL
 FROM DUAL
-WHERE NOT EXISTS (SELECT 1 FROM `users` WHERE `userId` = 'ZOEHACKZ001' AND `role` = 'rider');
+WHERE NOT EXISTS (SELECT 1 FROM `users` WHERE `userId` = 'zoehackz001' AND `role` = 'rider');
 
 INSERT INTO `users` (`userId`, `name`, `email`, `password`, `role`, `status`, `canteen`)
-SELECT 'Zoehackz001', 'Main Cafeteria Kitchen', 'canteen@fuotuoke.edu.ng', '$2a$10$i2vtOCakLAxTgHATS0cXxuXvFhhi5k1yShHx8eSY9qVhIfzFEyMsW', 'kitchen', 'active', 'Main Cafeteria'
+SELECT 'zoehackz001', 'Main Cafeteria Kitchen', 'canteen@fuotuoke.edu.ng', '$2a$10$WiWN/ZNVEoaBuSzfqIhE4OW9SfcPbBy.k2JpRTfwwSmPcjshk7qJq', 'kitchen', 'active', 'Main Cafeteria'
 FROM DUAL
-WHERE NOT EXISTS (SELECT 1 FROM `users` WHERE `userId` = 'Zoehackz001' AND `role` = 'kitchen');
+WHERE NOT EXISTS (SELECT 1 FROM `users` WHERE `userId` = 'zoehackz001' AND `role` = 'kitchen');
 
 INSERT INTO `users` (`userId`, `name`, `email`, `password`, `role`, `status`, `canteen`)
-SELECT 'SCIENCE-KITCHEN', 'Science Cafeteria Kitchen', 'science@fuotuoke.edu.ng', '$2a$10$i2vtOCakLAxTgHATS0cXxuXvFhhi5k1yShHx8eSY9qVhIfzFEyMsW', 'kitchen', 'active', 'Science Cafeteria'
+SELECT 'SCIENCE-KITCHEN', 'Science Cafeteria Kitchen', 'science@fuotuoke.edu.ng', '$2a$10$WiWN/ZNVEoaBuSzfqIhE4OW9SfcPbBy.k2JpRTfwwSmPcjshk7qJq', 'kitchen', 'active', 'Science Cafeteria'
 FROM DUAL
 WHERE NOT EXISTS (SELECT 1 FROM `users` WHERE `userId` = 'SCIENCE-KITCHEN' AND `role` = 'kitchen');
 
 INSERT INTO `users` (`userId`, `name`, `email`, `password`, `role`, `status`, `canteen`)
-SELECT 'SUB-KITCHEN', 'Student Union Buka Kitchen', 'sub@fuotuoke.edu.ng', '$2a$10$i2vtOCakLAxTgHATS0cXxuXvFhhi5k1yShHx8eSY9qVhIfzFEyMsW', 'kitchen', 'active', 'Student Union Buka'
+SELECT 'SUB-KITCHEN', 'Student Union Buka Kitchen', 'sub@fuotuoke.edu.ng', '$2a$10$WiWN/ZNVEoaBuSzfqIhE4OW9SfcPbBy.k2JpRTfwwSmPcjshk7qJq', 'kitchen', 'active', 'Student Union Buka'
 FROM DUAL
 WHERE NOT EXISTS (SELECT 1 FROM `users` WHERE `userId` = 'SUB-KITCHEN' AND `role` = 'kitchen');
 
 INSERT INTO `users` (`userId`, `name`, `email`, `password`, `role`, `status`, `canteen`)
-SELECT 'ENG-KITCHEN', 'Engineering Canteen Kitchen', 'eng@fuotuoke.edu.ng', '$2a$10$i2vtOCakLAxTgHATS0cXxuXvFhhi5k1yShHx8eSY9qVhIfzFEyMsW', 'kitchen', 'active', 'Engineering Canteen'
+SELECT 'ENG-KITCHEN', 'Engineering Canteen Kitchen', 'eng@fuotuoke.edu.ng', '$2a$10$WiWN/ZNVEoaBuSzfqIhE4OW9SfcPbBy.k2JpRTfwwSmPcjshk7qJq', 'kitchen', 'active', 'Engineering Canteen'
 FROM DUAL
 WHERE NOT EXISTS (SELECT 1 FROM `users` WHERE `userId` = 'ENG-KITCHEN' AND `role` = 'kitchen');
 
 
 -- ── 10. SEED DEFAULT MENU ITEMS ──
-INSERT INTO `menu_items` (`id`, `name`, `price`, `cat`, `emoji`, `desc`, `popular`, `available`) VALUES
-(1, 'Eba + soup (Egusi/Vegetable)', 1500.00, 'Soup', '', 'Fresh garri served with choice of Egusi or Vegetable soup', 1, 1),
-(2, 'Eba + Okra soup', 1500.00, 'Soup', '', 'Yellow garri paired with draw okra soup and fish', 0, 1),
-(3, 'Amala + Ewedu/Gbegiri', 1700.00, 'Soup', '', 'Soft yam flour with combination of Ewedu and bean soup', 1, 1),
-(4, 'Pounded yam + soup', 1700.00, 'Soup', '', 'Smooth pounded yam served with choice of soup', 1, 1),
-(5, 'Pepper soup (fish)', 2500.00, 'Soup', '', 'Spicy pepper soup broth served with fresh catfish', 0, 1),
-(6, 'Jollof Rice & Chicken', 2500.00, 'Rice', '', 'Rich smokey Nigerian party Jollof served with fried chicken', 1, 1),
-(7, 'Fried Rice & Fish', 2500.00, 'Rice', '', 'Savory seasoned fried rice mixed with vegetables and fried fish', 0, 1),
-(8, 'White Rice & Stew', 1800.00, 'Rice', '', 'Fluffy white long-grain rice served with standard tomato stew and beef', 0, 1),
-(9, 'Spaghetti Bolognese', 2000.00, 'Mains', '', 'Pasta tossed in seasoned minced beef sauce', 1, 1),
-(10, 'Plantain & Egg Sauce', 1500.00, 'Mains', '', 'Fried sweet plantain slices served with scrambled egg sauce', 0, 1),
-(11, 'Meat Pie', 800.00, 'Snacks', '', 'Baked pastry filled with minced beef and potatoes', 1, 1),
-(12, 'Sausage Roll', 600.00, 'Snacks', '', 'Savory sausage meat rolled in flaky pastry', 0, 1),
-(13, 'Chilled Coca-Cola', 500.00, 'Drinks', '', '35cl pet bottle served ice-cold', 0, 1),
-(14, 'Cold Fanta', 500.00, 'Drinks', '', '35cl pet bottle served ice-cold', 0, 1),
-(15, 'Water (Bottle)', 300.00, 'Drinks', '', '75cl pure table water bottle', 0, 1)
+INSERT INTO `menu_items` (`id`, `name`, `price`, `cat`, `emoji`, `image`, `desc`, `popular`, `available`) VALUES
+(1, 'Eba + soup (Egusi/Vegetable)', 1500.00, 'Soup', '', '/images/menu/eba_egusi_soup.png', 'Fresh garri served with choice of Egusi or Vegetable soup', 1, 1),
+(2, 'Eba + Okra soup', 1500.00, 'Soup', '', '/images/menu/eba_okra_soup.png', 'Yellow garri paired with draw okra soup and fish', 0, 1),
+(3, 'Amala + Ewedu/Gbegiri', 1700.00, 'Soup', '', '/images/menu/amala_ewedu.png', 'Soft yam flour with combination of Ewedu and bean soup', 1, 1),
+(4, 'Pounded yam + soup', 1700.00, 'Soup', '', '/images/menu/pounded_yam_soup.png', 'Smooth pounded yam served with choice of soup', 1, 1),
+(5, 'Pepper soup (fish)', 2500.00, 'Soup', '', '/images/menu/pepper_soup_fish.png', 'Spicy pepper soup broth served with fresh catfish', 0, 1),
+(6, 'Jollof Rice & Chicken', 2500.00, 'Rice', '', '/images/menu/jollof_rice_chicken.png', 'Rich smokey Nigerian party Jollof served with fried chicken', 1, 1),
+(7, 'Fried Rice & Fish', 2500.00, 'Rice', '', '/images/menu/fried_rice_chicken.png', 'Savory seasoned fried rice mixed with vegetables and fried fish', 0, 1),
+(8, 'White Rice & Stew', 1800.00, 'Rice', '', '/images/menu/white_rice_stew.png', 'Fluffy white long-grain rice served with standard tomato stew and beef', 0, 1),
+(9, 'Spaghetti Bolognese', 2000.00, 'Mains', '', '/images/menu/spaghetti_chicken.png', 'Pasta tossed in seasoned minced beef sauce', 1, 1),
+(10, 'Plantain & Egg Sauce', 1500.00, 'Mains', '', '/images/menu/fried_plantain.png', 'Fried sweet plantain slices served with scrambled egg sauce', 0, 1),
+(11, 'Meat Pie', 800.00, 'Snacks', '', 'https://images.unsplash.com/photo-1588168333986-5078647ac9ab?auto=format&fit=crop&w=600&q=80', 'Baked pastry filled with minced beef and potatoes', 1, 1),
+(12, 'Sausage Roll', 600.00, 'Snacks', '', 'https://images.unsplash.com/photo-1626132647523-66f5bf380027?auto=format&fit=crop&w=600&q=80', 'Savory sausage meat rolled in flaky pastry', 0, 1),
+(13, 'Chilled Coca-Cola', 500.00, 'Drinks', '', 'https://images.unsplash.com/photo-1622483767028-3f66f32aef97?auto=format&fit=crop&w=600&q=80', '35cl pet bottle served ice-cold', 0, 1),
+(14, 'Cold Fanta', 500.00, 'Drinks', '', 'https://images.unsplash.com/photo-1581009137042-c552e4856c7d?auto=format&fit=crop&w=600&q=80', '35cl pet bottle served ice-cold', 0, 1),
+(15, 'Water (Bottle)', 300.00, 'Drinks', '', 'https://images.unsplash.com/photo-1560023907-5f67b3104e94?auto=format&fit=crop&w=600&q=80', '75cl table water bottle', 0, 1)
 ON DUPLICATE KEY UPDATE `name`=VALUES(`name`);
 
 

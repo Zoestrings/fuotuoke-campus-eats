@@ -12,6 +12,7 @@ class MenuItemInstance {
     this.price = parseFloat(data.price);
     this.cat = data.cat;
     this.emoji = data.emoji || "";
+    this.image = data.image || "";
     this.desc = data.desc || "";
     this.popular = !!data.popular;
     this.available = !!data.available;
@@ -85,14 +86,15 @@ class MenuItem {
 
   static async create(data) {
     const sql = `
-      INSERT INTO menu_items (name, price, cat, emoji, \`desc\`, popular, available)
-      VALUES (?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO menu_items (name, price, cat, emoji, image, \`desc\`, popular, available)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
     `;
     const params = [
       data.name,
       data.price,
       data.cat,
       data.emoji || "",
+      data.image || "",
       data.desc || "Freshly prepared campus special.",
       data.popular ? 1 : 0,
       data.available !== false ? 1 : 0
@@ -116,7 +118,7 @@ class MenuItem {
     const params = [];
     
     // Split properties to update in main table
-    const allowedFields = ["name", "price", "cat", "emoji", "desc", "popular", "available"];
+    const allowedFields = ["name", "price", "cat", "emoji", "image", "desc", "popular", "available"];
     allowedFields.forEach(f => {
       if (updates[f] !== undefined) {
         fields.push(`\`${f}\` = ?`);

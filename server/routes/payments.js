@@ -202,7 +202,7 @@ router.post("/webhook", async (req, res, next) => {
 // ── GET /api/payments — Admin: get all payment records ──
 router.get("/", authenticate, requireRole("admin"), async (req, res, next) => {
   try {
-    const orders = await Order.find({}).sort({ createdAt: -1 });
+    const orders = await Order.find({});
 
     const payments = orders.map(o => ({
       id: `PAY-${o._id}`,
