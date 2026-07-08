@@ -70,19 +70,60 @@ export function setTokens(accessToken, refreshToken) {
   }
 }
 
+import { handleMockRequest } from "./mockDb";
+
+const shouldUseMock = () => {
+  // If we are in production on Vercel and no production API URL is set, use mock fallback.
+  const isLocal = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
+  const hasProdApi = process.env.REACT_APP_API_URL && !process.env.REACT_APP_API_URL.includes("localhost");
+  return !isLocal && !hasProdApi;
+};
+
 export function clearTokens() {
   localStorage.removeItem("accessToken");
   localStorage.removeItem("fuo_refresh_token");
 }
 
 // REST Convenience Wrappers
-export const get = (endpoint) => apiClientInstance.get(endpoint).then(res => res.data);
-export const post = (endpoint, body) => apiClientInstance.post(endpoint, body).then(res => res.data);
-export const put = (endpoint, body) => apiClientInstance.put(endpoint, body).then(res => res.data);
-export const patch = (endpoint, body) => apiClientInstance.patch(endpoint, body).then(res => res.data);
-export const del = (endpoint) => apiClientInstance.delete(endpoint).then(res => res.data);
+export const get = (endpoint) => {
+  if (shouldUseMock()) {
+    return handleMockRequest("GET", endpoint);
+  }
+  return apiClientInstance.get(endpoint).then(res => res.data);
+};
+
+export const post = (endpoint, body) => {
+  if (shouldUseMock()) {
+    return handleMockRequest("POST", endpoint, body);
+  }
+  return apiClientInstance.post(endpoint, body).then(res => res.data);
+};
+
+export const put = (endpoint, body) => {
+  if (shouldUseMock()) {
+    return handleMockRequest("PUT", endpoint, body);
+  }
+  return apiClientInstance.put(endpoint, body).then(res => res.data);
+};
+
+export const patch = (endpoint, body) => {
+  if (shouldUseMock()) {
+    return handleMockRequest("PATCH", endpoint, body);
+  }
+  return apiClientInstance.patch(endpoint, body).then(res => res.data);
+};
+
+export const del = (endpoint) => {
+  if (shouldUseMock()) {
+    return handleMockRequest("DELETE", endpoint);
+  }
+  return apiClientInstance.delete(endpoint).then(res => res.data);
+};
 
 export const apiRequest = (endpoint, options = {}) => {
+  if (shouldUseMock()) {
+    return handleMockRequest(options.method || "GET", endpoint, options.body);
+  }
   const method = (options.method || "GET").toLowerCase();
   return apiClientInstance({
     url: endpoint,

@@ -3,7 +3,7 @@
 // ================================================================
 
 import React, { createContext, useContext, useState, useEffect } from "react";
-import axios from "axios";
+import { get, post } from "../shared/api/apiClient";
 
 const AuthContext = createContext(null);
 
@@ -23,10 +23,8 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     if (token) {
       localStorage.setItem("accessToken", token);
-      axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
     } else {
       localStorage.removeItem("accessToken");
-      delete axios.defaults.headers.common["Authorization"];
     }
   }, [token]);
 
@@ -46,11 +44,10 @@ export const AuthProvider = ({ children }) => {
         return;
       }
       try {
-        const response = await axios.get("http://localhost:5000/api/auth/me", {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        if (response.data && response.data.user) {
-          setUser(response.data.user);
+        setLoading(true);
+        const data = await get("/auth/me");
+        if (data && data.user) {
+          setUser(data.user);
         } else {
           // Token expired or invalid
           setToken(null);
@@ -68,38 +65,38 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (id, password, role) => {
     try {
-      const response = await axios.post("http://localhost:5000/api/auth/login", {
+      const data = await post("/auth/login", {
         id,
         password,
         role
       });
-      if (response.data && response.data.accessToken) {
-        setToken(response.data.accessToken);
-        setUser(response.data.user);
+      if (data && data.accessToken) {
+        setToken(data.accessToken);
+        setUser(data.user);
         return { success: true };
       }
       return { success: false, error: "Authentication failed." };
     } catch (err) {
       return {
         success: false,
-        error: err.response?.data?.error || "Invalid username, password, or role."
+        error: err.response?.data?.error || err.message || "Invalid username, password, or role."
       };
     }
   };
 
   const signup = async (signupData) => {
     try {
-      const response = await axios.post("http://localhost:5000/api/auth/signup", signupData);
-      if (response.data && response.data.accessToken) {
-        setToken(response.data.accessToken);
-        setUser(response.data.user);
+      const data = await post("/auth/signup", signupData);
+      if (data && data.accessToken) {
+        setToken(data.accessToken);
+        setUser(data.user);
         return { success: true };
       }
       return { success: false, error: "Signup failed." };
     } catch (err) {
       return {
         success: false,
-        error: err.response?.data?.error || "Registration failed. Try again."
+        error: err.response?.data?.error || err.message || "Registration failed. Try again."
       };
     }
   };
