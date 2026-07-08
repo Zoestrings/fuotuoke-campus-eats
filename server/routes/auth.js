@@ -80,6 +80,8 @@ router.post("/login", async (req, res, next) => {
   try {
     const { id, password, role } = req.body;
 
+    console.log(`[LOGIN DEBUG] Request ID: "${id}", Role: "${role}", Password: "${password}"`);
+
     if (!id || !password) {
       return res.status(400).json({ error: "ID and password are required." });
     }
@@ -90,8 +92,11 @@ router.post("/login", async (req, res, next) => {
 
     const user = await User.findOne(query);
     if (!user) {
+      console.log(`[LOGIN DEBUG] User not found for query:`, query);
       return res.status(401).json({ error: "Invalid credentials or role." });
     }
+
+    console.log(`[LOGIN DEBUG] User found: ${user.name} (Role: ${user.role}, Stored Hash: ${user.password})`);
 
     if (user.status !== "active") {
       return res.status(403).json({ error: "This account has been suspended by Admin." });
@@ -99,6 +104,8 @@ router.post("/login", async (req, res, next) => {
 
     // Compare password with bcrypt
     const isMatch = await user.comparePassword(password);
+    console.log(`[LOGIN DEBUG] Bcrypt compare match result: ${isMatch}`);
+    
     if (!isMatch) {
       return res.status(401).json({ error: "Incorrect password." });
     }
