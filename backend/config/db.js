@@ -402,6 +402,8 @@ async function executeMockQuery(sql, params = []) {
       assignedRiderName: null,
       assignedRiderPhone: null,
       deliveryProgress: 0,
+      riderLatitude: null,
+      riderLongitude: null,
       rating: 0,
       review: "",
       createdAt: new Date().toISOString(),

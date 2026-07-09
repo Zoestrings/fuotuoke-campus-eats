@@ -215,12 +215,30 @@ export const handleMockRequest = async (method, endpoint, body = null) => {
       return { success: true, order: newOrder };
     }
 
-    if (method === "PUT") {
-      // Modify order status
+    if (method === "PUT" || method === "PATCH") {
       const idVal = parseInt(parts[1], 10);
+      const subAction = parts[2];
       const updatedOrders = orders.map(ord => {
         if (ord.id === idVal) {
-          return { ...ord, ...body, updatedAt: new Date().toISOString() };
+          let updated = { ...ord, updatedAt: new Date().toISOString() };
+          if (subAction === "location") {
+            updated.riderLatitude = Number(body.latitude);
+            updated.riderLongitude = Number(body.longitude);
+          } else if (subAction === "delivery-progress") {
+            updated.deliveryProgress = Number(body.progress);
+            if (updated.deliveryProgress >= 100) {
+              updated.status = "Completed";
+            }
+          } else if (subAction === "complete-delivery") {
+            updated.status = "Completed";
+            updated.deliveryProgress = 100;
+          } else if (subAction === "review") {
+            updated.rating = Number(body.rating);
+            updated.review = (body.review || "").trim();
+          } else {
+            updated = { ...updated, ...body };
+          }
+          return updated;
         }
         return ord;
       });

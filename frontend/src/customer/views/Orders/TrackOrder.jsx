@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Badge, Btn } from "../../../shared/ui";
 import { OrderService } from "../../services/OrderService";
 import { useToast } from "../../../context/ToastContext";
@@ -38,6 +38,24 @@ const STEPS = [
   },
 ];
 
+const FACULTY_COORDS = {
+  science: { lat: 4.9780, lng: 6.2770, label: "Science Faculty" },
+  humanities: { lat: 4.9720, lng: 6.2730, label: "Humanities Faculty" },
+  social: { lat: 4.9720, lng: 6.2730, label: "Social Sciences Faculty" },
+  management: { lat: 4.9760, lng: 6.2790, label: "Management Sciences" },
+  admin: { lat: 4.9760, lng: 6.2790, label: "Senate Admin Building" },
+  engineering: { lat: 4.9790, lng: 6.2810, label: "Engineering Faculty" }
+};
+
+function getDestinationCoords(facultyName) {
+  const lower = (facultyName || "").toLowerCase();
+  if (lower.includes("science")) return FACULTY_COORDS.science;
+  if (lower.includes("humanities") || lower.includes("social")) return FACULTY_COORDS.humanities;
+  if (lower.includes("management") || lower.includes("admin")) return FACULTY_COORDS.management;
+  if (lower.includes("engineering")) return FACULTY_COORDS.engineering;
+  return { lat: 4.9760, lng: 6.2790, label: facultyName || "Your Faculty" }; // Default center
+}
+
 function getActiveIndex(status) {
   if (status === "Preparing") return 1;
   if (status === "Out for Delivery" || status === "Ready for Pickup") return 2;
@@ -56,15 +74,64 @@ export default function TrackOrder({ order, onClose, accent }) {
   const { showToast } = useToast();
   const isGold = accent === "var(--gold)";
   const isPickup = order.type === "pickup";
-  const status = order.status || "Received";
+
+  const [liveOrder, setLiveOrder] = useState(order);
+  const status = liveOrder.status || "Received";
   const activeIdx = getActiveIndex(status);
   const fillPct = Math.min((activeIdx / (STEPS.length - 1)) * 100, 100);
   const statusColor = getStatusColor(status);
 
-  const [userRating, setUserRating] = useState(order.rating || 0);
-  const [reviewText, setReviewText] = useState(order.review || "");
+  const [userRating, setUserRating] = useState(liveOrder.rating || 0);
+  const [reviewText, setReviewText] = useState(liveOrder.review || "");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [successMsg, setSuccessMsg] = useState("");
+
+  const [leafletLoaded, setLeafletLoaded] = useState(false);
+  const mapRef = useRef(null);
+  const riderMarkerRef = useRef(null);
+
+  // Poll for live coordinates when order is active
+  useEffect(() => {
+    let interval = null;
+    const fetchLatest = async () => {
+      try {
+        const data = await OrderService.getOrderById(order.id);
+        if (data) {
+          setLiveOrder(data);
+        }
+      } catch (e) {
+        console.error("Error polling order update:", e);
+      }
+    };
+
+    fetchLatest();
+
+    if (["Out for Delivery", "Preparing", "Received"].includes(status)) {
+      interval = setInterval(fetchLatest, 4000);
+    }
+
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [order.id, status]);
+
+  // Load Leaflet Script / CSS
+  useEffect(() => {
+    if (window.L) {
+      setLeafletLoaded(true);
+      return;
+    }
+
+    const link = document.createElement("link");
+    link.rel = "stylesheet";
+    link.href = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css";
+    document.head.appendChild(link);
+
+    const script = document.createElement("script");
+    script.src = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js";
+    script.onload = () => setLeafletLoaded(true);
+    document.head.appendChild(script);
+  }, []);
 
   const handleReviewSubmit = async () => {
     if (userRating === 0) {
@@ -82,6 +149,84 @@ export default function TrackOrder({ order, onClose, accent }) {
       setIsSubmitting(false);
     }
   };
+
+  // Initialize and update Leaflet Map
+  useEffect(() => {
+    if (!leafletLoaded || !["Out for Delivery", "Completed"].includes(status) || liveOrder.type !== "delivery") {
+      return;
+    }
+
+    const L = window.L;
+    const canteenCoords = [4.9750, 6.2750];
+    const dest = getDestinationCoords(liveOrder.faculty);
+    const destCoords = [dest.lat, dest.lng];
+
+    const currentRiderLat = liveOrder.riderLatitude || canteenCoords[0];
+    const currentRiderLng = liveOrder.riderLongitude || canteenCoords[1];
+    const riderCoords = [currentRiderLat, currentRiderLng];
+
+    // Initialize Map if not created yet
+    if (!mapRef.current) {
+      const mapElement = document.getElementById("leaflet-map");
+      if (!mapElement) return;
+
+      const map = L.map("leaflet-map", {
+        zoomControl: true,
+        attributionControl: false
+      }).setView(canteenCoords, 15);
+
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        maxZoom: 19
+      }).addTo(map);
+
+      // Add Canteen Marker
+      L.marker(canteenCoords, {
+        icon: L.divIcon({
+          className: "leaflet-custom-marker-canteen",
+          html: `<div style="background: var(--gold); border: 2px solid #fff; border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; font-size: 11px; box-shadow: 0 1px 3px rgba(0,0,0,0.2)">🍳</div>`,
+          iconSize: [24, 24]
+        })
+      }).bindPopup(`<b>${liveOrder.outlet?.name || "Canteen"}</b>`).addTo(map);
+
+      // Add Destination Marker
+      L.marker(destCoords, {
+        icon: L.divIcon({
+          className: "leaflet-custom-marker-dest",
+          html: `<div style="background: var(--green-text); border: 2px solid #fff; border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; font-size: 11px; box-shadow: 0 1px 3px rgba(0,0,0,0.2)">📍</div>`,
+          iconSize: [24, 24]
+        })
+      }).bindPopup(`<b>${dest.label}</b>`).addTo(map);
+
+      // Draw Polyline route
+      L.polyline([canteenCoords, destCoords], {
+        color: "var(--primary)",
+        weight: 3,
+        dashArray: "5, 5",
+        opacity: 0.6
+      }).addTo(map);
+
+      // Add Rider Marker
+      const riderMarker = L.marker(riderCoords, {
+        icon: L.divIcon({
+          className: "leaflet-custom-marker-rider",
+          html: `<div style="background: #2563eb; border: 2px solid #fff; border-radius: 50%; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; font-size: 14px; box-shadow: 0 2px 5px rgba(0,0,0,0.3)">🚴</div>`,
+          iconSize: [28, 28]
+        })
+      }).bindPopup(`<b>Rider Live Position</b>`).addTo(map);
+
+      riderMarkerRef.current = riderMarker;
+      mapRef.current = map;
+
+      // Fit bounds to show entire route
+      const bounds = L.latLngBounds([canteenCoords, destCoords]);
+      map.fitBounds(bounds, { padding: [30, 30] });
+    } else {
+      // Map already initialized, just update Rider Position marker!
+      if (riderMarkerRef.current) {
+        riderMarkerRef.current.setLatLng(riderCoords);
+      }
+    }
+  }, [leafletLoaded, liveOrder.riderLatitude, liveOrder.riderLongitude, status]);
 
   return (
     <div className="tracker-fullscreen-backdrop" style={{ zIndex: 4000 }}>
@@ -113,80 +258,22 @@ export default function TrackOrder({ order, onClose, accent }) {
         <div className="tracker-body">
 
           {/* Live GPS Campus Tracker Map (Only if Delivery and Out for Delivery / Completed) */}
-          {order.type === "delivery" && ["Out for Delivery", "Completed"].includes(status) && (
+          {liveOrder.type === "delivery" && ["Out for Delivery", "Completed"].includes(status) && (
             <div className="tracker-summary-card" style={{ marginBottom: 20, padding: 16, background: "#f8fafc", border: "1px solid var(--border)", position: "relative", overflow: "hidden" }}>
               <div style={{ fontSize: ".8rem", fontWeight: 800, color: "var(--text-dark)", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: 12 }}>
                 <i className="bi bi-geo-alt-fill" style={{ marginRight: 6, color: "var(--red-text)" }} />
                 Live Campus GPS Map (FUOTUOKE Campus)
               </div>
               
-              <div style={{ position: "relative", width: "100%", height: 160, background: "#e2e8f0", borderRadius: 10, border: "1px solid var(--border)" }}>
-                <svg width="100%" height="100%" viewBox="0 0 400 160" style={{ display: "block" }}>
-                  <defs>
-                    <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
-                      <path d="M 20 0 L 0 0 0 20" fill="none" stroke="rgba(0,0,0,0.03)" strokeWidth="1" />
-                    </pattern>
-                  </defs>
-                  <rect width="100%" height="100%" fill="url(#grid)" />
-
-                  {/* Stylized road/path */}
-                  {(() => {
-                    const facultyName = order.faculty || "";
-                    const getCoords = (name) => {
-                      const lower = name.toLowerCase();
-                      if (lower.includes("science")) return { x: 320, y: 30, label: "Science Faculty" };
-                      if (lower.includes("humanities") || lower.includes("hss") || lower.includes("social")) return { x: 320, y: 130, label: "Humanities Faculty" };
-                      if (lower.includes("management") || lower.includes("admin")) return { x: 320, y: 80, label: "Management Sciences" };
-                      return { x: 320, y: 80, label: name || "Your Faculty" };
-                    };
-                    const dest = getCoords(facultyName);
-                    const startX = 60;
-                    const startY = 80;
-                    const endX = dest.x;
-                    const endY = dest.y;
-                    const controlX = 180;
-                    const controlY = endY - 20;
-
-                    const progress = order.deliveryProgress || 0;
-                    const t = progress / 100;
-                    const bikeX = Math.round(Math.pow(1 - t, 2) * startX + 2 * (1 - t) * t * controlX + Math.pow(t, 2) * endX);
-                    const bikeY = Math.round(Math.pow(1 - t, 2) * startY + 2 * (1 - t) * t * controlY + Math.pow(t, 2) * endY);
-
-                    return (
-                      <>
-                        <path
-                          d={`M ${startX} ${startY} Q ${controlX} ${controlY} ${endX} ${endY}`}
-                          fill="none"
-                          stroke="var(--primary)"
-                          strokeWidth="3"
-                          strokeDasharray="6,4"
-                          opacity="0.3"
-                        />
-                        {/* Canteen Node */}
-                        <circle cx={startX} cy={startY} r="8" fill="var(--gold)" stroke="#fff" strokeWidth="2" />
-                        <text x={startX - 45} y={startY + 22} fontSize="9" fontWeight="800" fill="var(--text-dark)">{order.outlet?.name || "Canteen"}</text>
-
-                        {/* Faculty Node */}
-                        <circle cx={endX} cy={endY} r="8" fill="var(--green-text)" stroke="#fff" strokeWidth="2" />
-                        <text x={endX - 45} y={endY + 22} fontSize="9" fontWeight="800" fill="var(--text-dark)">{dest.label}</text>
-
-                        {/* Rider Bike */}
-                        <g transform={`translate(${bikeX - 10}, ${bikeY - 10})`}>
-                          <circle cx="10" cy="10" r="12" fill="#2563eb" opacity="0.15" />
-                          <circle cx="10" cy="10" r="8" fill="#2563eb" stroke="#fff" strokeWidth="1.5" />
-                          <text x="3.5" y="13.5" fontSize="9" fill="#fff">🚴</text>
-                        </g>
-                      </>
-                    );
-                  })()}
-                </svg>
+              <div style={{ position: "relative", width: "100%", height: 220, borderRadius: 10, border: "1px solid var(--border)", overflow: "hidden", zIndex: 1 }}>
+                <div id="leaflet-map" style={{ width: "100%", height: "100%" }} />
 
                 {/* Info strip overlay */}
-                <div style={{ position: "absolute", bottom: 8, left: 8, background: "rgba(255,255,255,0.9)", padding: "4px 8px", borderRadius: 6, fontSize: ".72rem", border: "1px solid var(--border)", fontWeight: 700, color: "var(--text-dark)" }}>
-                  {order.deliveryProgress === 100 ? (
+                <div style={{ position: "absolute", bottom: 8, left: 8, background: "rgba(255,255,255,0.9)", padding: "4px 8px", borderRadius: 6, fontSize: ".72rem", border: "1px solid var(--border)", fontWeight: 700, color: "var(--text-dark)", zIndex: 1000 }}>
+                  {liveOrder.deliveryProgress === 100 || status === "Completed" ? (
                     <span style={{ color: "var(--green-text)" }}><i className="bi bi-check-circle-fill" /> Arrived at Faculty!</span>
                   ) : (
-                    <span><i className="bi bi-bicycle" style={{ marginRight: 4 }} /> Rider is {100 - (order.deliveryProgress || 0)}% away...</span>
+                    <span><i className="bi bi-bicycle" style={{ marginRight: 4 }} /> Rider is {100 - (liveOrder.deliveryProgress || 0)}% away...</span>
                   )}
                 </div>
               </div>
@@ -260,7 +347,7 @@ export default function TrackOrder({ order, onClose, accent }) {
                   <i className="bi bi-shop" style={{ marginRight: 5 }} />
                   Canteen
                 </div>
-                <div className="tracker-info-value">{order.outlet?.name || "—"}</div>
+                <div className="tracker-info-value">{liveOrder.outlet?.name || "—"}</div>
               </div>
               <div className="tracker-info-item">
                 <div className="tracker-info-title">
@@ -268,7 +355,7 @@ export default function TrackOrder({ order, onClose, accent }) {
                   {isPickup ? "Pickup" : "Delivery"}
                 </div>
                 <div className="tracker-info-value">
-                  {isPickup ? "Canteen Counter" : order.faculty || "—"}
+                  {isPickup ? "Canteen Counter" : liveOrder.faculty || "—"}
                 </div>
               </div>
               <div className="tracker-info-item">
@@ -276,25 +363,25 @@ export default function TrackOrder({ order, onClose, accent }) {
                   <i className="bi bi-calendar2-check" style={{ marginRight: 5 }} />
                   Ordered
                 </div>
-                <div className="tracker-info-value">{order.time || "—"}</div>
+                <div className="tracker-info-value">{liveOrder.time || "—"}</div>
               </div>
             </div>
           </div>
 
           {/* Rider Info Card (Only if delivery and rider is assigned) */}
-          {!isPickup && order.assignedRiderName && (
+          {!isPickup && liveOrder.assignedRiderName && (
             <div className="tracker-info-card" style={{ marginTop: 14, background: "rgba(37, 99, 235, 0.04)", border: "1px solid rgba(37, 99, 235, 0.15)" }}>
               <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                <div style={{ width: 42, height: 42, borderRadius: "50%", background: "var(--primary)", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontSize: "1.2rem" }}>
+                <div style={{ width: 42, height: 42, borderRadius: "50%", background: "var(--primary)", display: "flex", alignItems: "center", justifyCon: "center", color: "#fff", fontSize: "1.2rem" }}>
                   <i className="bi bi-person-badge-fill" />
                 </div>
                 <div>
                   <div style={{ fontSize: ".76rem", color: "var(--text-light)", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.5px" }}>Delivery Rider Assigned</div>
-                  <div style={{ fontSize: "1rem", fontWeight: 800, color: "var(--text-dark)" }}>{order.assignedRiderName}</div>
+                  <div style={{ fontSize: "1rem", fontWeight: 800, color: "var(--text-dark)" }}>{liveOrder.assignedRiderName}</div>
                   <div style={{ fontSize: ".82rem", color: "var(--text-muted)", marginTop: 2 }}>
                     <i className="bi bi-telephone-fill" style={{ marginRight: 6, color: "var(--primary)" }} />
-                    <a href={`tel:${order.assignedRiderPhone}`} style={{ color: "var(--primary)", fontWeight: 700, textDecoration: "underline" }}>
-                      {order.assignedRiderPhone}
+                    <a href={`tel:${liveOrder.assignedRiderPhone}`} style={{ color: "var(--primary)", fontWeight: 700, textDecoration: "underline" }}>
+                      {liveOrder.assignedRiderPhone}
                     </a>
                   </div>
                 </div>
@@ -309,7 +396,7 @@ export default function TrackOrder({ order, onClose, accent }) {
               Order Summary
             </div>
             <div className="tracker-summary-items">
-              {order.items.map((item, idx) => (
+              {liveOrder.items.map((item, idx) => (
                 <div key={item.id || idx} className="tracker-summary-row">
                   <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                     {item.image ? (
@@ -319,7 +406,7 @@ export default function TrackOrder({ order, onClose, accent }) {
                         style={{ width: 36, height: 36, borderRadius: 8, objectFit: "cover", border: "1px solid var(--border)" }}
                       />
                     ) : (
-                      <div style={{ width: 36, height: 36, borderRadius: 8, background: "var(--bg-page)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.3rem", border: "1px solid var(--border)" }}>
+                      <div style={{ width: 36, height: 36, borderRadius: 8, background: "var(--bg-page)", display: "flex", alignItems: "center", justifyCon: "center", fontSize: "1.3rem", border: "1px solid var(--border)" }}>
                         {item.emoji}
                       </div>
                     )}
@@ -337,7 +424,7 @@ export default function TrackOrder({ order, onClose, accent }) {
             <div className="tracker-summary-total">
               <span>Total Paid</span>
               <span style={{ color: isGold ? "var(--gold)" : "var(--primary)" }}>
-                ₦{order.total.toLocaleString()}
+                ₦{liveOrder.total.toLocaleString()}
               </span>
             </div>
           </div>
@@ -347,22 +434,22 @@ export default function TrackOrder({ order, onClose, accent }) {
             <div className="tracker-summary-card" style={{ marginTop: 20, padding: 18, background: "rgba(16, 185, 129, 0.03)", border: "1px solid rgba(16, 185, 129, 0.2)" }}>
               <div style={{ fontSize: ".88rem", fontWeight: 800, color: "var(--text-dark)", display: "flex", alignItems: "center", gap: 6, marginBottom: 12 }}>
                 <i className="bi bi-star-fill" style={{ color: "var(--gold)" }} />
-                {(order.rating > 0 || successMsg) ? "Your Rating & Review" : "Rate Your Meal & Service"}
+                {(liveOrder.rating > 0 || successMsg) ? "Your Rating & Review" : "Rate Your Meal & Service"}
               </div>
 
-              {(order.rating > 0 || successMsg) ? (
+              {(liveOrder.rating > 0 || successMsg) ? (
                 <div>
                   <div style={{ display: "flex", gap: 4, marginBottom: 8, fontSize: "1.1rem" }}>
                     {[1, 2, 3, 4, 5].map(star => (
                       <i
                         key={star}
-                        className={`bi ${star <= (order.rating || userRating) ? "bi-star-fill" : "bi-star"}`}
+                        className={`bi ${star <= (liveOrder.rating || userRating) ? "bi-star-fill" : "bi-star"}`}
                         style={{ color: "var(--gold)" }}
                       />
                     ))}
                   </div>
                   <p style={{ fontSize: ".86rem", color: "var(--text-dark)", margin: 0, fontStyle: "italic" }}>
-                    "{order.review || reviewText || "No comment left."}"
+                    "{liveOrder.review || reviewText || "No comment left."}"
                   </p>
                   {successMsg && (
                     <span style={{ fontSize: ".76rem", color: "var(--green-text)", display: "block", marginTop: 6, fontWeight: 700 }}>

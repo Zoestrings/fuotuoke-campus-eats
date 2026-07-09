@@ -25,6 +25,8 @@ class OrderInstance {
     this.assignedRiderName = data.assignedRiderName;
     this.assignedRiderPhone = data.assignedRiderPhone;
     this.deliveryProgress = parseInt(data.deliveryProgress || "0", 10);
+    this.riderLatitude = data.riderLatitude ? parseFloat(data.riderLatitude) : null;
+    this.riderLongitude = data.riderLongitude ? parseFloat(data.riderLongitude) : null;
     this.rating = parseInt(data.rating || "0", 10);
     this.review = data.review || "";
     this.items = items;
@@ -33,12 +35,12 @@ class OrderInstance {
   }
 
   async save() {
-    // Allows calling order.save() to persist status, progress, rating updates
+    // Allows calling order.save() to persist status, progress, location, and rating updates
     const sql = `
       UPDATE orders
       SET status = ?, paymentStatus = ?, paymentRef = ?,
           assignedRiderId = ?, assignedRiderName = ?, assignedRiderPhone = ?,
-          deliveryProgress = ?, rating = ?, review = ?
+          deliveryProgress = ?, riderLatitude = ?, riderLongitude = ?, rating = ?, review = ?
       WHERE id = ?
     `;
     const params = [
@@ -49,6 +51,8 @@ class OrderInstance {
       this.assignedRiderName,
       this.assignedRiderPhone,
       this.deliveryProgress,
+      this.riderLatitude,
+      this.riderLongitude,
       this.rating,
       this.review,
       this.id

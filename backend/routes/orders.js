@@ -194,6 +194,27 @@ router.patch("/:id/delivery-progress", authenticate, requireRole("rider"), async
   }
 });
 
+// ── PATCH /api/orders/:id/location — Rider: update GPS coordinates ──
+router.patch("/:id/location", authenticate, requireRole("rider"), async (req, res, next) => {
+  try {
+    const { latitude, longitude } = req.body;
+    const order = await Order.findById(req.params.id);
+    if (!order) return res.status(404).json({ error: "Order not found." });
+
+    if (order.assignedRiderId !== req.user.userId) {
+      return res.status(403).json({ error: "Access denied. You are not the assigned rider for this order." });
+    }
+
+    order.riderLatitude = Number(latitude);
+    order.riderLongitude = Number(longitude);
+
+    await order.save();
+    res.json({ success: true, order });
+  } catch (error) {
+    next(error);
+  }
+});
+
 // ── PATCH /api/orders/:id/review — Customer: submit order rating and review ──
 router.patch("/:id/review", authenticate, async (req, res, next) => {
   try {

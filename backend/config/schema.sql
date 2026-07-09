@@ -58,6 +58,8 @@ CREATE TABLE IF NOT EXISTS `orders` (
   `assignedRiderName` VARCHAR(255) DEFAULT NULL,
   `assignedRiderPhone` VARCHAR(255) DEFAULT NULL,
   `deliveryProgress` INT DEFAULT 0,
+  `riderLatitude` DECIMAL(10, 8) DEFAULT NULL,
+  `riderLongitude` DECIMAL(11, 8) DEFAULT NULL,
   `rating` INT DEFAULT 0,
   `review` TEXT,
   `createdAt` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

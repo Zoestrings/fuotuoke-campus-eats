@@ -80,13 +80,43 @@ export default function RiderDashboard({ onLogoutSuccess }) {
   };
 
   const [runningSimulations, setRunningSimulations] = useState({});
+  const [activeWatchers, setActiveWatchers] = useState({});
 
-  const handleStartSimulation = (orderId) => {
+  const CANTEEN_COORDS = { lat: 4.9750, lng: 6.2750 };
+  const FACULTY_COORDS = {
+    science: { lat: 4.9780, lng: 6.2770 },
+    humanities: { lat: 4.9720, lng: 6.2730 },
+    social: { lat: 4.9720, lng: 6.2730 },
+    management: { lat: 4.9760, lng: 6.2790 },
+    admin: { lat: 4.9760, lng: 6.2790 },
+    engineering: { lat: 4.9790, lng: 6.2810 }
+  };
+
+  const getDestinationCoords = (facultyName) => {
+    const lower = (facultyName || "").toLowerCase();
+    if (lower.includes("science")) return FACULTY_COORDS.science;
+    if (lower.includes("humanities") || lower.includes("social")) return FACULTY_COORDS.humanities;
+    if (lower.includes("management") || lower.includes("admin")) return FACULTY_COORDS.management;
+    if (lower.includes("engineering")) return FACULTY_COORDS.engineering;
+    return { lat: 4.9760, lng: 6.2790 }; // Default center
+  };
+
+  const handleStartSimulation = (orderId, facultyName) => {
     if (runningSimulations[orderId]) return;
+
+    // Stop live tracking if active to avoid collision
+    stopLiveTracking(orderId);
+
+    const start = CANTEEN_COORDS;
+    const dest = getDestinationCoords(facultyName);
 
     let currentProgress = 0;
     const interval = setInterval(async () => {
       currentProgress += 10;
+      const t = currentProgress / 100;
+      const currentLat = start.lat + (dest.lat - start.lat) * t;
+      const currentLng = start.lng + (dest.lng - start.lng) * t;
+
       if (currentProgress >= 100) {
         clearInterval(interval);
         setRunningSimulations(prev => {
@@ -95,6 +125,7 @@ export default function RiderDashboard({ onLogoutSuccess }) {
           return next;
         });
         try {
+          await OrderService.updateRiderLocation(orderId, dest.lat, dest.lng);
           await OrderService.completeDelivery(orderId);
           fetchOrders();
           setActiveTab("completed");
@@ -103,22 +134,72 @@ export default function RiderDashboard({ onLogoutSuccess }) {
         }
       } else {
         try {
+          await OrderService.updateRiderLocation(orderId, currentLat, currentLng);
           await OrderService.updateDeliveryProgress(orderId, currentProgress);
-          setOrders(prev => prev.map(o => o.id === orderId ? { ...o, deliveryProgress: currentProgress } : o));
+          setOrders(prev => prev.map(o => o.id === orderId ? { ...o, deliveryProgress: currentProgress, riderLatitude: currentLat, riderLongitude: currentLng } : o));
         } catch (e) {
           console.error(e);
         }
       }
-    }, 2500);
+    }, 2000);
 
     setRunningSimulations(prev => ({ ...prev, [orderId]: interval }));
+  };
+
+  const startLiveTracking = (orderId) => {
+    if (activeWatchers[orderId]) return;
+
+    // Stop simulation if running to avoid conflicts
+    if (runningSimulations[orderId]) {
+      clearInterval(runningSimulations[orderId]);
+      setRunningSimulations(prev => {
+        const next = { ...prev };
+        delete next[orderId];
+        return next;
+      });
+    }
+
+    if (!navigator.geolocation) {
+      alert("Geolocation is not supported by your browser.");
+      return;
+    }
+
+    const watchId = navigator.geolocation.watchPosition(
+      async (position) => {
+        const { latitude, longitude } = position.coords;
+        try {
+          await OrderService.updateRiderLocation(orderId, latitude, longitude);
+          setOrders(prev => prev.map(o => o.id === orderId ? { ...o, riderLatitude: latitude, riderLongitude: longitude } : o));
+        } catch (e) {
+          console.error("Error updating location:", e);
+        }
+      },
+      (error) => {
+        console.error("Geolocation error:", error);
+      },
+      { enableHighAccuracy: true, maximumAge: 10000, timeout: 5000 }
+    );
+
+    setActiveWatchers(prev => ({ ...prev, [orderId]: watchId }));
+  };
+
+  const stopLiveTracking = (orderId) => {
+    if (activeWatchers[orderId]) {
+      navigator.geolocation.clearWatch(activeWatchers[orderId]);
+      setActiveWatchers(prev => {
+        const next = { ...prev };
+        delete next[orderId];
+        return next;
+      });
+    }
   };
 
   useEffect(() => {
     return () => {
       Object.values(runningSimulations).forEach(clearInterval);
+      Object.values(activeWatchers).forEach(navigator.geolocation.clearWatch);
     };
-  }, [runningSimulations]);
+  }, [runningSimulations, activeWatchers]);
 
   // Filter lists
   const availableOrders = orders.filter(
@@ -407,18 +488,36 @@ export default function RiderDashboard({ onLogoutSuccess }) {
                       </div>
                     ) : null}
 
+                     {/* GPS Active/Stream Mode indicators */}
+                    {activeWatchers[order.id] && (
+                      <div style={{ background: "rgba(16, 185, 129, 0.05)", border: "1px solid rgba(16, 185, 129, 0.15)", padding: 12, borderRadius: 10, marginBottom: 14, fontSize: ".8rem", color: "var(--green-text)", fontWeight: 700 }}>
+                        <i className="bi bi-broadcast-pin" style={{ marginRight: 6 }} /> 
+                        Streaming live device GPS coordinates to customer...
+                      </div>
+                    )}
+
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderTop: "1px dashed var(--border)", paddingTop: 12, marginTop: 4 }}>
                       <span style={{ fontSize: ".84rem", color: "var(--text-light)" }}>
                         Items: {order.items.map(i => `${i.name} (x${i.qty})`).join(", ")}
                       </span>
-                      <div style={{ display: "flex", gap: 8 }}>
+                      <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                        {activeWatchers[order.id] ? (
+                          <Btn sm variant="danger" onClick={() => stopLiveTracking(order.id)}>
+                            <i className="bi bi-stop-circle" /> Stop GPS Stream
+                          </Btn>
+                        ) : (
+                          <Btn sm variant="outline" onClick={() => startLiveTracking(order.id)}>
+                            <i className="bi bi-broadcast" /> Stream GPS
+                          </Btn>
+                        )}
+
                         {!(order.deliveryProgress > 0 || runningSimulations[order.id]) && (
-                          <Btn sm variant="primary" onClick={() => handleStartSimulation(order.id)}>
-                            <i className="bi bi-play-circle" /> Start GPS Run
+                          <Btn sm variant="primary" onClick={() => handleStartSimulation(order.id, order.faculty)}>
+                            <i className="bi bi-play-circle" /> Simulate GPS
                           </Btn>
                         )}
                         <Btn sm variant="green" onClick={() => handleCompleteDelivery(order.id)}>
-                          <i className="bi bi-check-circle" /> Complete Delivery
+                          <i className="bi bi-check-circle" /> Complete
                         </Btn>
                       </div>
                     </div>

@@ -20,4 +20,8 @@ export class OrderService {
   static async completeDelivery(orderId) {
     return patch(`/orders/${orderId}/complete-delivery`);
   }
+
+  static async updateRiderLocation(orderId, latitude, longitude) {
+    return patch(`/orders/${orderId}/location`, { latitude, longitude });
+  }
 }
