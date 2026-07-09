@@ -1,7 +1,7 @@
 export class UserModel {
   static validateMatric(matric) {
     const formatted = matric.trim().toUpperCase();
-    return /^FUO\/\d{2}\/[A-Z]{3,4}\/\d{5}$/.test(formatted);
+    return /^FUO\/\d{2}\/[A-Z]{2,6}\/(1\d{4}|20000)$/.test(formatted);
   }
 
   static validateStaffId(staffId) {
