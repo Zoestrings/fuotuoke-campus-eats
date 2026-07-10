@@ -1281,16 +1281,20 @@ a {
 
 .dashhome-step-card {
   padding: 28px 20px;
-  border-radius: 8px;
-  border: 2px solid var(--text-dark);
+  border-radius: 16px;
+  border: 1.5px solid var(--border-warm);
   background: var(--bg-card-warm);
-  box-shadow: 4px 4px 0px var(--text-dark);
-  transition: all 0.15s ease;
+  transition: all 0.2s ease;
 }
 
 .dashhome-step-card:hover {
-  transform: translate(2px, 2px);
-  box-shadow: 1px 1px 0px var(--text-dark);
+  border-color: var(--primary);
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-lg);
+}
+
+.dashhome-step-card.staff:hover {
+  border-color: var(--gold);
 }
 
 .dashhome-step-icon-wrap {
@@ -1341,17 +1345,17 @@ a {
 
 .dashhome-canteen-card {
   background: var(--bg-card);
-  border-radius: 8px;
+  border-radius: 16px;
   padding: 24px 20px;
   cursor: pointer;
-  border: 2px solid var(--text-dark);
-  box-shadow: 4px 4px 0px var(--text-dark);
-  transition: all 0.15s ease;
+  border: 1.5px solid var(--border);
+  transition: all 0.2s ease;
+  box-shadow: var(--shadow-sm);
 }
 
 .dashhome-canteen-card:hover {
-  transform: translate(2px, 2px);
-  box-shadow: 1px 1px 0px var(--text-dark);
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-md);
 }
 
 .dashhome-canteen-card.active-student {
@@ -1405,16 +1409,20 @@ a {
 
 .dashhome-popular-card {
   background: var(--bg-card-warm);
-  border-radius: 8px;
+  border-radius: 14px;
   padding: 20px 16px;
-  border: 2px solid var(--text-dark);
-  box-shadow: 4px 4px 0px var(--text-dark);
-  transition: all 0.15s ease;
+  border: 1.5px solid var(--border-warm);
+  transition: all 0.2s ease;
 }
 
 .dashhome-popular-card:hover {
-  transform: translate(2px, 2px);
-  box-shadow: 1px 1px 0px var(--text-dark);
+  border-color: var(--primary);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.dashhome-popular-card.staff:hover {
+  border-color: var(--gold);
 }
 
 .dashhome-popular-emoji {
