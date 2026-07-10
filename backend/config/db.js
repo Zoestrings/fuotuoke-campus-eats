@@ -1,6 +1,4 @@
-// ================================================================
-// FUOTUOKE Campus Eats — Hybrid MySQL Connection Pool & JSON SQL Emulator
-// ================================================================
+// Database configuration and mock DB fallback emulator
 
 const mysql = require("mysql2/promise");
 const fs = require("fs");

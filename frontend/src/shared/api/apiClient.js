@@ -1,9 +1,6 @@
-// ================================================================
-// FUOTUOKE Campus Eats — Centralized Axios API Client
-// All frontend services use this to communicate with Express backend.
-// ================================================================
-
+// Centralized Axios API Client
 import axios from "axios";
+import { handleMockRequest } from "./mockDb";
 
 const API_BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:5000/api";
 
@@ -69,8 +66,6 @@ export function setTokens(accessToken, refreshToken) {
     localStorage.setItem("fuo_refresh_token", refreshToken);
   }
 }
-
-import { handleMockRequest } from "./mockDb";
 
 const shouldUseMock = () => {
   // If we are in production on Vercel and no production API URL is set, use mock fallback.

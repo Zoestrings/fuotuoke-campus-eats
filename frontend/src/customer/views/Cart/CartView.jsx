@@ -108,7 +108,7 @@ export default function CartView({ isStaff, accent, cart, addItem, removeItem, c
                 <div key={item.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "11px 0", borderBottom: "1px solid var(--border)" }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
                     {item.image ? (
-                      <img src={item.image} alt={item.name} className="item-img-thumb" />
+                      <img src={item.image} alt={item.name} className="item-img-thumb" loading="lazy" />
                     ) : (
                       <span className="item-emoji-thumb">{item.emoji}</span>
                     )}

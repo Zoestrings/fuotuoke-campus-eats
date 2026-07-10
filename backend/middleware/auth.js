@@ -1,14 +1,9 @@
-// ================================================================
-// FUOTUOKE Campus Eats — JWT Authentication Middleware
-// ================================================================
+// Auth verification and role guard middlewares
 
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
 
-/**
- * Verify JWT token from Authorization header.
- * Attaches decoded user to req.user
- */
+// Checks Authorization header for Bearer token and binds user to req.user
 const authenticate = async (req, res, next) => {
   try {
     const authHeader = req.headers.authorization;
@@ -38,10 +33,7 @@ const authenticate = async (req, res, next) => {
   }
 };
 
-/**
- * Role-based access control guard.
- * Usage: requireRole("admin", "kitchen")
- */
+// Guard route by checking user role(s)
 const requireRole = (...roles) => {
   return (req, res, next) => {
     if (!req.user) {

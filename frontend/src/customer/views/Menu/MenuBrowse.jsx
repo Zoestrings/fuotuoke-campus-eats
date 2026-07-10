@@ -111,7 +111,7 @@ export default function MenuBrowse({ isStaff, accent, outlet, setOutlet, orderTy
                 >
                   <div className="menu-card-top">
                     {item.image ? (
-                      <img src={item.image} alt={item.name} className="item-img-card" />
+                      <img src={item.image} alt={item.name} className="item-img-card" loading="lazy" />
                     ) : (
                       <span className="item-emoji-card">{item.emoji}</span>
                     )}

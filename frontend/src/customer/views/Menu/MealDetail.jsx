@@ -42,7 +42,7 @@ export default function MealDetail({ item, onClose, onAdd, accent }) {
           </button>
           <div style={{ display: "flex", flexDirection: "column", gap: 14, width: "100%" }}>
             {item.image ? (
-              <img src={item.image} alt={item.name} className="item-img-modal" />
+              <img src={item.image} alt={item.name} className="item-img-modal" loading="lazy" />
             ) : (
               <span className="item-emoji-modal">{item.emoji}</span>
             )}

@@ -1,7 +1,8 @@
 export class UserModel {
+  // Standard FUOTUOKE matric validation (e.g. FUO/22/CSI/18843)
   static validateMatric(matric) {
     const formatted = matric.trim().toUpperCase();
-    return /^FUO\/\d{2}\/[A-Z]{2,6}\/(1\d{4}|20000)$/.test(formatted);
+    return /^FUO\/\d{2}\/[A-Z]{2,6}\/\d{4,5}$/.test(formatted);
   }
 
   static validateStaffId(staffId) {

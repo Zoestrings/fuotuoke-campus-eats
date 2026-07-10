@@ -227,7 +227,7 @@ export default function CustomerDashboard({ onLogoutSuccess }) {
                 {popularItems.slice(0, 4).map(item => (
                   <div key={item.id} className={`dashhome-popular-card${isStaff ? " staff" : ""}`}>
                     {item.image ? (
-                      <img src={item.image} alt={item.name} className="item-img-card" />
+                      <img src={item.image} alt={item.name} className="item-img-card" loading="lazy" />
                     ) : (
                       <div className="item-emoji-card">{item.emoji}</div>
                     )}
