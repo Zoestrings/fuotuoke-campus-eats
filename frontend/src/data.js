@@ -5,7 +5,7 @@ export const MENU = [
     price: 1500,
     cat: "Soup",
     emoji: "",
-    image: "/images/menu/eba_egusi_soup.jpg",
+    image: "/images/menu/eba_egusi_soup.png",
     desc: "Fresh garri served with choice of Egusi or Vegetable soup",
     popular: true,
     extras: [
@@ -19,7 +19,7 @@ export const MENU = [
     price: 1500,
     cat: "Soup",
     emoji: "",
-    image: "/images/menu/eba_okra_soup.jpg",
+    image: "/images/menu/eba_okra_soup.png",
     desc: "Yellow garri paired with draw okra soup and fish",
     popular: false,
     extras: [
@@ -33,7 +33,7 @@ export const MENU = [
     price: 1700,
     cat: "Soup",
     emoji: "",
-    image: "/images/menu/amala_ewedu.jpg",
+    image: "/images/menu/amala_ewedu.png",
     desc: "Soft yam flour with combination of Ewedu and bean soup",
     popular: true,
     extras: [
@@ -47,7 +47,7 @@ export const MENU = [
     price: 1700,
     cat: "Soup",
     emoji: "",
-    image: "/images/menu/pounded_yam_soup.jpg",
+    image: "/images/menu/pounded_yam_soup.png",
     desc: "Smooth pounded yam served with choice of soup",
     popular: true,
     extras: [
@@ -61,7 +61,7 @@ export const MENU = [
     price: 1500,
     cat: "Soup",
     emoji: "",
-    image: "/images/menu/pepper_soup_fish.jpg",
+    image: "/images/menu/pepper_soup_fish.png",
     desc: "Spicy campus fresh catfish pepper soup",
     popular: true,
     extras: [
@@ -74,7 +74,7 @@ export const MENU = [
     price: 1500,
     cat: "Soup",
     emoji: "",
-    image: "/images/menu/pepper_soup_goat.jpg",
+    image: "/images/menu/pepper_soup_goat.png",
     desc: "Hot and spicy local goat meat pepper soup",
     popular: true,
     extras: [
@@ -87,7 +87,7 @@ export const MENU = [
     price: 2500,
     cat: "Rice",
     emoji: "",
-    image: "/images/menu/jollof_rice_chicken.jpg",
+    image: "/images/menu/jollof_rice_chicken.png",
     desc: "Smoky campus jollof rice served with chicken or beef",
     popular: true,
     extras: [
@@ -102,7 +102,7 @@ export const MENU = [
     price: 1500,
     cat: "Rice",
     emoji: "",
-    image: "/images/menu/jollof_rice_plantain.jpg",
+    image: "/images/menu/jollof_rice_plantain.png",
     desc: "Nigerian party jollof rice paired with fried plantain",
     popular: false,
     extras: [
@@ -115,7 +115,7 @@ export const MENU = [
     price: 900,
     cat: "Rice",
     emoji: "",
-    image: "/images/menu/white_rice_stew.jpg",
+    image: "/images/menu/white_rice_stew.png",
     desc: "Steamed white rice served with local tomato stew and meat",
     popular: false,
     extras: [
@@ -129,7 +129,7 @@ export const MENU = [
     price: 2500,
     cat: "Rice",
     emoji: "",
-    image: "/images/menu/fried_rice_chicken.jpg",
+    image: "/images/menu/fried_rice_chicken.png",
     desc: "Tasty wok-fried rice served with grilled chicken",
     popular: true,
     extras: [
@@ -143,7 +143,7 @@ export const MENU = [
     price: 800,
     cat: "Rice",
     emoji: "",
-    image: "/images/menu/rice_beans_combo.jpg",
+    image: "/images/menu/rice_beans_combo.png",
     desc: "Combo of white rice and brown beans porridge with stew",
     popular: false,
     extras: [
@@ -157,7 +157,7 @@ export const MENU = [
     price: 600,
     cat: "Mains",
     emoji: "",
-    image: "/images/menu/beans_porridge.jpg",
+    image: "/images/menu/beans_porridge.png",
     desc: "Slow-cooked honey beans porridge",
     popular: false,
     extras: [
@@ -171,7 +171,7 @@ export const MENU = [
     price: 1500,
     cat: "Mains",
     emoji: "",
-    image: "/images/menu/beans_plantain.jpg",
+    image: "/images/menu/beans_plantain.png",
     desc: "Slow-cooked honey beans porridge served with sweet plantains",
     popular: true,
     extras: [
@@ -185,7 +185,7 @@ export const MENU = [
     price: 250,
     cat: "Snacks",
     emoji: "",
-    image: "/images/menu/fried_plantain.jpg",
+    image: "/images/menu/fried_plantain.png",
     desc: "Portion of sweet, golden fried plantain slices",
     popular: false,
     extras: []
@@ -196,7 +196,7 @@ export const MENU = [
     price: 1500,
     cat: "Snacks",
     emoji: "",
-    image: "/images/menu/spaghetti_egg.jpg",
+    image: "/images/menu/spaghetti_egg.png",
     desc: "Stir-fried jollof spaghetti topped with boiled or fried egg",
     popular: true,
     extras: [
@@ -209,7 +209,7 @@ export const MENU = [
     price: 2500,
     cat: "Snacks",
     emoji: "",
-    image: "/images/menu/spaghetti_chicken.jpg",
+    image: "/images/menu/spaghetti_chicken.png",
     desc: "Stir-fried jollof spaghetti served with seasoned chicken",
     popular: true,
     extras: [
