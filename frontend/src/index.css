@@ -77,6 +77,7 @@
 html {
   scroll-behavior: smooth;
   background-color: var(--bg-main);
+  overflow-x: hidden;
 }
 
 body {
@@ -89,20 +90,21 @@ body {
   line-height: 1.6;
 }
 
-body::after {
+body::before {
   content: "";
   position: fixed;
   top: 0;
   left: 0;
-  right: 0;
-  bottom: 0;
+  width: 100vw;
+  height: 100vh;
   background-image: url('./FUO_Logo.png');
+  background-attachment: fixed;
   background-size: clamp(300px, 38vw, 520px);
   background-repeat: no-repeat;
   background-position: center center;
   opacity: 0.045;
   pointer-events: none;
-  z-index: 0;
+  z-index: -1;
 }
 
 input,
