@@ -34,7 +34,7 @@ router.put("/", async (req, res, next) => {
 
     let settings = await Settings.findOne();
     if (!settings) {
-      settings = new Settings();
+      settings = await Settings.create({});
     }
 
     if (maintenanceMode !== undefined) settings.maintenanceMode = maintenanceMode;

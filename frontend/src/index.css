@@ -1408,7 +1408,7 @@ a {
 }
 
 .dashhome-popular-card {
-  background: var(--bg-card-warm);
+  background: #fff6eb;
   border-radius: 14px;
   padding: 20px 16px;
   border: 1.5px solid var(--border-warm);
@@ -1537,7 +1537,7 @@ a {
 }
 
 .menu-card {
-  background: var(--bg-card);
+  background: #fff6eb;
   border-radius: 14px;
   padding: 20px 16px;
   border: 1px solid var(--border);
@@ -1704,7 +1704,7 @@ a {
   object-fit: cover;
   border-radius: 10px;
   margin-bottom: 12px;
-  background: #f1f5f9;
+  background: #fdf0e0;
   display: block;
 }
 
@@ -1721,7 +1721,7 @@ a {
   object-fit: cover;
   border-radius: 12px;
   margin-bottom: 16px;
-  background: #f1f5f9;
+  background: #fdf0e0;
   display: block;
 }
 
@@ -1737,7 +1737,7 @@ a {
   height: 40px;
   object-fit: cover;
   border-radius: 8px;
-  background: #f1f5f9;
+  background: #fdf0e0;
   flex-shrink: 0;
 }
 
@@ -4527,6 +4527,7 @@ a {
   display: flex;
   align-items: stretch;
   height: 100%;
+  width: 100%;
 }
 
 .bottom-tab-item {
@@ -4535,13 +4536,13 @@ a {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 4px;
-  padding: 6px 4px;
+  gap: 2px;
+  padding: 6px 2px;
   border: none;
   background: none;
-  color: rgba(255, 255, 255, 0.45);
+  color: rgba(255, 255, 255, 0.55);
   cursor: pointer;
-  transition: color 0.18s ease;
+  transition: all 0.18s ease;
   position: relative;
 }
 
@@ -4551,22 +4552,26 @@ a {
 }
 
 .bottom-tab-item span {
-  font-size: 0.6rem;
+  font-size: 0.58rem;
   font-weight: 700;
-  letter-spacing: 0.2px;
+  letter-spacing: 0.1px;
   text-transform: uppercase;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  max-width: 100%;
 }
 
 .bottom-tab-item:hover {
-  color: rgba(255, 255, 255, 0.75);
+  color: rgba(255, 255, 255, 0.85);
 }
 
 .bottom-tab-item.active {
-  color: var(--primary-mid);
+  color: #34d399; /* Vibrant primary green highlight for student active page */
 }
 
 .bottom-tab-item.active.staff {
-  color: var(--gold);
+  color: var(--gold); /* Warm amber highlight for staff active page */
 }
 
 .bottom-tab-item.active i {
@@ -4874,7 +4879,8 @@ a {
   }
 
   /* Outlets — 1 col */
-  .hp-outlets-grid {
+  .hp-outlets-grid,
+  .dashhome-canteen-grid {
     grid-template-columns: 1fr;
   }
 
@@ -4931,7 +4937,7 @@ a {
 
   /* Bottom tab bar slightly taller for safe area */
   .bottom-tab-bar {
-    height: 60px;
+    height: 66px;
   }
 }
 
