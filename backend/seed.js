@@ -42,13 +42,14 @@ const seedDatabase = async () => {
     try {
       const initialDb = {
         users: [
-          { id: 1, userId: "zoehackz001", name: "Zoe Hackz Admin", email: "admin@fuotuoke.edu.ng", password: "$2a$10$WiWN/ZNVEoaBuSzfqIhE4OW9SfcPbBy.k2JpRTfwwSmPcjshk7qJq", role: "admin", status: "active", canteen: null, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+          { id: 1, userId: "zoehackz001", name: "Zoe Hackz Admin", email: "admin@fuotuoke.edu.ng", password: "$2a$10$fwIdhhCATNc6asUEV2nCcO..MWF8Ac03Kfa4mlWJU1VEY4jBNRNt2", role: "admin", status: "active", canteen: null, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
           { id: 2, userId: "FUO/22/CSI/18843", name: "Precious Daniel", email: "precious.daniel@fuotuoke.edu.ng", password: "$2a$10$WiWN/ZNVEoaBuSzfqIhE4OW9SfcPbBy.k2JpRTfwwSmPcjshk7qJq", role: "student", status: "active", canteen: null, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
-          { id: 3, userId: "zoehackz001", name: "Zoe Hackz Rider", email: "rider@fuotuoke.edu.ng", password: "$2a$10$WiWN/ZNVEoaBuSzfqIhE4OW9SfcPbBy.k2JpRTfwwSmPcjshk7qJq", role: "rider", status: "active", canteen: null, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+          { id: 3, userId: "zoehackz001", name: "Zoe Hackz Rider", email: "rider@fuotuoke.edu.ng", password: "$2a$10$fwIdhhCATNc6asUEV2nCcO..MWF8Ac03Kfa4mlWJU1VEY4jBNRNt2", role: "rider", status: "active", canteen: null, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
           { id: 4, userId: "zoehackz001", name: "Main Cafeteria Kitchen", email: "canteen@fuotuoke.edu.ng", password: "$2a$10$WiWN/ZNVEoaBuSzfqIhE4OW9SfcPbBy.k2JpRTfwwSmPcjshk7qJq", role: "kitchen", status: "active", canteen: "Main Cafeteria", createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
           { id: 5, userId: "SCIENCE-KITCHEN", name: "Science Cafeteria Kitchen", email: "science@fuotuoke.edu.ng", password: "$2a$10$WiWN/ZNVEoaBuSzfqIhE4OW9SfcPbBy.k2JpRTfwwSmPcjshk7qJq", role: "kitchen", status: "active", canteen: "Science Cafeteria", createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
           { id: 6, userId: "SUB-KITCHEN", name: "Student Union Buka Kitchen", email: "sub@fuotuoke.edu.ng", password: "$2a$10$WiWN/ZNVEoaBuSzfqIhE4OW9SfcPbBy.k2JpRTfwwSmPcjshk7qJq", role: "kitchen", status: "active", canteen: "Student Union Buka", createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
-          { id: 7, userId: "ENG-KITCHEN", name: "Engineering Canteen Kitchen", email: "eng@fuotuoke.edu.ng", password: "$2a$10$WiWN/ZNVEoaBuSzfqIhE4OW9SfcPbBy.k2JpRTfwwSmPcjshk7qJq", role: "kitchen", status: "active", canteen: "Engineering Canteen", createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() }
+          { id: 7, userId: "ENG-KITCHEN", name: "Engineering Canteen Kitchen", email: "eng@fuotuoke.edu.ng", password: "$2a$10$WiWN/ZNVEoaBuSzfqIhE4OW9SfcPbBy.k2JpRTfwwSmPcjshk7qJq", role: "kitchen", status: "active", canteen: "Engineering Canteen", createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+          { id: 8, userId: "zoehackz001", name: "Zoe Hackz Staff", email: "staff@fuotuoke.edu.ng", password: "$2a$10$fwIdhhCATNc6asUEV2nCcO..MWF8Ac03Kfa4mlWJU1VEY4jBNRNt2", role: "staff", status: "active", canteen: null, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() }
         ],
         menu_items: [
           { id: 1, name: "Eba + soup (Egusi/Vegetable)", price: 1500.00, cat: "Soup", emoji: "", image: "/images/menu/eba_egusi_soup.png", desc: "Fresh garri served with choice of Egusi or Vegetable soup", popular: 1, available: 1, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
@@ -87,7 +88,8 @@ const seedDatabase = async () => {
         settings: [
           { id: 1, maintenanceMode: 0, allowRegistration: 1, allowDeliveries: 1, deliveryFee: 300.00, supportPhone: "08012345678", createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() }
         ],
-        audit_logs: []
+        audit_logs: [],
+        refresh_tokens: []
       };
       fs.writeFileSync(dbPath, JSON.stringify(initialDb, null, 2), "utf8");
       console.log("✅ JSON database fallback created and pre-seeded successfully!");

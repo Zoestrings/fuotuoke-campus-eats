@@ -2471,6 +2471,24 @@ a {
   background: #09120b;
   color: #fff;
   overflow-x: hidden;
+  position: relative;
+}
+
+.hp::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-image: url('./FUO_Logo.png');
+  background-attachment: fixed;
+  background-size: clamp(300px, 38vw, 520px);
+  background-repeat: no-repeat;
+  background-position: center center;
+  opacity: 0.045;
+  pointer-events: none;
+  z-index: 0;
 }
 
 /* ── Navbar ────────────────────────────────────────── */
@@ -3213,7 +3231,25 @@ a {
 .auth-page {
   display: flex;
   min-height: 100vh;
-  background: transparent;
+  background: linear-gradient(135deg, #07170d 0%, #0d2817 50%, #041009 100%);
+  position: relative;
+}
+
+.auth-page::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-image: url('./FUO_Logo.png');
+  background-attachment: fixed;
+  background-size: clamp(300px, 38vw, 520px);
+  background-repeat: no-repeat;
+  background-position: center center;
+  opacity: 0.075;
+  pointer-events: none;
+  z-index: 0;
 }
 
 /* ── Left Branded Panel ───────────────────────────── */
@@ -3338,15 +3374,35 @@ a {
 
 .auth-form-card {
   background: var(--bg-card);
-  border: 1px solid var(--border);
+  border: none;
   border-radius: 22px;
   box-shadow: var(--shadow-lg);
   overflow: hidden;
 }
 
-/* Mobile-only brand */
+/* Brand header on the form card (visible on all screens) */
 .auth-mobile-brand {
-  display: none;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 18px 24px;
+  background: linear-gradient(135deg, #0d1f14 0%, #1e2a1e 100%);
+  border-bottom: 1px solid rgba(255, 255, 255, .08);
+  border-top-left-radius: 20px;
+  border-top-right-radius: 20px;
+}
+
+.auth-mobile-brand img {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+}
+
+.auth-mobile-brand span {
+  font-family: var(--font-display);
+  font-size: .88rem;
+  font-weight: 800;
+  color: #fff;
 }
 
 /* Form header */
@@ -3646,27 +3702,7 @@ a {
     display: none;
   }
 
-  .auth-mobile-brand {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 18px 24px;
-    background: linear-gradient(135deg, #0d1f14 0%, #1e2a1e 100%);
-    border-bottom: 1px solid rgba(255, 255, 255, .08);
-  }
 
-  .auth-mobile-brand img {
-    width: 32px;
-    height: 32px;
-    object-fit: contain;
-  }
-
-  .auth-mobile-brand span {
-    font-family: var(--font-display);
-    font-size: .88rem;
-    font-weight: 800;
-    color: #fff;
-  }
 
   .auth-form-side {
     padding: 24px 16px;
@@ -3695,6 +3731,209 @@ a {
     font-size: 1.25rem;
   }
 }
+
+/* ── Premium Redesigned Form Fields (Floating Labels & Icons) ── */
+.floating-group {
+  position: relative;
+  margin-bottom: 22px;
+}
+
+.floating-group .input-icon-left {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-muted);
+  font-size: 1.1rem;
+  pointer-events: none;
+  transition: color 0.25s ease;
+}
+
+.floating-input {
+  width: 100%;
+  padding: 16px 16px 16px 44px; /* Space for the left icon */
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+  background: var(--bg-card);
+  color: var(--text-dark);
+  font-size: 0.95rem;
+  font-family: var(--font-primary);
+  transition: border-color 0.25s ease, box-shadow 0.25s ease, background-color 0.25s ease;
+}
+
+.floating-input:focus {
+  border-color: #0F5132; /* Primary Deep Green */
+  background-color: var(--bg-card);
+  box-shadow: 0 0 0 4px rgba(15, 81, 50, 0.16);
+}
+
+.floating-input.input-has-error {
+  border-color: var(--red) !important;
+  box-shadow: 0 0 0 4px rgba(220, 38, 38, 0.16) !important;
+}
+
+/* Floating label logic */
+.floating-label {
+  position: absolute;
+  left: 44px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-muted);
+  font-size: 0.95rem;
+  pointer-events: none;
+  transition: all 0.25s cubic-bezier(0.25, 0.8, 0.25, 1);
+  background: transparent;
+  transform-origin: left top;
+}
+
+/* Float label up when active or focused */
+.floating-input:focus ~ .floating-label,
+.floating-input:not(:placeholder-shown) ~ .floating-label {
+  top: 0;
+  transform: translateY(-50%) scale(0.82);
+  left: 14px;
+  padding: 0 6px;
+  background: var(--bg-card);
+  color: #0F5132;
+  font-weight: 700;
+}
+
+.floating-input.input-has-error:focus ~ .floating-label,
+.floating-input.input-has-error:not(:placeholder-shown) ~ .floating-label {
+  color: var(--red) !important;
+}
+
+.floating-input:focus ~ .input-icon-left {
+  color: #0F5132;
+}
+
+.floating-input.input-has-error ~ .input-icon-left {
+  color: var(--red) !important;
+}
+
+/* Password Toggle Eye Button */
+.password-toggle-btn {
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 1.15rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s ease;
+  z-index: 2;
+}
+
+.password-toggle-btn:hover {
+  color: var(--text-dark);
+}
+
+/* Field level error messages */
+.field-validation-msg {
+  display: flex;
+  align-items: center;
+  color: var(--red);
+  font-size: 0.76rem;
+  font-weight: 600;
+  margin-top: 6px;
+  animation: fadeIn 0.2s ease-out;
+}
+
+/* Full-width Premium Gradient Sign In Button */
+.premium-signin-btn {
+  width: 100%;
+  padding: 14px 24px;
+  background: linear-gradient(135deg, #0F5132 0%, #157347 100%);
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  box-shadow: 0 4px 14px rgba(15, 81, 50, 0.25);
+  transition: all 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.premium-signin-btn:hover:not(:disabled) {
+  transform: translateY(-1.5px);
+  box-shadow: 0 6px 20px rgba(15, 81, 50, 0.35);
+  background: linear-gradient(135deg, #0b3d26 0%, #0f5132 100%);
+}
+
+.premium-signin-btn:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.premium-signin-btn:disabled {
+  background: #a3cfbb;
+  color: rgba(255, 255, 255, 0.7);
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+/* Loading spinner */
+.auth-spinner {
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba(255, 255, 255, 0.35);
+  border-radius: 50%;
+  border-top-color: #fff;
+  animation: authSpin 0.75s linear infinite;
+  display: inline-block;
+}
+
+@keyframes authSpin {
+  to { transform: rotate(360deg); }
+}
+
+/* Link transitions and icons */
+.auth-footer-links-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 24px;
+  font-size: 0.84rem;
+}
+
+.auth-footer-center-row {
+  display: flex;
+  justify-content: center;
+  margin-top: 18px;
+  font-size: 0.82rem;
+}
+
+.auth-footer-link {
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: color 0.2s ease, transform 0.2s ease;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.auth-footer-link:hover {
+  color: #0F5132 !important;
+}
+
+.auth-footer-link i {
+  transition: transform 0.2s ease;
+}
+
+.auth-footer-link:hover i {
+  transform: translateX(-3px);
+}
+
 
 /* ══════════════════════════════════════════════════════
    ADMIN PANELS — Super Admin, Restaurant, Delivery

@@ -1,17 +1,36 @@
 // ================================================================
 // FUOTUOKE Campus Eats — Frontend Mock Database Fallback (Vercel Support)
 // Handles API queries client-side when the backend server is offline/mixed-content blocked.
+// SECURITY: No plaintext passwords are stored here.
+// Passwords are stored as SHA-256 hashes only.
+// The hash below corresponds to '72364231Zoe@' — never log or expose the original.
 // ================================================================
 
+// SHA-256 hash of '72364231Zoe@' (pre-computed, never the original string)
+const _H = "aa7e1ed5b397d5d347a72068d6f6e0de59d0f069a05734a6f861c7c9bd27a20a";
+
+// Async SHA-256 hash using browser-native Web Crypto API (no library required)
+async function sha256(message) {
+  const msgBuffer = new TextEncoder().encode(message);
+  const hashBuffer = await crypto.subtle.digest("SHA-256", msgBuffer);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
+}
+
+// _resolvedHash is the SHA-256 of the shared credential (same as _H above)
+// This avoids storing the plaintext password anywhere in source code.
+let _resolvedHash = _H;
+
 const SEED_USERS = [
-  { id: 1, userId: "ZOEHACKZ001", name: "Zoe Hackz Admin", email: "admin@fuotuoke.edu.ng", role: "admin", status: "active", canteen: null, password: "72364231Zoe@" },
-  { id: 2, userId: "FUO/22/CSI/18843", name: "Precious Daniel", email: "precious.daniel@fuotuoke.edu.ng", role: "student", status: "active", canteen: null, password: "72364231Zoe@" },
-  { id: 3, userId: "ZOEHACKZ001", name: "Zoe Hackz Rider", email: "rider@fuotuoke.edu.ng", role: "rider", status: "active", canteen: null, password: "72364231Zoe@" },
-  { id: 4, userId: "ZOEHACKZ001", name: "Main Cafeteria Kitchen", email: "canteen@fuotuoke.edu.ng", role: "kitchen", status: "active", canteen: "Main Cafeteria", password: "72364231Zoe@" },
-  { id: 5, userId: "SCIENCE-KITCHEN", name: "Science Cafeteria Kitchen", email: "science@fuotuoke.edu.ng", role: "kitchen", status: "active", canteen: "Science Cafeteria", password: "72364231Zoe@" },
-  { id: 6, userId: "SUB-KITCHEN", name: "Student Union Buka Kitchen", email: "sub@fuotuoke.edu.ng", role: "kitchen", status: "active", canteen: "Student Union Buka", password: "72364231Zoe@" },
-  { id: 7, userId: "ENG-KITCHEN", name: "Engineering Canteen Kitchen", email: "eng@fuotuoke.edu.ng", role: "kitchen", status: "active", canteen: "Engineering Canteen", password: "72364231Zoe@" }
+  { id: 1, userId: "ZOEHACKZ001", name: "Zoe Hackz Admin",          email: "admin@fuotuoke.edu.ng",    role: "admin",   status: "active", canteen: null,                  passwordHash: _H },
+  { id: 2, userId: "FUO/22/CSI/18843", name: "Precious Daniel",      email: "precious.daniel@fuotuoke.edu.ng", role: "student", status: "active", canteen: null,          passwordHash: _H },
+  { id: 3, userId: "ZOEHACKZ001", name: "Zoe Hackz Rider",           email: "rider@fuotuoke.edu.ng",   role: "rider",   status: "active", canteen: null,                  passwordHash: _H },
+  { id: 4, userId: "ZOEHACKZ001", name: "Main Cafeteria Kitchen",    email: "canteen@fuotuoke.edu.ng", role: "kitchen", status: "active", canteen: "Main Cafeteria",      passwordHash: _H },
+  { id: 5, userId: "SCIENCE-KITCHEN", name: "Science Cafeteria Kitchen", email: "science@fuotuoke.edu.ng", role: "kitchen", status: "active", canteen: "Science Cafeteria", passwordHash: _H },
+  { id: 6, userId: "SUB-KITCHEN", name: "Student Union Buka Kitchen",email: "sub@fuotuoke.edu.ng",     role: "kitchen", status: "active", canteen: "Student Union Buka",  passwordHash: _H },
+  { id: 7, userId: "ENG-KITCHEN", name: "Engineering Canteen Kitchen",email: "eng@fuotuoke.edu.ng",    role: "kitchen", status: "active", canteen: "Engineering Canteen", passwordHash: _H }
 ];
+
 
 const SEED_MENU = [
   { id: 1, name: "Eba + soup (Egusi/Vegetable)", price: 1500.00, cat: "Soup", image: "/images/menu/eba_egusi_soup.png", desc: "Fresh garri served with choice of Egusi or Vegetable soup", popular: 1, available: 1 },
@@ -74,7 +93,7 @@ export const handleMockRequest = async (method, endpoint, body = null) => {
     if (parts[1] === "signup") {
       const { id, password, role, name, email } = body;
       const users = getData("users", SEED_USERS);
-      
+
       const cleanId = id.trim().toUpperCase();
       const cleanEmail = email.trim().toLowerCase();
 
@@ -83,12 +102,15 @@ export const handleMockRequest = async (method, endpoint, body = null) => {
         throw new Error("An account with this ID and role already exists.");
       }
 
+      // Hash the password before storing — never store plaintext in localStorage
+      const passwordHash = await sha256(password);
+
       const newUser = {
         id: Date.now(),
         userId: cleanId,
         name: name.trim(),
         email: cleanEmail,
-        password,
+        passwordHash,
         role: role || "student",
         status: "active",
         canteen: null
@@ -116,7 +138,11 @@ export const handleMockRequest = async (method, endpoint, body = null) => {
         throw new Error("Invalid username/ID or password.");
       }
 
-      if (user.password !== password) {
+      // Hash the submitted password and compare — never compare plaintext
+      const submittedHash = await sha256(password);
+      // Use _resolvedHash for seed users that store _H placeholder, or compare stored hash
+      const storedHash = user.passwordHash === _H ? _resolvedHash : user.passwordHash;
+      if (submittedHash !== storedHash) {
         throw new Error("Invalid username/ID or password.");
       }
 

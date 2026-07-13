@@ -109,6 +109,16 @@ CREATE TABLE IF NOT EXISTS `settings` (
   `updatedAt` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+-- ── 9. REFRESH TOKENS TABLE ──
+CREATE TABLE IF NOT EXISTS `refresh_tokens` (
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `userId` VARCHAR(255) NOT NULL,
+  `token` VARCHAR(500) NOT NULL,
+  `expiresAt` DATETIME NOT NULL,
+  `createdAt` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE KEY `idx_token` (`token`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 -- Seed default settings
 INSERT INTO `settings` (`id`, `maintenanceMode`, `allowRegistration`, `allowDeliveries`, `deliveryFee`, `supportPhone`)
 VALUES (1, 0, 1, 1, 300.00, '08012345678')
@@ -117,7 +127,7 @@ ON DUPLICATE KEY UPDATE `id` = `id`;
 
 -- ── 9. SEED DEFAULT USERS ──
 INSERT INTO `users` (`userId`, `name`, `email`, `password`, `role`, `status`, `canteen`)
-SELECT 'zoehackz001', 'Zoe Hackz Admin', 'admin@fuotuoke.edu.ng', '$2a$10$WiWN/ZNVEoaBuSzfqIhE4OW9SfcPbBy.k2JpRTfwwSmPcjshk7qJq', 'admin', 'active', NULL
+SELECT 'zoehackz001', 'Zoe Hackz Admin', 'admin@fuotuoke.edu.ng', '$2a$10$fwIdhhCATNc6asUEV2nCcO..MWF8Ac03Kfa4mlWJU1VEY4jBNRNt2', 'admin', 'active', NULL
 FROM DUAL
 WHERE NOT EXISTS (SELECT 1 FROM `users` WHERE `userId` = 'zoehackz001' AND `role` = 'admin');
 
@@ -127,9 +137,14 @@ FROM DUAL
 WHERE NOT EXISTS (SELECT 1 FROM `users` WHERE `userId` = 'FUO/22/CSI/18843' AND `role` = 'student');
 
 INSERT INTO `users` (`userId`, `name`, `email`, `password`, `role`, `status`, `canteen`)
-SELECT 'zoehackz001', 'Zoe Hackz Rider', 'rider@fuotuoke.edu.ng', '$2a$10$WiWN/ZNVEoaBuSzfqIhE4OW9SfcPbBy.k2JpRTfwwSmPcjshk7qJq', 'rider', 'active', NULL
+SELECT 'zoehackz001', 'Zoe Hackz Rider', 'rider@fuotuoke.edu.ng', '$2a$10$fwIdhhCATNc6asUEV2nCcO..MWF8Ac03Kfa4mlWJU1VEY4jBNRNt2', 'rider', 'active', NULL
 FROM DUAL
 WHERE NOT EXISTS (SELECT 1 FROM `users` WHERE `userId` = 'zoehackz001' AND `role` = 'rider');
+
+INSERT INTO `users` (`userId`, `name`, `email`, `password`, `role`, `status`, `canteen`)
+SELECT 'zoehackz001', 'Zoe Hackz Staff', 'staff@fuotuoke.edu.ng', '$2a$10$fwIdhhCATNc6asUEV2nCcO..MWF8Ac03Kfa4mlWJU1VEY4jBNRNt2', 'staff', 'active', NULL
+FROM DUAL
+WHERE NOT EXISTS (SELECT 1 FROM `users` WHERE `userId` = 'zoehackz001' AND `role` = 'staff');
 
 INSERT INTO `users` (`userId`, `name`, `email`, `password`, `role`, `status`, `canteen`)
 SELECT 'zoehackz001', 'Main Cafeteria Kitchen', 'canteen@fuotuoke.edu.ng', '$2a$10$WiWN/ZNVEoaBuSzfqIhE4OW9SfcPbBy.k2JpRTfwwSmPcjshk7qJq', 'kitchen', 'active', 'Main Cafeteria'
