@@ -97,7 +97,7 @@ export default function TrackOrder({ order, onClose, accent }) {
     const fetchLatest = async () => {
       try {
         const data = await OrderService.getOrderById(order.id);
-        if (data) {
+        if (data && data.id) {
           setLiveOrder(data);
         }
       } catch (e) {

@@ -207,9 +207,16 @@ export const handleMockRequest = async (method, endpoint, body = null) => {
   // 4. ORDERS ENDPOINTS
   if (parts[0] === "orders") {
     const orders = getData("orders", []);
-    
+
     if (method === "GET") {
-      // Return order history or all orders
+      // GET /orders/:id  — return single order
+      if (parts[1]) {
+        const idVal = parseInt(parts[1], 10) || parts[1];
+        const found = orders.find(o => o.id === idVal || String(o.id) === String(parts[1]));
+        if (!found) throw new Error(`Order ${parts[1]} not found`);
+        return found;
+      }
+      // GET /orders — return all orders
       return orders;
     }
 
