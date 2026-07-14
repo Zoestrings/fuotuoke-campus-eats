@@ -34,7 +34,12 @@ export function useAdminController(onLogoutSuccess) {
       const allMenu = await MenuService.getAll();
       setMenuItems(allMenu || []);
       const allOrders = await OrderService.getAll();
-      setOrders(allOrders || []);
+      // Normalize legacy "pending" status to "Received" for display
+      const normalizedOrders = (allOrders || []).map(o => ({
+        ...o,
+        status: o.status === "pending" ? "Received" : o.status
+      }));
+      setOrders(normalizedOrders);
       const allPayments = await PaymentService.getPayments();
       setPayments(allPayments || []);
       const platformStats = ReportService.getPlatformStats(allOrders, allUsers, allMenu);

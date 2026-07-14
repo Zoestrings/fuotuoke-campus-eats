@@ -39,8 +39,15 @@ export function useVendorController(onLogoutSuccess) {
 
     const loadData = async () => {
       try {
-        const fetchedOrders = await OrderService.getOrders(selectedOutlet);
-        setOrders(fetchedOrders || []);
+        const allOrders = await OrderService.getOrders(selectedOutlet);
+        // Filter to only this canteen's orders and normalize legacy "pending" status
+        const myOrders = (allOrders || [])
+          .filter(o => {
+            const outletName = o.outlet?.name || o.canteen || o.outletName || "";
+            return outletName.toLowerCase() === selectedOutlet.toLowerCase() || outletName === "";
+          })
+          .map(o => ({ ...o, status: o.status === "pending" ? "Received" : o.status }));
+        setOrders(myOrders);
         const fetchedMeals = await MealService.getMeals();
         setMenuItems(fetchedMeals || []);
       } catch (error) {
@@ -71,8 +78,14 @@ export function useVendorController(onLogoutSuccess) {
   const advanceOrderStatus = async (orderId, currentStatus, type) => {
     const next = OrderModel.advanceStatus(currentStatus, type);
     await OrderService.updateOrderStatus(orderId, next);
-    const fetchedOrders = await OrderService.getOrders(selectedOutlet);
-    setOrders(fetchedOrders || []);
+    const allOrders = await OrderService.getOrders(selectedOutlet);
+    const myOrders = (allOrders || [])
+      .filter(o => {
+        const outletName = o.outlet?.name || o.canteen || o.outletName || "";
+        return outletName.toLowerCase() === selectedOutlet.toLowerCase() || outletName === "";
+      })
+      .map(o => ({ ...o, status: o.status === "pending" ? "Received" : o.status }));
+    setOrders(myOrders);
   };
 
   const handleAddItem = async (e) => {
