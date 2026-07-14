@@ -27,6 +27,10 @@ class OrderInstance {
     this.deliveryProgress = parseInt(data.deliveryProgress || "0", 10);
     this.riderLatitude = data.riderLatitude ? parseFloat(data.riderLatitude) : null;
     this.riderLongitude = data.riderLongitude ? parseFloat(data.riderLongitude) : null;
+    this.latitude = data.latitude ? parseFloat(data.latitude) : null;
+    this.longitude = data.longitude ? parseFloat(data.longitude) : null;
+    this.formattedAddress = data.formattedAddress || null;
+    this.deliveryNotes = data.deliveryNotes || null;
     this.rating = parseInt(data.rating || "0", 10);
     this.review = data.review || "";
     this.items = items;
@@ -176,8 +180,8 @@ class Order {
 
     try {
       const orderSql = `
-        INSERT INTO orders (total, outletName, outletId, type, faculty, status, customerId, customerName, paymentRef, paymentStatus, time)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO orders (total, outletName, outletId, type, faculty, status, customerId, customerName, paymentRef, paymentStatus, time, latitude, longitude, formattedAddress, deliveryNotes)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `;
       const orderParams = [
         data.total,
@@ -190,7 +194,11 @@ class Order {
         data.customerName,
         data.paymentRef || null,
         data.paymentStatus || "pending",
-        data.time || new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+        data.time || new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+        data.latitude !== undefined ? data.latitude : null,
+        data.longitude !== undefined ? data.longitude : null,
+        data.formattedAddress || null,
+        data.deliveryNotes || null
       ];
 
       const [orderResult] = await connection.query(orderSql, orderParams);

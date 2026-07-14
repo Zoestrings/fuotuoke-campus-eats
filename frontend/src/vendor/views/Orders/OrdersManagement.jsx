@@ -1,5 +1,16 @@
 import React from "react";
 import { Badge, Btn } from "../../../shared/ui";
+import { CANTEEN_COORDS, getCoordsForLabel } from "../../../CampusLocations";
+
+const haversineKm = (lat1, lng1, lat2, lng2) => {
+  const R = 6371;
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLng = (lng2 - lng1) * Math.PI / 180;
+  const a = Math.sin(dLat / 2) ** 2 +
+    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLng / 2) ** 2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+};
+const etaLabel = (km) => `~${Math.max(2, Math.ceil((km / 25) * 60) + 3)} min`;
 
 export default function OrdersManagement({ orders = [], outletName, onAdvanceStatus, isCompletedView = false }) {
   if (orders.length === 0) {
@@ -43,7 +54,16 @@ export default function OrdersManagement({ orders = [], outletName, onAdvanceSta
                   <i className={`bi ${order.type === "pickup" ? "bi-bag-check" : "bi-truck"}`} style={{ marginRight: 4 }} />
                   {isCompletedView
                     ? `Completed · ${order.time}`
-                    : (order.type === "pickup" ? "Pickup" : `Delivery to ${order.faculty}`)}
+                    : (order.type === "pickup" ? "Pickup" : (
+                        (() => {
+                          const label = order.formattedAddress || order.faculty || "Campus";
+                          const dest = order.latitude && order.longitude
+                            ? { lat: parseFloat(order.latitude), lng: parseFloat(order.longitude) }
+                            : getCoordsForLabel(label);
+                          const km = haversineKm(CANTEEN_COORDS.lat, CANTEEN_COORDS.lng, dest.lat, dest.lng);
+                          return `Delivery to ${label} · ${etaLabel(km)}`;
+                        })()
+                      ))}
                 </div>
               </div>
               <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
@@ -61,6 +81,14 @@ export default function OrdersManagement({ orders = [], outletName, onAdvanceSta
                 )}
               </div>
             </div>
+
+            {/* Delivery notes */}
+            {order.type === "delivery" && order.deliveryNotes && (
+              <div style={{ background: "rgba(212,175,55,0.07)", border: "1px solid rgba(212,175,55,0.25)", padding: "8px 12px", borderRadius: 8, marginBottom: 10, fontSize: ".8rem", color: "var(--text-dark)" }}>
+                <i className="bi bi-pencil-square" style={{ color: "var(--gold)", marginRight: 5 }} />
+                <strong>Note:</strong> {order.deliveryNotes}
+              </div>
+            )}
 
             <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
               {order.items.map(item => (

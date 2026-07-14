@@ -59,7 +59,7 @@ router.get("/:id", authenticate, async (req, res, next) => {
 // ── POST /api/orders — Customer: place new order ──
 router.post("/", authenticate, async (req, res, next) => {
   try {
-    const { items, total, outlet, type, faculty } = req.body;
+    const { items, total, outlet, type, faculty, latitude, longitude, formattedAddress, deliveryNotes } = req.body;
 
     if (!items || items.length === 0) {
       return res.status(400).json({ error: "Your cart is empty." });
@@ -67,8 +67,13 @@ router.post("/", authenticate, async (req, res, next) => {
     if (!outlet || !outlet.name) {
       return res.status(400).json({ error: "Please select a canteen." });
     }
-    if (type === "delivery" && !faculty) {
-      return res.status(400).json({ error: "Please select a faculty for delivery." });
+    if (type === "delivery") {
+      if (!faculty) {
+        return res.status(400).json({ error: "Please select a faculty for delivery." });
+      }
+      if (!formattedAddress || !formattedAddress.trim()) {
+        return res.status(400).json({ error: "Please provide your delivery address." });
+      }
     }
 
     const order = await Order.create({
@@ -77,6 +82,10 @@ router.post("/", authenticate, async (req, res, next) => {
       outlet,
       type,
       faculty: type === "delivery" ? faculty : null,
+      latitude: type === "delivery" ? latitude : null,
+      longitude: type === "delivery" ? longitude : null,
+      formattedAddress: type === "delivery" ? formattedAddress : null,
+      deliveryNotes: type === "delivery" ? deliveryNotes : null,
       status: "Received",
       customerId: req.user.userId,
       customerName: req.user.name,

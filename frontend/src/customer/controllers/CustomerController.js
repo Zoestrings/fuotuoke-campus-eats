@@ -119,7 +119,7 @@ export function useCustomerController(onLogoutSuccess) {
     });
   };
 
-  const placeOrder = (faculty) => {
+  const placeOrder = (faculty, locationData) => {
     if (!currentCanteen) {
       return { success: false, error: "Please select a canteen first." };
     }
@@ -133,6 +133,10 @@ export function useCustomerController(onLogoutSuccess) {
       outlet: { name: outletName },
       type: orderType,
       faculty: orderType === "delivery" ? faculty : null,
+      latitude: orderType === "delivery" ? (locationData ? locationData.latitude : null) : null,
+      longitude: orderType === "delivery" ? (locationData ? locationData.longitude : null) : null,
+      formattedAddress: orderType === "delivery" ? (locationData ? locationData.formattedAddress : null) : null,
+      deliveryNotes: orderType === "delivery" ? (locationData ? locationData.deliveryNotes : null) : null,
       status: "Received",
       time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
       customerId: user.id,

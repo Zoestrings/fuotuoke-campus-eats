@@ -2,6 +2,19 @@ import React, { useState, useEffect } from "react";
 import { OrderService } from "../../services/OrderService";
 import { AuthService } from "../../services/AuthService";
 import { Badge, Btn } from "../../../shared/ui";
+import { CANTEEN_COORDS, getCoordsForLabel } from "../../../CampusLocations";
+
+// ── Inline distance & ETA helpers ────────────────────────────
+const haversineKm = (lat1, lng1, lat2, lng2) => {
+  const R = 6371;
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLng = (lng2 - lng1) * Math.PI / 180;
+  const a = Math.sin(dLat / 2) ** 2 +
+    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLng / 2) ** 2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+};
+const etaLabel = (km) => `~${Math.max(2, Math.ceil((km / 25) * 60) + 3)} min`;
+const fmtDist = (km) => km < 1 ? `${Math.round(km * 1000)} m` : `${km.toFixed(2)} km`;
 
 export default function RiderDashboard({ onLogoutSuccess }) {
   const [orders, setOrders] = useState([]);
@@ -82,33 +95,31 @@ export default function RiderDashboard({ onLogoutSuccess }) {
   const [runningSimulations, setRunningSimulations] = useState({});
   const [activeWatchers, setActiveWatchers] = useState({});
 
-  const CANTEEN_COORDS = { lat: 4.9750, lng: 6.2750 };
-  const FACULTY_COORDS = {
-    science: { lat: 4.9780, lng: 6.2770 },
-    humanities: { lat: 4.9720, lng: 6.2730 },
-    social: { lat: 4.9720, lng: 6.2730 },
-    management: { lat: 4.9760, lng: 6.2790 },
-    admin: { lat: 4.9760, lng: 6.2790 },
-    engineering: { lat: 4.9790, lng: 6.2810 }
+  // Destination coordinates from campus locations registry
+  const getDestinationCoords = (order) => {
+    // 1. Try saved GPS coordinates from the order
+    if (order.latitude && order.longitude) {
+      return { lat: parseFloat(order.latitude), lng: parseFloat(order.longitude) };
+    }
+    // 2. Look up by formattedAddress (campus location name)
+    if (order.formattedAddress) {
+      return getCoordsForLabel(order.formattedAddress);
+    }
+    // 3. Fallback: old faculty keyword lookup
+    if (order.faculty) {
+      return getCoordsForLabel(order.faculty);
+    }
+    return CANTEEN_COORDS;
   };
 
-  const getDestinationCoords = (facultyName) => {
-    const lower = (facultyName || "").toLowerCase();
-    if (lower.includes("science")) return FACULTY_COORDS.science;
-    if (lower.includes("humanities") || lower.includes("social")) return FACULTY_COORDS.humanities;
-    if (lower.includes("management") || lower.includes("admin")) return FACULTY_COORDS.management;
-    if (lower.includes("engineering")) return FACULTY_COORDS.engineering;
-    return { lat: 4.9760, lng: 6.2790 }; // Default center
-  };
-
-  const handleStartSimulation = (orderId, facultyName) => {
+  const handleStartSimulation = (orderId, order) => {
     if (runningSimulations[orderId]) return;
 
     // Stop live tracking if active to avoid collision
     stopLiveTracking(orderId);
 
     const start = CANTEEN_COORDS;
-    const dest = getDestinationCoords(facultyName);
+    const dest = getDestinationCoords(order);
 
     let currentProgress = 0;
     const interval = setInterval(async () => {
@@ -418,29 +429,52 @@ export default function RiderDashboard({ onLogoutSuccess }) {
                   <p style={{ color: "var(--text-light)", fontSize: ".86rem" }}>Orders show up here when canteens start preparing food.</p>
                 </div>
               ) : (
-                availableOrders.map(order => (
-                  <div key={order.id} className="order-card" style={{ background: "#fff", padding: 18, borderRadius: 14, border: "1px solid var(--border)" }}>
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 10 }}>
-                      <div>
-                        <div style={{ fontWeight: 800, fontSize: "1rem", color: "var(--text-dark)" }}>Order #{String(order.id).slice(-5)}</div>
-                        <div style={{ fontSize: ".82rem", color: "var(--text-light)" }}>Canteen: <strong>{order.outlet.name}</strong></div>
+                availableOrders.map(order => {
+                  const destCoords = getDestinationCoords(order);
+                  const distKm = haversineKm(CANTEEN_COORDS.lat, CANTEEN_COORDS.lng, destCoords.lat, destCoords.lng);
+                  const locationLabel = order.formattedAddress || order.faculty || "Campus Location";
+                  return (
+                    <div key={order.id} className="order-card" style={{ background: "#fff", padding: 18, borderRadius: 14, border: "1px solid var(--border)" }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 10 }}>
+                        <div>
+                          <div style={{ fontWeight: 800, fontSize: "1rem", color: "var(--text-dark)" }}>Order #{String(order.id).slice(-5)}</div>
+                          <div style={{ fontSize: ".82rem", color: "var(--text-light)" }}>Canteen: <strong>{order.outlet.name}</strong></div>
+                        </div>
+                        <Badge color="gold">{order.status}</Badge>
                       </div>
-                      <Badge color="gold">{order.status}</Badge>
+
+                      {/* Destination info */}
+                      <div style={{ background: "rgba(15,81,50,0.05)", border: "1px solid rgba(15,81,50,0.12)", padding: "10px 12px", borderRadius: 9, marginBottom: 10 }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 4 }}>
+                          <i className="bi bi-geo-alt-fill" style={{ color: "var(--primary)", fontSize: ".9rem" }} />
+                          <span style={{ fontWeight: 800, fontSize: ".86rem", color: "var(--text-dark)" }}>{locationLabel}</span>
+                        </div>
+                        <div style={{ display: "flex", gap: 10, fontSize: ".74rem", color: "var(--text-muted)", fontWeight: 700 }}>
+                          <span><i className="bi bi-arrows-angle-expand" style={{ marginRight: 3 }} />{fmtDist(distKm)}</span>
+                          <span><i className="bi bi-clock" style={{ marginRight: 3 }} />{etaLabel(distKm)} ETA</span>
+                          {order.latitude && <span style={{ opacity: 0.7 }}><i className="bi bi-crosshair" style={{ marginRight: 3 }} />{parseFloat(order.latitude).toFixed(4)}, {parseFloat(order.longitude).toFixed(4)}</span>}
+                        </div>
+                      </div>
+
+                      {/* Delivery notes */}
+                      {order.deliveryNotes && (
+                        <div style={{ background: "rgba(212,175,55,0.08)", border: "1px solid rgba(212,175,55,0.25)", padding: "8px 12px", borderRadius: 8, marginBottom: 10, fontSize: ".8rem", color: "var(--text-dark)" }}>
+                          <i className="bi bi-pencil-square" style={{ marginRight: 5, color: "var(--gold)" }} />
+                          <strong>Note:</strong> {order.deliveryNotes}
+                        </div>
+                      )}
+
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                        <span style={{ fontSize: ".86rem", color: "var(--text-light)" }}>
+                          Items: {order.items.map(i => `${i.name} (x${i.qty})`).join(", ")}
+                        </span>
+                        <Btn sm variant="primary" onClick={() => handleOpenAcceptModal(order.id)}>
+                          <i className="bi bi-bicycle" /> Claim Delivery
+                        </Btn>
+                      </div>
                     </div>
-                    <div style={{ background: "rgba(0,0,0,0.02)", padding: "10px 12px", borderRadius: 8, fontSize: ".86rem", color: "var(--text-dark)", marginBottom: 14 }}>
-                      <i className="bi bi-geo-alt" style={{ marginRight: 6, color: "var(--red-text)" }} />
-                      Deliver to: <strong>{order.faculty}</strong>
-                    </div>
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                      <span style={{ fontSize: ".86rem", color: "var(--text-light)" }}>
-                        Items: {order.items.map(i => `${i.name} (x${i.qty})`).join(", ")}
-                      </span>
-                      <Btn sm variant="primary" onClick={() => handleOpenAcceptModal(order.id)}>
-                        <i className="bi bi-bicycle" /> Claim Delivery
-                      </Btn>
-                    </div>
-                  </div>
-                ))
+                  );
+                })
               )
             )}
 
@@ -453,7 +487,11 @@ export default function RiderDashboard({ onLogoutSuccess }) {
                   <p style={{ color: "var(--text-light)", fontSize: ".86rem" }}>Claim orders in the "Available" tab to start delivering!</p>
                 </div>
               ) : (
-                activeDeliveries.map(order => (
+                activeDeliveries.map(order => {
+                  const destCoords = getDestinationCoords(order);
+                  const distKm = haversineKm(CANTEEN_COORDS.lat, CANTEEN_COORDS.lng, destCoords.lat, destCoords.lng);
+                  const locationLabel = order.formattedAddress || order.faculty || "Campus Location";
+                  return (
                   <div key={order.id} className="order-card" style={{ background: "#fff", padding: 18, borderRadius: 14, border: "1px solid var(--border)", borderLeft: "4px solid var(--gold)" }}>
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 10 }}>
                       <div>
@@ -462,16 +500,33 @@ export default function RiderDashboard({ onLogoutSuccess }) {
                       </div>
                       <Badge color="blue">{order.status}</Badge>
                     </div>
-                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, margin: "10px 0 14px" }}>
-                      <div style={{ background: "rgba(0,0,0,0.02)", padding: 10, borderRadius: 8, fontSize: ".84rem" }}>
-                        <div style={{ color: "var(--text-muted)", fontSize: ".76rem", fontWeight: 700 }}>LOCATION</div>
-                        <div style={{ color: "var(--text-dark)", fontWeight: 700, marginTop: 2 }}>{order.faculty}</div>
+
+                    {/* Delivery destination details */}
+                    <div style={{ background: "rgba(15,81,50,0.05)", border: "1px solid rgba(15,81,50,0.15)", borderRadius: 10, padding: "12px 14px", margin: "10px 0 12px" }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 6 }}>
+                        <i className="bi bi-geo-alt-fill" style={{ color: "var(--primary)", fontSize: "1rem" }} />
+                        <span style={{ fontWeight: 800, fontSize: ".88rem", color: "var(--text-dark)" }}>{locationLabel}</span>
                       </div>
-                      <div style={{ background: "rgba(0,0,0,0.02)", padding: 10, borderRadius: 8, fontSize: ".84rem" }}>
-                        <div style={{ color: "var(--text-muted)", fontSize: ".76rem", fontWeight: 700 }}>CUSTOMER</div>
-                        <div style={{ color: "var(--text-dark)", fontWeight: 700, marginTop: 2 }}>{order.customerName}</div>
+                      <div style={{ display: "flex", gap: 12, flexWrap: "wrap", fontSize: ".74rem", color: "var(--text-muted)", fontWeight: 700, marginBottom: order.latitude ? 6 : 0 }}>
+                        <span><i className="bi bi-arrows-angle-expand" style={{ marginRight: 3 }} />{fmtDist(distKm)} away</span>
+                        <span><i className="bi bi-clock" style={{ marginRight: 3 }} />ETA: {etaLabel(distKm)}</span>
+                        <span><i className="bi bi-person-fill" style={{ marginRight: 3 }} />{order.customerName}</span>
                       </div>
+                      {order.latitude && (
+                        <div style={{ fontSize: ".71rem", color: "var(--text-muted)", fontFamily: "monospace" }}>
+                          <i className="bi bi-crosshair" style={{ marginRight: 4 }} />
+                          {parseFloat(order.latitude).toFixed(5)}, {parseFloat(order.longitude).toFixed(5)}
+                        </div>
+                      )}
                     </div>
+
+                    {/* Delivery notes callout */}
+                    {order.deliveryNotes && (
+                      <div style={{ background: "rgba(212,175,55,0.08)", border: "1px solid rgba(212,175,55,0.3)", padding: "9px 12px", borderRadius: 8, marginBottom: 12, fontSize: ".8rem" }}>
+                        <i className="bi bi-pencil-square" style={{ color: "var(--gold)", marginRight: 5 }} />
+                        <strong>Rider Note:</strong> {order.deliveryNotes}
+                      </div>
+                    )}
                     {/* GPS Progress simulation row */}
                     {(order.deliveryProgress > 0 || runningSimulations[order.id]) ? (
                       <div style={{ background: "rgba(37, 99, 235, 0.05)", border: "1px solid rgba(37, 99, 235, 0.15)", padding: 12, borderRadius: 10, marginBottom: 14 }}>
@@ -512,7 +567,7 @@ export default function RiderDashboard({ onLogoutSuccess }) {
                         )}
 
                         {!(order.deliveryProgress > 0 || runningSimulations[order.id]) && (
-                          <Btn sm variant="primary" onClick={() => handleStartSimulation(order.id, order.faculty)}>
+                          <Btn sm variant="primary" onClick={() => handleStartSimulation(order.id, order)}>
                             <i className="bi bi-play-circle" /> Simulate GPS
                           </Btn>
                         )}
@@ -522,7 +577,8 @@ export default function RiderDashboard({ onLogoutSuccess }) {
                       </div>
                     </div>
                   </div>
-                ))
+                  );
+                })
               )
             )}
 

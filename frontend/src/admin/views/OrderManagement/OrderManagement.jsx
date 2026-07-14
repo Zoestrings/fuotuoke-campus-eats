@@ -15,6 +15,8 @@ export default function OrderManagement({ orders = [], onDelete, onUpdateStatus 
   const [editTotal, setEditTotal] = useState("");
   const [editOrderType, setEditOrderType] = useState("pickup");
   const [editFaculty, setEditFaculty] = useState("");
+  const [editFormattedAddress, setEditFormattedAddress] = useState("");
+  const [editDeliveryNotes, setEditDeliveryNotes] = useState("");
   const [editStatus, setEditStatus] = useState("Received");
   const [editRiderName, setEditRiderName] = useState("");
   const [editRiderPhone, setEditRiderPhone] = useState("");
@@ -34,6 +36,8 @@ export default function OrderManagement({ orders = [], onDelete, onUpdateStatus 
     setEditTotal(order.total || "");
     setEditOrderType(order.type || "pickup");
     setEditFaculty(order.faculty || "");
+    setEditFormattedAddress(order.formattedAddress || order.faculty || "");
+    setEditDeliveryNotes(order.deliveryNotes || "");
     setEditStatus(order.status || "Received");
     setEditRiderName(order.assignedRiderName || "");
     setEditRiderPhone(order.assignedRiderPhone || "");
@@ -54,6 +58,8 @@ export default function OrderManagement({ orders = [], onDelete, onUpdateStatus 
       total: Number(editTotal),
       type: editOrderType,
       faculty: editOrderType === "delivery" ? editFaculty.trim() : null,
+      formattedAddress: editOrderType === "delivery" ? editFormattedAddress.trim() : null,
+      deliveryNotes: editOrderType === "delivery" ? editDeliveryNotes.trim() : null,
       status: editStatus,
       assignedRiderName: editOrderType === "delivery" && editRiderName.trim() ? editRiderName.trim() : null,
       assignedRiderPhone: editOrderType === "delivery" && editRiderPhone.trim() ? editRiderPhone.trim() : null
@@ -130,7 +136,19 @@ export default function OrderManagement({ orders = [], onDelete, onUpdateStatus 
                   <td style={{ padding: "14px 10px", fontSize: ".82rem" }}>
                     <div>{o.items.map(it => `${it.name} x${it.qty}`).join(", ")}</div>
                     <div style={{ fontSize: ".72rem", color: "var(--text-muted)", display: "flex", gap: 6, flexWrap: "wrap", marginTop: 2 }}>
-                      <span>{o.type.toUpperCase()} · {o.time} {o.faculty ? `(${o.faculty})` : ""}</span>
+                      <span>{o.type.toUpperCase()} · {o.time}</span>
+                      {(o.formattedAddress || o.faculty) && (
+                        <span style={{ color: "var(--primary)", fontWeight: 700 }}>
+                          <i className="bi bi-geo-alt" style={{ marginRight: 3 }} />
+                          {o.formattedAddress || o.faculty}
+                        </span>
+                      )}
+                      {o.deliveryNotes && (
+                        <span style={{ color: "var(--gold)", fontWeight: 700 }}>
+                          <i className="bi bi-pencil-square" style={{ marginRight: 3 }} />
+                          {o.deliveryNotes}
+                        </span>
+                      )}
                       {o.assignedRiderName && (
                         <span style={{ color: "var(--primary)", fontWeight: 700 }}>
                           <i className="bi bi-bicycle" style={{ marginRight: 3 }} />
@@ -260,7 +278,26 @@ export default function OrderManagement({ orders = [], onDelete, onUpdateStatus 
                         onChange={e => setEditFaculty(e.target.value)}
                       />
                     </div>
-                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+                  <div>
+                    <label className="form-label">Campus Location / Delivery Address</label>
+                    <input
+                      className="form-input"
+                      placeholder="e.g. Faculty of Engineering — Drawing Studio"
+                      value={editFormattedAddress}
+                      onChange={e => setEditFormattedAddress(e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <label className="form-label">Delivery Notes</label>
+                    <textarea
+                      className="form-input"
+                      placeholder="Room number, landmark, instructions..."
+                      value={editDeliveryNotes}
+                      onChange={e => setEditDeliveryNotes(e.target.value)}
+                      style={{ minHeight: 56, resize: "vertical" }}
+                    />
+                  </div>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
                       <div>
                         <label className="form-label">Assigned Rider Name</label>
                         <input
