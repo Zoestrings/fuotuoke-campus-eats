@@ -465,8 +465,8 @@ export default function CustomerDashboard({ onLogoutSuccess }) {
       )}
 
       {/* Order tracker modal */}
-      {activeTrackOrder && (
-        <TrackOrder order={activeTrackOrder} onClose={() => setTrackingOrder(null)} accent={accent} />
+      {trackingOrder && (
+        <TrackOrder order={trackingOrder} onClose={() => setTrackingOrder(null)} accent={accent} />
       )}
 
       {/* Floating notifications */}

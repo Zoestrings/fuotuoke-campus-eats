@@ -38,22 +38,24 @@ const STEPS = [
   },
 ];
 
-const FACULTY_COORDS = {
-  science: { lat: 4.9780, lng: 6.2770, label: "Science Faculty" },
-  humanities: { lat: 4.9720, lng: 6.2730, label: "Humanities Faculty" },
-  social: { lat: 4.9720, lng: 6.2730, label: "Social Sciences Faculty" },
-  management: { lat: 4.9760, lng: 6.2790, label: "Management Sciences" },
-  admin: { lat: 4.9760, lng: 6.2790, label: "Senate Admin Building" },
-  engineering: { lat: 4.9790, lng: 6.2810, label: "Engineering Faculty" }
-};
+import { getCoordsForLabel, CANTEEN_COORDS } from "../../../CampusLocations";
 
-function getDestinationCoords(facultyName) {
-  const lower = (facultyName || "").toLowerCase();
-  if (lower.includes("science")) return FACULTY_COORDS.science;
-  if (lower.includes("humanities") || lower.includes("social")) return FACULTY_COORDS.humanities;
-  if (lower.includes("management") || lower.includes("admin")) return FACULTY_COORDS.management;
-  if (lower.includes("engineering")) return FACULTY_COORDS.engineering;
-  return { lat: 4.9760, lng: 6.2790, label: facultyName || "Your Faculty" }; // Default center
+function getDestinationCoords(order) {
+  // 1. Prefer saved GPS coords from order
+  if (order.latitude && order.longitude) {
+    return { lat: parseFloat(order.latitude), lng: parseFloat(order.longitude), label: order.formattedAddress || "Your Location" };
+  }
+  // 2. Use formattedAddress to look up campus location
+  if (order.formattedAddress) {
+    const coords = getCoordsForLabel(order.formattedAddress);
+    return { ...coords, label: order.formattedAddress };
+  }
+  // 3. Fall back to faculty keyword lookup
+  if (order.faculty) {
+    const coords = getCoordsForLabel(order.faculty);
+    return { ...coords, label: order.faculty };
+  }
+  return { lat: CANTEEN_COORDS.lat, lng: CANTEEN_COORDS.lng, label: "Your Campus Location" };
 }
 
 function getActiveIndex(status) {
@@ -106,7 +108,7 @@ export default function TrackOrder({ order, onClose, accent }) {
 
     fetchLatest();
 
-    if (["Out for Delivery", "Preparing", "Received"].includes(status)) {
+    if (["Out for Delivery", "Preparing", "Received", "Ready for Pickup"].includes(status)) {
       interval = setInterval(fetchLatest, 4000);
     }
 
@@ -114,6 +116,22 @@ export default function TrackOrder({ order, onClose, accent }) {
       if (interval) clearInterval(interval);
     };
   }, [order.id, status]);
+
+  // Haversine distance in km (used for live ETA display)
+  const haversineKm = (lat1, lng1, lat2, lng2) => {
+    const R = 6371;
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLng = (lng2 - lng1) * Math.PI / 180;
+    const a = Math.sin(dLat / 2) ** 2 +
+      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLng / 2) ** 2;
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  };
+
+  const destInfo = !isPickup ? getDestinationCoords(liveOrder) : null;
+  const riderLat = liveOrder.riderLatitude ? parseFloat(liveOrder.riderLatitude) : CANTEEN_COORDS.lat;
+  const riderLng = liveOrder.riderLongitude ? parseFloat(liveOrder.riderLongitude) : CANTEEN_COORDS.lng;
+  const distKm = destInfo ? haversineKm(riderLat, riderLng, destInfo.lat, destInfo.lng) : 0;
+  const etaMin = Math.max(1, Math.ceil((distKm / 25) * 60));
 
   // Load Leaflet Script / CSS
   useEffect(() => {
@@ -152,17 +170,17 @@ export default function TrackOrder({ order, onClose, accent }) {
 
   // Initialize and update Leaflet Map
   useEffect(() => {
-    if (!leafletLoaded || !["Out for Delivery", "Completed"].includes(status) || liveOrder.type !== "delivery") {
+    if (!leafletLoaded || isPickup || !["Preparing", "Out for Delivery", "Completed"].includes(status)) {
       return;
     }
 
     const L = window.L;
-    const canteenCoords = [4.9750, 6.2750];
-    const dest = getDestinationCoords(liveOrder.faculty);
+    const canteenCoords = [CANTEEN_COORDS.lat, CANTEEN_COORDS.lng];
+    const dest = getDestinationCoords(liveOrder);
     const destCoords = [dest.lat, dest.lng];
 
-    const currentRiderLat = liveOrder.riderLatitude || canteenCoords[0];
-    const currentRiderLng = liveOrder.riderLongitude || canteenCoords[1];
+    const currentRiderLat = liveOrder.riderLatitude ? parseFloat(liveOrder.riderLatitude) : CANTEEN_COORDS.lat;
+    const currentRiderLng = liveOrder.riderLongitude ? parseFloat(liveOrder.riderLongitude) : CANTEEN_COORDS.lng;
     const riderCoords = [currentRiderLat, currentRiderLng];
 
     // Initialize Map if not created yet
@@ -248,7 +266,7 @@ export default function TrackOrder({ order, onClose, accent }) {
             <p className="tracker-header-sub">
               {order.outlet?.name || "Campus Canteen"} &nbsp;·&nbsp;
               <i className={`bi ${isPickup ? "bi-bag-check" : "bi-truck"}`} style={{ marginRight: 4 }} />
-              {isPickup ? "Campus Pickup" : `Faculty Delivery → ${order.faculty}`}
+              {isPickup ? "Campus Pickup" : `Delivery → ${liveOrder.formattedAddress || liveOrder.faculty || "Campus"}`}
             </p>
           </div>
           <Badge color={statusColor}>{status}</Badge>
@@ -257,21 +275,41 @@ export default function TrackOrder({ order, onClose, accent }) {
         {/* Scrollable body */}
         <div className="tracker-body">
 
-          {/* Live GPS Campus Tracker Map (Only if Delivery and Out for Delivery / Completed) */}
-          {liveOrder.type === "delivery" && ["Out for Delivery", "Completed"].includes(status) && (
+          {/* Live GPS Campus Tracker Map (delivery orders in active/complete state) */}
+          {liveOrder.type === "delivery" && ["Preparing", "Out for Delivery", "Completed"].includes(status) && (
             <div className="tracker-summary-card" style={{ marginBottom: 20, padding: 16, background: "#f8fafc", border: "1px solid var(--border)", position: "relative", overflow: "hidden" }}>
               <div style={{ fontSize: ".8rem", fontWeight: 800, color: "var(--text-dark)", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: 12 }}>
                 <i className="bi bi-geo-alt-fill" style={{ marginRight: 6, color: "var(--red-text)" }} />
-                Live Campus GPS Map (FUOTUOKE Campus)
+                Live Campus GPS Map
+                {status !== "Completed" && (
+                  <span style={{ marginLeft: 10, background: "rgba(37,99,235,0.08)", color: "var(--primary)", fontSize: ".7rem", fontWeight: 800, padding: "2px 7px", borderRadius: 6 }}>
+                    <i className="bi bi-broadcast" style={{ marginRight: 3 }} />
+                    Updating every 4s
+                  </span>
+                )}
               </div>
-              
+
+              {/* Distance / ETA strip */}
+              {status !== "Completed" && (
+                <div style={{ display: "flex", gap: 12, marginBottom: 10 }}>
+                  <div style={{ background: "rgba(15,81,50,0.07)", border: "1px solid rgba(15,81,50,0.15)", borderRadius: 8, padding: "6px 12px", fontSize: ".78rem", fontWeight: 800, color: "var(--text-dark)" }}>
+                    <i className="bi bi-arrows-angle-expand" style={{ marginRight: 5, color: "var(--primary)" }} />
+                    {distKm < 1 ? `${Math.round(distKm * 1000)} m` : `${distKm.toFixed(2)} km`} away
+                  </div>
+                  <div style={{ background: "rgba(15,81,50,0.07)", border: "1px solid rgba(15,81,50,0.15)", borderRadius: 8, padding: "6px 12px", fontSize: ".78rem", fontWeight: 800, color: "var(--text-dark)" }}>
+                    <i className="bi bi-clock" style={{ marginRight: 5, color: "var(--primary)" }} />
+                    ETA ~{etaMin} min
+                  </div>
+                </div>
+              )}
+
               <div style={{ position: "relative", width: "100%", height: 220, borderRadius: 10, border: "1px solid var(--border)", overflow: "hidden", zIndex: 1 }}>
                 <div id="leaflet-map" style={{ width: "100%", height: "100%" }} />
 
                 {/* Info strip overlay */}
                 <div style={{ position: "absolute", bottom: 8, left: 8, background: "rgba(255,255,255,0.9)", padding: "4px 8px", borderRadius: 6, fontSize: ".72rem", border: "1px solid var(--border)", fontWeight: 700, color: "var(--text-dark)", zIndex: 1000 }}>
                   {liveOrder.deliveryProgress === 100 || status === "Completed" ? (
-                    <span style={{ color: "var(--green-text)" }}><i className="bi bi-check-circle-fill" /> Arrived at Faculty!</span>
+                    <span style={{ color: "var(--green-text)" }}><i className="bi bi-check-circle-fill" /> Arrived!</span>
                   ) : (
                     <span><i className="bi bi-bicycle" style={{ marginRight: 4 }} /> Rider is {100 - (liveOrder.deliveryProgress || 0)}% away...</span>
                   )}
@@ -352,10 +390,10 @@ export default function TrackOrder({ order, onClose, accent }) {
               <div className="tracker-info-item">
                 <div className="tracker-info-title">
                   <i className={`bi ${isPickup ? "bi-bag-check" : "bi-truck"}`} style={{ marginRight: 5 }} />
-                  {isPickup ? "Pickup" : "Delivery"}
+                  {isPickup ? "Pickup" : "Delivery Location"}
                 </div>
                 <div className="tracker-info-value">
-                  {isPickup ? "Canteen Counter" : liveOrder.faculty || "—"}
+                  {isPickup ? "Canteen Counter" : (liveOrder.formattedAddress || liveOrder.faculty || "—")}
                 </div>
               </div>
               <div className="tracker-info-item">
@@ -366,6 +404,14 @@ export default function TrackOrder({ order, onClose, accent }) {
                 <div className="tracker-info-value">{liveOrder.time || "—"}</div>
               </div>
             </div>
+
+            {/* Delivery Notes */}
+            {!isPickup && liveOrder.deliveryNotes && (
+              <div style={{ background: "rgba(212,175,55,0.07)", border: "1px solid rgba(212,175,55,0.25)", padding: "8px 12px", borderRadius: 8, marginTop: 10, fontSize: ".82rem", color: "var(--text-dark)" }}>
+                <i className="bi bi-pencil-square" style={{ color: "var(--gold)", marginRight: 6 }} />
+                <strong>Your delivery note:</strong> {liveOrder.deliveryNotes}
+              </div>
+            )}
           </div>
 
           {/* Rider Info Card (Only if delivery and rider is assigned) */}
