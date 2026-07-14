@@ -60,7 +60,7 @@ export default function OrdersList({ isStaff, accent, orders, setPage, onTrackOr
 
                   {/* Items list */}
                   <div className="order-list-items-grid">
-                    {order.items.map((item, idx) => (
+                    {(order.items || []).map((item, idx) => (
                       <div key={item.id || idx} className="order-list-row">
                         {item.image ? (
                           <img src={item.image} alt={item.name} className="order-list-thumb" loading="lazy" />

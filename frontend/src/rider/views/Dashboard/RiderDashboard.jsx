@@ -36,7 +36,8 @@ export default function RiderDashboard({ onLogoutSuccess }) {
     setError("");
     try {
       const data = await OrderService.getRiderOrders();
-      setOrders(data || []);
+      const deliveryOrders = (data || []).filter(o => o.type === "delivery");
+      setOrders(deliveryOrders);
     } catch (err) {
       console.error(err);
       setError("Failed to load delivery orders.");

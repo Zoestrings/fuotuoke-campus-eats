@@ -266,6 +266,26 @@ export const handleMockRequest = async (method, endpoint, body = null) => {
             // Merge any extra fields (rider info, etc.) from the body
             const { status: _s, ...rest } = body;
             updated = { ...updated, ...rest };
+          } else if (subAction === "accept-delivery") {
+            updated.status = "Out for Delivery";
+            updated.assignedRiderPhone = body.phone;
+            const userStr = localStorage.getItem("accessTokenUser");
+            let riderName = "Zoe Hackz Rider";
+            let riderId = "ZOEHACKZ001";
+            if (userStr) {
+              try {
+                const loggedUser = JSON.parse(userStr);
+                if (loggedUser.role === "rider" || loggedUser.name) {
+                  riderName = loggedUser.name;
+                }
+                riderId = loggedUser.userId || loggedUser.id || "ZOEHACKZ001";
+              } catch (e) {}
+            }
+            updated.assignedRiderName = riderName;
+            updated.assignedRiderId = riderId;
+            updated.riderLatitude = 4.9750;
+            updated.riderLongitude = 6.2750;
+            updated.deliveryProgress = 0;
           } else if (subAction === "location") {
             updated.riderLatitude = Number(body.latitude);
             updated.riderLongitude = Number(body.longitude);
@@ -294,7 +314,22 @@ export const handleMockRequest = async (method, endpoint, body = null) => {
 
   // 5. PAYMENTS ENDPOINTS
   if (parts[0] === "payments") {
-    return getData("payments", []);
+    const payments = getData("payments", []);
+    if (method === "GET") {
+      return payments;
+    }
+    if (method === "PUT" || method === "PATCH") {
+      const idVal = parseInt(parts[1], 10);
+      const updatedPayments = payments.map(p => (p.id === idVal || String(p.id) === String(parts[1])) ? { ...p, ...body } : p);
+      setData("payments", updatedPayments);
+      return { success: true };
+    }
+    if (method === "DELETE") {
+      const idVal = parseInt(parts[1], 10);
+      const remaining = payments.filter(p => p.id !== idVal && String(p.id) !== String(parts[1]));
+      setData("payments", remaining);
+      return { success: true };
+    }
   }
 
   // 6. USERS MANAGEMENT ENDPOINTS
@@ -303,10 +338,16 @@ export const handleMockRequest = async (method, endpoint, body = null) => {
     if (method === "GET") {
       return users;
     }
-    if (method === "PUT") {
+    if (method === "PUT" || method === "PATCH") {
       const idVal = parseInt(parts[1], 10);
-      const updatedUsers = users.map(u => u.id === idVal ? { ...u, ...body } : u);
+      const updatedUsers = users.map(u => (u.id === idVal || String(u.id) === String(parts[1])) ? { ...u, ...body } : u);
       setData("users", updatedUsers);
+      return { success: true };
+    }
+    if (method === "DELETE") {
+      const idVal = parseInt(parts[1], 10);
+      const remaining = users.filter(u => u.id !== idVal && String(u.id) !== String(parts[1]));
+      setData("users", remaining);
       return { success: true };
     }
   }

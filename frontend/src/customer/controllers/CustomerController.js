@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { AuthService } from "../services/AuthService";
 import { OrderService } from "../services/OrderService";
 import { get } from "../../shared/api/apiClient";
@@ -16,6 +16,11 @@ export function useCustomerController(onLogoutSuccess) {
   const [customizingItem, setCustomizingItem] = useState(null);
   const [trackingOrder, setTrackingOrder] = useState(null);
   const [notifications, setNotifications] = useState([]);
+
+  const ordersRef = useRef(orders);
+  useEffect(() => {
+    ordersRef.current = orders;
+  }, [orders]);
 
   // Fetch initial data
   useEffect(() => {
@@ -51,7 +56,7 @@ export function useCustomerController(onLogoutSuccess) {
         
         // Compare status to check if anything advanced
         dbOrders.forEach(dbO => {
-          const localO = orders.find(x => x.id === dbO.id);
+          const localO = ordersRef.current.find(x => x.id === dbO.id);
           if (localO && localO.status !== dbO.status) {
             // Status changed!
             const notification = {
@@ -69,7 +74,7 @@ export function useCustomerController(onLogoutSuccess) {
     }, 4000); // Check every 4s
 
     return () => clearInterval(interval);
-  }, [user, orders]);
+  }, [user]);
 
   const cartCount = cart.reduce((s, x) => s + x.qty, 0);
   const cartTotal = cart.reduce((s, x) => s + x.price * x.qty, 0);

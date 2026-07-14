@@ -6,7 +6,8 @@ import { get, post, patch } from "../../shared/api/apiClient";
 
 export class OrderService {
   static async getCustomerOrders(customerId) {
-    return get("/orders");
+    const all = await get("/orders");
+    return (all || []).filter(o => o.customerId === customerId || String(o.customerId) === String(customerId));
   }
 
   static async placeOrder(orderData) {
