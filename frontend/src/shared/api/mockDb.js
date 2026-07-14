@@ -97,7 +97,7 @@ export const handleMockRequest = async (method, endpoint, body = null) => {
       const cleanId = id.trim().toUpperCase();
       const cleanEmail = email.trim().toLowerCase();
 
-      const existing = users.find(u => u.userId === cleanId && u.role === role);
+      const existing = users.find(u => u.userId.toUpperCase() === cleanId && u.role === role);
       if (existing) {
         throw new Error("An account with this ID and role already exists.");
       }
