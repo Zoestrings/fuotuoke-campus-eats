@@ -224,7 +224,7 @@ export const handleMockRequest = async (method, endpoint, body = null) => {
       const newOrder = {
         id: Date.now(),
         orderId: `ORD-${Date.now().toString().slice(-6)}`,
-        status: "pending",
+        status: "Received",
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
         ...body
@@ -248,13 +248,25 @@ export const handleMockRequest = async (method, endpoint, body = null) => {
       return { success: true, order: newOrder };
     }
 
+    if (method === "DELETE") {
+      const idVal = parseInt(parts[1], 10) || parts[1];
+      const remaining = orders.filter(o => o.id !== idVal && String(o.id) !== String(parts[1]));
+      setData("orders", remaining);
+      return { success: true };
+    }
+
     if (method === "PUT" || method === "PATCH") {
       const idVal = parseInt(parts[1], 10);
       const subAction = parts[2];
       const updatedOrders = orders.map(ord => {
         if (ord.id === idVal) {
           let updated = { ...ord, updatedAt: new Date().toISOString() };
-          if (subAction === "location") {
+          if (subAction === "status") {
+            updated.status = body.status || updated.status;
+            // Merge any extra fields (rider info, etc.) from the body
+            const { status: _s, ...rest } = body;
+            updated = { ...updated, ...rest };
+          } else if (subAction === "location") {
             updated.riderLatitude = Number(body.latitude);
             updated.riderLongitude = Number(body.longitude);
           } else if (subAction === "delivery-progress") {
