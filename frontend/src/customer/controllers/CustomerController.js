@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { AuthService } from "../services/AuthService";
 import { OrderService } from "../services/OrderService";
 import { get } from "../../shared/api/apiClient";
+import { playChimeSound, playSuccessSound } from "../../shared/utils/sound";
 
 export function useCustomerController(onLogoutSuccess) {
   const [user, setUser] = useState(AuthService.getSession());
@@ -150,6 +151,7 @@ export function useCustomerController(onLogoutSuccess) {
 
     setPendingOrder(order);
     setShowPayment(true);
+    playChimeSound(); // Play dynamic chime sound
     return { success: true };
   };
 
@@ -161,6 +163,7 @@ export function useCustomerController(onLogoutSuccess) {
           paymentMethod: paymentMethod || "Credit Card"
         };
         const newOrder = await OrderService.placeOrder(orderWithPayment);
+        playSuccessSound(); // Play sparkling success ding
         setOrders(prev => [newOrder, ...prev]);
         setCart([]);
         setShowPayment(false);
