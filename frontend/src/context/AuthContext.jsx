@@ -16,7 +16,14 @@ export const useAuth = () => {
 };
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState(() => {
+    const saved = localStorage.getItem("accessTokenUser");
+    try {
+      return saved ? JSON.parse(saved) : null;
+    } catch {
+      return null;
+    }
+  });
   const [token, setToken] = useState(() => localStorage.getItem("accessToken") || null);
   const [loading, setLoading] = useState(true);
 
@@ -71,6 +78,8 @@ export const AuthProvider = ({ children }) => {
         role
       });
       if (data && data.accessToken) {
+        localStorage.setItem("accessToken", data.accessToken);
+        localStorage.setItem("accessTokenUser", JSON.stringify(data.user));
         setToken(data.accessToken);
         setUser(data.user);
         return { success: true };
@@ -88,6 +97,8 @@ export const AuthProvider = ({ children }) => {
     try {
       const data = await post("/auth/signup", signupData);
       if (data && data.accessToken) {
+        localStorage.setItem("accessToken", data.accessToken);
+        localStorage.setItem("accessTokenUser", JSON.stringify(data.user));
         setToken(data.accessToken);
         setUser(data.user);
         return { success: true };
