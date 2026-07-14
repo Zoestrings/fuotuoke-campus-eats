@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { Badge, Btn } from "../../../shared/ui";
 import { OrderService } from "../../services/OrderService";
 import { useToast } from "../../../context/ToastContext";
+import { getCoordsForLabel, CANTEEN_COORDS } from "../../../CampusLocations";
 
 const STEPS = [
   {
@@ -37,8 +38,6 @@ const STEPS = [
     eta: "Done",
   },
 ];
-
-import { getCoordsForLabel, CANTEEN_COORDS } from "../../../CampusLocations";
 
 function getDestinationCoords(order) {
   // 1. Prefer saved GPS coords from order
