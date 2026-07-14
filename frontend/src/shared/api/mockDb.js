@@ -74,6 +74,17 @@ const setData = (key, val) => {
 
 // Initialize Mock Database
 export const initMockDb = () => {
+  const MOCK_DB_VERSION = "v6";
+  const currentVersion = localStorage.getItem("fuo_mock_db_version");
+  if (currentVersion !== MOCK_DB_VERSION) {
+    localStorage.removeItem("fuo_mock_users");
+    localStorage.removeItem("fuo_mock_menu");
+    localStorage.removeItem("fuo_mock_settings");
+    localStorage.removeItem("fuo_mock_orders");
+    localStorage.removeItem("fuo_mock_payments");
+    localStorage.setItem("fuo_mock_db_version", MOCK_DB_VERSION);
+  }
+  
   getData("users", SEED_USERS);
   getData("menu", SEED_MENU);
   getData("settings", SEED_SETTINGS);
