@@ -1,10 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useMemo, memo } from "react";
 import { OUTLETS } from "../../../data";
 import { Btn } from "../../../shared/ui";
 
 const CATS = ["All", "Rice", "Soup", "Mains", "Snacks", "Drinks"];
 
-export default function MenuBrowse({ isStaff, accent, outlet, setOutlet, orderType, setOType, cart, addItem, removeItem, cartCount, cartTotal, setPage, onCustomizeItem, menuItems = [] }) {
+function MenuBrowse({ isStaff, accent, outlet, setOutlet, orderType, setOType, cart, addItem, removeItem, cartCount, cartTotal, setPage, onCustomizeItem, menuItems = [] }) {
   const [cat, setCat] = useState("All");
   const [search, setSearch] = useState("");
 
@@ -12,7 +12,15 @@ export default function MenuBrowse({ isStaff, accent, outlet, setOutlet, orderTy
     const found = cart.find(x => x.baseId === id || x.id === id);
     return found ? found.qty : 0;
   };
-  const filtered = menuItems.filter(m => (cat === "All" || m.cat === cat) && m.name.toLowerCase().includes(search.toLowerCase()));
+
+  // Memoized: only recalculates when menuItems, cat, or search changes
+  const filtered = useMemo(
+    () => menuItems.filter(m =>
+      (cat === "All" || m.cat === cat) &&
+      m.name.toLowerCase().includes(search.toLowerCase())
+    ),
+    [menuItems, cat, search]
+  );
 
   return (
     <div className="page-bg animate-fade-in">
@@ -174,3 +182,6 @@ export default function MenuBrowse({ isStaff, accent, outlet, setOutlet, orderTy
     </div>
   );
 }
+
+// Wrap in memo: skips re-render when parent updates but props haven't changed
+export default memo(MenuBrowse);

@@ -88,7 +88,40 @@ body {
   -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
   line-height: 1.6;
+  /* Speed up text rendering (kerning/ligatures cost CPU) */
+  text-rendering: optimizeSpeed;
 }
+
+/* Images: lazy load by default, no layout shift */
+img {
+  content-visibility: auto;
+  max-width: 100%;
+  height: auto;
+}
+
+/* GPU-accelerate any element with a CSS transition or animation */
+[class*="transition"],
+[class*="anim"],
+[class*="modal"],
+[class*="drawer"],
+[class*="toast"] {
+  will-change: transform;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+/* Respect user preference for reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
 
 body::before {
   content: "";

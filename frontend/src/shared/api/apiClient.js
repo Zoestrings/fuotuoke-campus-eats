@@ -4,6 +4,27 @@ import { handleMockRequest } from "./mockDb";
 
 const API_BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:5000/api";
 
+// ── Lightweight GET cache (60s TTL) ──
+// Prevents duplicate API calls when switching between tabs/pages.
+const CACHE_TTL_MS = 60 * 1000;
+const _cache = new Map();
+
+function cacheGet(key) {
+  const entry = _cache.get(key);
+  if (!entry) return null;
+  if (Date.now() > entry.expiresAt) { _cache.delete(key); return null; }
+  return entry.data;
+}
+function cacheSet(key, data) {
+  _cache.set(key, { data, expiresAt: Date.now() + CACHE_TTL_MS });
+}
+function cacheInvalidate(key) {
+  // Invalidate the exact key and any cache key that starts with it
+  for (const k of _cache.keys()) {
+    if (k === key || k.startsWith(key.split("?")[0])) _cache.delete(k);
+  }
+}
+
 const apiClientInstance = axios.create({
   baseURL: API_BASE_URL,
   headers: {
@@ -80,17 +101,26 @@ export function clearTokens() {
 }
 
 // REST Convenience Wrappers
-export const get = (endpoint) => {
+export const get = (endpoint, { cache = true } = {}) => {
   if (shouldUseMock()) {
     return handleMockRequest("GET", endpoint);
   }
-  return apiClientInstance.get(endpoint).then(res => res.data);
+  // Return cached response if available
+  if (cache) {
+    const hit = cacheGet(endpoint);
+    if (hit) return Promise.resolve(hit);
+  }
+  return apiClientInstance.get(endpoint).then(res => {
+    if (cache) cacheSet(endpoint, res.data);
+    return res.data;
+  });
 };
 
 export const post = (endpoint, body) => {
   if (shouldUseMock()) {
     return handleMockRequest("POST", endpoint, body);
   }
+  cacheInvalidate(endpoint);
   return apiClientInstance.post(endpoint, body).then(res => res.data);
 };
 
@@ -98,6 +128,7 @@ export const put = (endpoint, body) => {
   if (shouldUseMock()) {
     return handleMockRequest("PUT", endpoint, body);
   }
+  cacheInvalidate(endpoint);
   return apiClientInstance.put(endpoint, body).then(res => res.data);
 };
 
@@ -105,6 +136,7 @@ export const patch = (endpoint, body) => {
   if (shouldUseMock()) {
     return handleMockRequest("PATCH", endpoint, body);
   }
+  cacheInvalidate(endpoint);
   return apiClientInstance.patch(endpoint, body).then(res => res.data);
 };
 
@@ -112,6 +144,7 @@ export const del = (endpoint) => {
   if (shouldUseMock()) {
     return handleMockRequest("DELETE", endpoint);
   }
+  cacheInvalidate(endpoint);
   return apiClientInstance.delete(endpoint).then(res => res.data);
 };
 

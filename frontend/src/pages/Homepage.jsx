@@ -10,7 +10,13 @@ export default function Homepage({ goTo }) {
       {/* ── Navbar ─────────────────────────────────── */}
       <nav className="hp-nav">
         <div className="hp-nav-brand">
-          <img src="/FUO_Logo.png" alt="FUOTUOKE Logo" className="hp-nav-logo" />
+          <img
+            src="/FUO_Logo.png"
+            alt="FUOTUOKE Logo"
+            className="hp-nav-logo"
+            fetchpriority="high"
+            decoding="async"
+          />
           <div>
             <div className="hp-nav-title">FUOTUOKE Campus Eats</div>
             <div className="hp-nav-sub">Federal University Otuoke</div>
@@ -175,7 +181,13 @@ export default function Homepage({ goTo }) {
       <footer className="hp-footer">
         <div className="hp-footer-top" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 16 }}>
           <div className="hp-footer-brand">
-            <img src="/FUO_Logo.png" alt="FUOTUOKE" className="hp-footer-logo" />
+            <img
+              src="/FUO_Logo.png"
+              alt="FUOTUOKE"
+              className="hp-footer-logo"
+              loading="lazy"
+              decoding="async"
+            />
             <div>
               <div className="hp-footer-title">FUOTUOKE Campus Eats</div>
               <div className="hp-footer-motto">Knowledge · Excellence · Service</div>

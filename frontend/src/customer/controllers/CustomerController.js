@@ -23,58 +23,63 @@ export function useCustomerController(onLogoutSuccess) {
     ordersRef.current = orders;
   }, [orders]);
 
-  // Fetch initial data
+  // Fetch initial data in parallel (menu + orders at the same time)
   useEffect(() => {
-    if (user) {
-      // Load menu items from API
-      const fetchMenu = async () => {
-        try {
-          const items = await get("/menu");
-          setMenuItems(items || []);
-        } catch (err) {
-          console.error("Failed to load menu items:", err.message);
-        }
-      };
-      fetchMenu();
-
-      // Load customer orders
-      const fetchOrders = async () => {
-        const fetched = await OrderService.getCustomerOrders(user.id);
+    if (!user) return;
+    const fetchInitialData = async () => {
+      try {
+        const [items, fetched] = await Promise.all([
+          get("/menu"),                                  // cached by apiClient (60s TTL)
+          OrderService.getCustomerOrders(user.id)
+        ]);
+        setMenuItems(items || []);
         setOrders(fetched || []);
-      };
-      fetchOrders();
-    }
+      } catch (err) {
+        console.error("Failed to load initial data:", err.message);
+      }
+    };
+    fetchInitialData();
   }, [user]);
 
-  // Sync orders updates and check for status changes to trigger notifications
+  // Poll for order status changes — paused when the tab is hidden
   useEffect(() => {
     if (!user) return;
 
-    const interval = setInterval(async () => {
+    let timerId = null;
+
+    const poll = async () => {
+      // Skip if tab is not visible (saves CPU, battery, and server load)
+      if (document.hidden) return;
       try {
         const dbOrders = await OrderService.getCustomerOrders(user.id);
         if (!Array.isArray(dbOrders)) return;
-        
-        // Compare status to check if anything advanced
+
         dbOrders.forEach(dbO => {
           const localO = ordersRef.current.find(x => x.id === dbO.id);
           if (localO && localO.status !== dbO.status) {
-            // Status changed!
-            const notification = {
+            setNotifications(prev => [{
               id: Date.now() + Math.random(),
               message: `🔔 Order #${String(dbO.id).slice(-5)} status updated to: ${dbO.status}`
-            };
-            setNotifications(prev => [notification, ...prev]);
+            }, ...prev]);
           }
         });
-        
         setOrders(dbOrders);
       } catch (error) {
         console.error("Order sync error:", error);
       }
-    }, 4000); // Check every 4s
+    };
 
-    return () => clearInterval(interval);
+    // Poll every 12 seconds (down from 4s — 75% fewer API calls)
+    timerId = setInterval(poll, 12000);
+
+    // Resume polling immediately when tab becomes visible again
+    const onVisible = () => { if (!document.hidden) poll(); };
+    document.addEventListener("visibilitychange", onVisible);
+
+    return () => {
+      clearInterval(timerId);
+      document.removeEventListener("visibilitychange", onVisible);
+    };
   }, [user]);
 
   const cartCount = cart.reduce((s, x) => s + x.qty, 0);
