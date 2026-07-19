@@ -507,7 +507,10 @@ async function executeMockQuery(sql, params = []) {
   if (upperSql.startsWith("SELECT * FROM AUDIT_LOGS")) {
     let results = [...db.audit_logs];
     results.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-    return [results.slice(0, 100), []];
+    // Respect LIMIT and OFFSET params if provided
+    const limitVal = params && params[0] ? parseInt(params[0], 10) : 100;
+    const offsetVal = params && params[1] ? parseInt(params[1], 10) : 0;
+    return [results.slice(offsetVal, offsetVal + limitVal), []];
   }
 
   // 24. INSERT refresh_tokens

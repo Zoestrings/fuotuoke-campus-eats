@@ -25,9 +25,16 @@ const loginLimiter = rateLimit({
 // ── Helpers ──
 const generateAccessToken = (user) => {
   return jwt.sign(
-    { id: user._id, userId: user.userId, role: user.role },
+    { 
+      id: user._id, 
+      userId: user.userId, 
+      role: user.role, 
+      status: user.status,
+      name: user.name,
+      email: user.email
+    },
     process.env.JWT_SECRET,
-    { expiresIn: process.env.JWT_EXPIRES_IN || "1d" }
+    { expiresIn: process.env.JWT_EXPIRES_IN || "15m" }
   );
 };
 
@@ -40,12 +47,29 @@ const generateRefreshToken = (user) => {
   );
 };
 
-const getRefreshTokenExpiresAt = () => {
-  const expiresAt = new Date();
-  // Default to 7 days
-  expiresAt.setDate(expiresAt.getDate() + 7);
-  return expiresAt;
+// Parses a duration string like "7d", "24h", "30m" into milliseconds
+const parseDurationMs = (str = "7d") => {
+  const match = String(str).match(/^(\d+)([smhd])$/);
+  if (!match) return 7 * 24 * 60 * 60 * 1000; // default 7 days
+  const num = parseInt(match[1], 10);
+  const unit = match[2];
+  const multipliers = { s: 1000, m: 60000, h: 3600000, d: 86400000 };
+  return num * multipliers[unit];
 };
+
+const getRefreshTokenExpiresAt = () => {
+  const ms = parseDurationMs(process.env.JWT_REFRESH_EXPIRES_IN || "7d");
+  return new Date(Date.now() + ms);
+};
+
+// Strict rate limiter for signup — prevents bot account creation
+const signupLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000, // 1 hour
+  max: 5,
+  message: { error: "Too many accounts created from this IP. Please try again in an hour." },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
 
 // Input validation middleware for login
 const validateLoginInput = (req, res, next) => {
@@ -72,7 +96,7 @@ const validateLoginInput = (req, res, next) => {
 };
 
 // ── POST /api/auth/signup ──
-router.post("/signup", async (req, res, next) => {
+router.post("/signup", signupLimiter, async (req, res, next) => {
   try {
     const { id, password, role, name, email, canteen } = req.body;
 

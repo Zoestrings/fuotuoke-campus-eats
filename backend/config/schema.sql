@@ -43,31 +43,37 @@ CREATE TABLE IF NOT EXISTS `menu_extras` (
 -- ── 4. ORDERS TABLE ──
 CREATE TABLE IF NOT EXISTS `orders` (
   `id` INT AUTO_INCREMENT PRIMARY KEY,
-  `total` DECIMAL(10, 2) NOT NULL,
+  `total` DECIMAL(10, 2) NOT NULL CHECK (`total` >= 0),
   `outletName` VARCHAR(255) NOT NULL,
   `outletId` VARCHAR(50) DEFAULT NULL,
   `type` ENUM('pickup', 'delivery') NOT NULL,
   `faculty` VARCHAR(255) DEFAULT NULL,
-  `status` ENUM('Received', 'Preparing', 'Ready', 'Completed', 'Cancelled') NOT NULL DEFAULT 'Received',
+  `status` ENUM('Received', 'Preparing', 'Ready', 'Out for Delivery', 'Completed', 'Cancelled') NOT NULL DEFAULT 'Received',
   `customerId` VARCHAR(255) NOT NULL,
   `customerName` VARCHAR(255) NOT NULL,
-  `paymentRef` VARCHAR(255) DEFAULT NULL,
+  `paymentRef` VARCHAR(300) DEFAULT NULL,
   `paymentStatus` ENUM('pending', 'paid', 'failed') NOT NULL DEFAULT 'pending',
   `time` VARCHAR(50) DEFAULT NULL,
   `assignedRiderId` VARCHAR(255) DEFAULT NULL,
   `assignedRiderName` VARCHAR(255) DEFAULT NULL,
-  `assignedRiderPhone` VARCHAR(255) DEFAULT NULL,
-  `deliveryProgress` INT DEFAULT 0,
+  `assignedRiderPhone` VARCHAR(50) DEFAULT NULL,
+  `deliveryProgress` INT DEFAULT 0 CHECK (`deliveryProgress` BETWEEN 0 AND 100),
   `riderLatitude` DECIMAL(10, 8) DEFAULT NULL,
   `riderLongitude` DECIMAL(11, 8) DEFAULT NULL,
   `latitude` DECIMAL(10, 8) DEFAULT NULL,
   `longitude` DECIMAL(11, 8) DEFAULT NULL,
   `formattedAddress` TEXT DEFAULT NULL,
   `deliveryNotes` TEXT DEFAULT NULL,
-  `rating` INT DEFAULT 0,
+  `rating` INT DEFAULT 0 CHECK (`rating` BETWEEN 0 AND 5),
   `review` TEXT,
   `createdAt` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  `updatedAt` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+  `updatedAt` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  INDEX `idx_orders_customerId` (`customerId`),
+  INDEX `idx_orders_status` (`status`),
+  INDEX `idx_orders_paymentStatus` (`paymentStatus`),
+  INDEX `idx_orders_assignedRider` (`assignedRiderId`),
+  INDEX `idx_orders_outletName` (`outletName`),
+  INDEX `idx_orders_createdAt` (`createdAt`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- ── 5. ORDER ITEMS TABLE ──
@@ -95,10 +101,12 @@ CREATE TABLE IF NOT EXISTS `order_item_extras` (
 CREATE TABLE IF NOT EXISTS `audit_logs` (
   `id` INT AUTO_INCREMENT PRIMARY KEY,
   `userId` VARCHAR(255) DEFAULT NULL,
-  `action` VARCHAR(255) NOT NULL,
+  `action` VARCHAR(500) NOT NULL,
   `details` TEXT,
   `ipAddress` VARCHAR(100) DEFAULT NULL,
-  `createdAt` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  `createdAt` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  INDEX `idx_audit_userId` (`userId`),
+  INDEX `idx_audit_createdAt` (`createdAt`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- ── 8. SETTINGS TABLE ──
@@ -117,10 +125,11 @@ CREATE TABLE IF NOT EXISTS `settings` (
 CREATE TABLE IF NOT EXISTS `refresh_tokens` (
   `id` INT AUTO_INCREMENT PRIMARY KEY,
   `userId` VARCHAR(255) NOT NULL,
-  `token` VARCHAR(500) NOT NULL,
+  `token` VARCHAR(700) NOT NULL,
   `expiresAt` DATETIME NOT NULL,
   `createdAt` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  UNIQUE KEY `idx_token` (`token`)
+  INDEX `idx_refresh_userId` (`userId`),
+  UNIQUE KEY `idx_token` (`token`(255))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Seed default settings

@@ -69,9 +69,12 @@ class MenuItem {
   }
 
   static async findOne(query) {
+    // Whitelist allowed filter fields to prevent SQL column injection
+    const ALLOWED = ["id", "name", "cat", "popular", "available"];
     let sql = "SELECT * FROM menu_items WHERE 1=1";
     const params = [];
-    for (const key in query) {
+    for (const key of Object.keys(query)) {
+      if (!ALLOWED.includes(key)) continue;
       sql += ` AND \`${key}\` = ?`;
       params.push(query[key]);
     }

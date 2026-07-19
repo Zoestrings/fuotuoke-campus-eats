@@ -12,10 +12,12 @@ const router = express.Router();
 // All routes require admin authentication
 router.use(authenticate, requireRole("admin"));
 
-// ── GET /api/audit — Get all audit logs ──
+// ── GET /api/audit — Get audit logs (paginated) ──
 router.get("/", async (req, res, next) => {
   try {
-    const logs = await AuditLog.find();
+    const limit = Math.min(500, parseInt(req.query.limit) || 100);
+    const offset = Math.max(0, parseInt(req.query.offset) || 0);
+    const logs = await AuditLog.find({ limit, offset });
     res.json(logs);
   } catch (error) {
     next(error);

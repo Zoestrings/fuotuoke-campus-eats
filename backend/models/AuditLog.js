@@ -18,9 +18,11 @@ class AuditLog {
   }
 
   static async find(query = {}) {
-    let sql = "SELECT * FROM audit_logs ORDER BY createdAt DESC LIMIT 100";
-    const [rows] = await pool.query(sql);
-    // Map column names to Mongoose schema naming convention for compatibility
+    const limit = Math.min(500, parseInt(query.limit) || 100);
+    const offset = parseInt(query.offset) || 0;
+    const sql = "SELECT * FROM audit_logs ORDER BY createdAt DESC LIMIT ? OFFSET ?";
+    const [rows] = await pool.query(sql, [limit, offset]);
+    // Map column names to schema naming convention
     return rows.map(r => ({
       id: r.id,
       _id: r.id,

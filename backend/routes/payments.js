@@ -199,9 +199,13 @@ router.post("/webhook", async (req, res, next) => {
   }
 });
 
-// ── GET /api/payments — Admin: get all payment records ──
+// ── GET /api/payments — Admin: get all payment records (paginated) ──
 router.get("/", authenticate, requireRole("admin"), async (req, res, next) => {
   try {
+    const page = Math.max(1, parseInt(req.query.page) || 1);
+    const limit = Math.min(100, Math.max(1, parseInt(req.query.limit) || 50));
+    const offset = (page - 1) * limit;
+
     const orders = await Order.find({});
 
     const payments = orders.map(o => ({
@@ -216,7 +220,18 @@ router.get("/", authenticate, requireRole("admin"), async (req, res, next) => {
       createdAt: o.createdAt
     }));
 
-    res.json(payments);
+    const total = payments.length;
+    const paginated = payments.slice(offset, offset + limit);
+
+    res.json({
+      data: paginated,
+      pagination: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit)
+      }
+    });
   } catch (error) {
     next(error);
   }

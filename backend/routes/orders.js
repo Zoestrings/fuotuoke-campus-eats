@@ -59,13 +59,19 @@ router.get("/:id", authenticate, async (req, res, next) => {
 // ── POST /api/orders — Customer: place new order ──
 router.post("/", authenticate, async (req, res, next) => {
   try {
-    const { items, total, outlet, type, faculty, latitude, longitude, formattedAddress, deliveryNotes } = req.body;
+    const { items, outlet, type, faculty, latitude, longitude, formattedAddress, deliveryNotes } = req.body;
 
-    if (!items || items.length === 0) {
+    if (!items || !Array.isArray(items) || items.length === 0) {
       return res.status(400).json({ error: "Your cart is empty." });
+    }
+    if (items.length > 20) {
+      return res.status(400).json({ error: "Too many items in cart. Maximum 20 unique items allowed." });
     }
     if (!outlet || !outlet.name) {
       return res.status(400).json({ error: "Please select a canteen." });
+    }
+    if (!type || !["pickup", "delivery"].includes(type)) {
+      return res.status(400).json({ error: "Invalid order type." });
     }
     if (type === "delivery") {
       if (!faculty) {
@@ -76,16 +82,44 @@ router.post("/", authenticate, async (req, res, next) => {
       }
     }
 
+    // ── Server-side total recalculation (prevent price manipulation) ──
+    let serverTotal = 0;
+    for (const item of items) {
+      const price = parseFloat(item.price);
+      const qty = parseInt(item.qty, 10);
+      if (isNaN(price) || price < 0 || isNaN(qty) || qty < 1) {
+        return res.status(400).json({ error: "Invalid item price or quantity." });
+      }
+      if (!item.name || typeof item.name !== "string") {
+        return res.status(400).json({ error: "Each item must have a name." });
+      }
+      serverTotal += price * qty;
+      // Add extras if present
+      if (Array.isArray(item.extras)) {
+        for (const extra of item.extras) {
+          const ePrice = parseFloat(extra.price);
+          if (!isNaN(ePrice) && ePrice >= 0) {
+            serverTotal += ePrice * qty;
+          }
+        }
+      }
+    }
+    serverTotal = Math.round(serverTotal * 100) / 100; // round to 2dp
+
+    if (serverTotal <= 0 || serverTotal > 500000) {
+      return res.status(400).json({ error: "Order total is out of valid range." });
+    }
+
     const order = await Order.create({
       items,
-      total,
+      total: serverTotal, // always use server-computed total
       outlet,
       type,
       faculty: type === "delivery" ? faculty : null,
       latitude: type === "delivery" ? latitude : null,
       longitude: type === "delivery" ? longitude : null,
-      formattedAddress: type === "delivery" ? formattedAddress : null,
-      deliveryNotes: type === "delivery" ? deliveryNotes : null,
+      formattedAddress: type === "delivery" ? formattedAddress?.trim() : null,
+      deliveryNotes: type === "delivery" ? (deliveryNotes || null) : null,
       status: "Received",
       customerId: req.user.userId,
       customerName: req.user.name,

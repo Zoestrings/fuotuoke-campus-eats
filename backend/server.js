@@ -6,6 +6,7 @@ dns.setServers(["8.8.8.8", "1.1.1.1"]);
 const express = require("express");
 const cors = require("cors");
 const helmet = require("helmet");
+const compression = require("compression");
 const rateLimit = require("express-rate-limit");
 const connectDB = require("./config/db");
 
@@ -25,18 +26,24 @@ const app = express();
 
 // Security config
 app.use(helmet());
+
+// Compress all responses (gzip/brotli) — reduces payload size significantly
+app.use(compression());
+
 app.use(cors({
   origin: process.env.CLIENT_URL || "http://localhost:3000",
   credentials: true
 }));
 
-// Rate limiting middleware
-const limiter = rateLimit({
+// Global rate limiter — covers all /api/* routes
+const globalLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // limit each IP to 100 requests per windowMs
-  message: { error: "Too many requests, please try again later." }
+  max: 200, // generous limit for general API usage
+  message: { error: "Too many requests, please try again later." },
+  standardHeaders: true,
+  legacyHeaders: false,
 });
-app.use("/api/auth", limiter);
+app.use("/api", globalLimiter);
 
 // Parse incoming request bodies
 // Raw body for Paystack webhook signature verification
