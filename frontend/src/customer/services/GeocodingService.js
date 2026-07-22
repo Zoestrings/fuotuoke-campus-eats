@@ -1,4 +1,4 @@
-import { getFlatLocations } from "../CampusLocations";
+import { getFlatLocations } from "../../CampusLocations";
 
 export class GeocodingService {
   /**

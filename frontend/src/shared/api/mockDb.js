@@ -24,8 +24,8 @@ let _resolvedHash = _H;
 const SEED_USERS = [
   { id: 1, userId: "ZOEHACKZ001", name: "Zoe Hackz Admin",          email: "admin@fuotuoke.edu.ng",    role: "admin",   status: "active", canteen: null,                  passwordHash: _H },
   { id: 2, userId: "FUO/22/CSI/18843", name: "Precious Daniel",      email: "precious.daniel@fuotuoke.edu.ng", role: "student", status: "active", canteen: null,          passwordHash: _H },
-  { id: 3, userId: "ZOEHACKZ001", name: "Zoe Hackz Rider",           email: "rider@fuotuoke.edu.ng",   role: "rider",   status: "active", canteen: null,                  passwordHash: _H },
-  { id: 4, userId: "ZOEHACKZ001", name: "Main Cafeteria Kitchen",    email: "canteen@fuotuoke.edu.ng", role: "kitchen", status: "active", canteen: "Main Cafeteria",      passwordHash: _H },
+  { id: 3, userId: "FUO-RIDER-001", name: "Zoe Hackz Rider",           email: "rider@fuotuoke.edu.ng",   role: "rider",   status: "active", canteen: null,                  passwordHash: _H },
+  { id: 4, userId: "MAIN-KITCHEN",  name: "Main Cafeteria Kitchen",    email: "canteen@fuotuoke.edu.ng", role: "kitchen", status: "active", canteen: "Main Cafeteria",      passwordHash: _H },
   { id: 5, userId: "SCIENCE-KITCHEN", name: "Science Cafeteria Kitchen", email: "science@fuotuoke.edu.ng", role: "kitchen", status: "active", canteen: "Science Cafeteria", passwordHash: _H },
   { id: 6, userId: "SUB-KITCHEN", name: "Student Union Buka Kitchen",email: "sub@fuotuoke.edu.ng",     role: "kitchen", status: "active", canteen: "Student Union Buka",  passwordHash: _H },
   { id: 7, userId: "ENG-KITCHEN", name: "Engineering Canteen Kitchen",email: "eng@fuotuoke.edu.ng",    role: "kitchen", status: "active", canteen: "Engineering Canteen", passwordHash: _H }
@@ -74,7 +74,7 @@ const setData = (key, val) => {
 
 // Initialize Mock Database
 export const initMockDb = () => {
-  const MOCK_DB_VERSION = "v6";
+  const MOCK_DB_VERSION = "v7"; // bumped: unique userIds for rider/kitchen
   const currentVersion = localStorage.getItem("fuo_mock_db_version");
   if (currentVersion !== MOCK_DB_VERSION) {
     localStorage.removeItem("fuo_mock_users");
