@@ -10,6 +10,7 @@ import NotificationsList from "../Notifications/NotificationsList";
 import { OUTLETS } from "../../../data";
 import { Btn, Badge } from "../../../shared/ui";
 import { useToast } from "../../../context/ToastContext";
+import { PaymentService } from "../../services/PaymentService";
 
 export default function CustomerDashboard({ onLogoutSuccess }) {
   const { showToast } = useToast();
@@ -46,28 +47,64 @@ export default function CustomerDashboard({ onLogoutSuccess }) {
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
 
-  // Payment modal state — kept in parent to prevent blinking on re-render
-  const [paymentMethod, setPaymentMethod] = useState("card");
+  // Payment modal state
+  const [paymentMethod, setPaymentMethod] = useState("paystack");
   const [cardNumber, setCardNumber]       = useState("");
   const [cardName, setCardName]           = useState("");
   const [cardExpiry, setCardExpiry]       = useState("");
   const [cardCVV, setCardCVV]             = useState("");
+  const [isProcessingPay, setIsProcessingPay] = useState(false);
 
-  const handlePaymentSubmit = () => {
+  const handlePaymentSubmit = async () => {
     if (paymentMethod === "card") {
       if (!cardNumber.trim() || !cardName.trim() || !cardExpiry.trim() || !cardCVV.trim()) {
         showToast("Please fill in all card details", "warning");
         return;
       }
     }
-    const res = confirmPayment(paymentMethod === "card" ? "Credit Card" : "Bank Transfer");
-    if (res && res.success) {
-      setCardNumber("");
-      setCardName("");
-      setCardExpiry("");
-      setCardCVV("");
-      setPaymentMethod("card");
-      showToast("Payment successful! Order placed successfully!", "success");
+
+    setIsProcessingPay(true);
+    try {
+      if (paymentMethod === "paystack") {
+        const payRes = await PaymentService.initializePayment(
+          pendingOrder?.id || Date.now(),
+          user?.email || "customer@fuotuoke.edu.ng",
+          pendingOrder?.total || 0
+        );
+
+        if (payRes.success && payRes.authorization_url) {
+          if (payRes.isMock) {
+            const res = await confirmPayment("Paystack Online", payRes.reference);
+            if (res && res.success) {
+              showToast("Paystack Payment Successful! Order placed.", "success");
+            }
+          } else {
+            window.location.href = payRes.authorization_url;
+            return;
+          }
+        } else {
+          showToast(payRes.error || "Failed to initialize Paystack payment.", "error");
+        }
+      } else {
+        const methodLabel = paymentMethod === "card"
+          ? "Credit Card"
+          : paymentMethod === "transfer"
+          ? "Bank Transfer"
+          : "Pay on Delivery";
+
+        const res = await confirmPayment(methodLabel);
+        if (res && res.success) {
+          setCardNumber("");
+          setCardName("");
+          setCardExpiry("");
+          setCardCVV("");
+          showToast(`Order placed successfully with ${methodLabel}!`, "success");
+        }
+      }
+    } catch (e) {
+      showToast(e.message || "Payment process failed.", "error");
+    } finally {
+      setIsProcessingPay(false);
     }
   };
 
@@ -415,16 +452,33 @@ export default function CustomerDashboard({ onLogoutSuccess }) {
             </div>
             <div className="pay-modal-body">
               <p className="pay-details-title">Payment Method</p>
-              <div className="pay-method-row">
+              <div className="pay-method-row" style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 8 }}>
+                <div onClick={() => setPaymentMethod("paystack")} className={`pay-method-card${paymentMethod === "paystack" ? (isStaff ? " active-gold" : " active-primary") : ""}`}>
+                  <i className="bi bi-shield-check pay-method-icon" style={{ color: "#10b981" }} />
+                  <span className="pay-method-label">Paystack Online</span>
+                </div>
                 <div onClick={() => setPaymentMethod("card")} className={`pay-method-card${paymentMethod === "card" ? (isStaff ? " active-gold" : " active-primary") : ""}`}>
                   <i className="bi bi-credit-card pay-method-icon" />
-                  <span className="pay-method-label">Credit Card</span>
+                  <span className="pay-method-label">Direct Card</span>
                 </div>
                 <div onClick={() => setPaymentMethod("transfer")} className={`pay-method-card${paymentMethod === "transfer" ? (isStaff ? " active-gold" : " active-primary") : ""}`}>
                   <i className="bi bi-bank pay-method-icon" />
                   <span className="pay-method-label">Bank Transfer</span>
                 </div>
+                <div onClick={() => setPaymentMethod("cash")} className={`pay-method-card${paymentMethod === "cash" ? (isStaff ? " active-gold" : " active-primary") : ""}`}>
+                  <i className="bi bi-cash-stack pay-method-icon" style={{ color: "var(--gold)" }} />
+                  <span className="pay-method-label">Pay on Delivery</span>
+                </div>
               </div>
+
+              {paymentMethod === "paystack" && (
+                <div className="pay-details-box" style={{ textAlign: "center" }}>
+                  <p className="pay-details-title">Paystack Gateway Checkout</p>
+                  <p style={{ fontSize: ".84rem", color: "var(--text-light)", margin: 0, lineHeight: 1.5 }}>
+                    Secure transaction via Paystack. Supports <strong>Card, USSD, and Bank Transfer</strong>.
+                  </p>
+                </div>
+              )}
 
               {paymentMethod === "card" && (
                 <div className="pay-details-box">
@@ -450,9 +504,20 @@ export default function CustomerDashboard({ onLogoutSuccess }) {
                 </div>
               )}
 
+              {paymentMethod === "cash" && (
+                <div className="pay-details-box" style={{ textAlign: "center" }}>
+                  <p className="pay-details-title">Pay on Delivery / Pickup</p>
+                  <p style={{ fontSize: ".84rem", color: "var(--text-light)", margin: 0, lineHeight: 1.5 }}>
+                    Pay cash directly to the rider upon delivery or at the canteen counter during pickup.
+                  </p>
+                </div>
+              )}
+
               <div style={{ display: "flex", gap: 10, marginTop: 20 }}>
-                <button onClick={cancelPayment} className="btn btn-outline" style={{ flex: 1, padding: "12px 0", fontSize: ".85rem" }}>Cancel</button>
-                <button onClick={handlePaymentSubmit} className={`btn btn-${isStaff ? "gold" : "primary"}`} style={{ flex: 1, padding: "12px 0", fontSize: ".85rem" }}>Confirm Payment</button>
+                <button onClick={cancelPayment} disabled={isProcessingPay} className="btn btn-outline" style={{ flex: 1, padding: "12px 0", fontSize: ".85rem" }}>Cancel</button>
+                <button onClick={handlePaymentSubmit} disabled={isProcessingPay} className={`btn btn-${isStaff ? "gold" : "primary"}`} style={{ flex: 1, padding: "12px 0", fontSize: ".85rem" }}>
+                  {isProcessingPay ? "Processing..." : "Confirm Payment"}
+                </button>
               </div>
             </div>
           </div>

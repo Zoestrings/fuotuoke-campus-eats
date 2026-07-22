@@ -132,22 +132,21 @@ export default function TrackOrder({ order, onClose, accent }) {
   const distKm = destInfo ? haversineKm(riderLat, riderLng, destInfo.lat, destInfo.lng) : 0;
   const etaMin = Math.max(1, Math.ceil((distKm / 25) * 60));
 
-  // Load Leaflet Script / CSS
+  // Load Leaflet Script / CSS or wait for window.L
   useEffect(() => {
     if (window.L) {
       setLeafletLoaded(true);
       return;
     }
 
-    const link = document.createElement("link");
-    link.rel = "stylesheet";
-    link.href = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css";
-    document.head.appendChild(link);
+    const checkInterval = setInterval(() => {
+      if (window.L) {
+        setLeafletLoaded(true);
+        clearInterval(checkInterval);
+      }
+    }, 200);
 
-    const script = document.createElement("script");
-    script.src = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js";
-    script.onload = () => setLeafletLoaded(true);
-    document.head.appendChild(script);
+    return () => clearInterval(checkInterval);
   }, []);
 
   const handleReviewSubmit = async () => {
@@ -186,6 +185,11 @@ export default function TrackOrder({ order, onClose, accent }) {
     if (!mapRef.current) {
       const mapElement = document.getElementById("leaflet-map");
       if (!mapElement) return;
+
+      // Clean up previous instance on element if any
+      if (mapElement._leaflet_id) {
+        mapElement._leaflet_id = null;
+      }
 
       const map = L.map("leaflet-map", {
         zoomControl: true,
@@ -237,12 +241,24 @@ export default function TrackOrder({ order, onClose, accent }) {
       // Fit bounds to show entire route
       const bounds = L.latLngBounds([canteenCoords, destCoords]);
       map.fitBounds(bounds, { padding: [30, 30] });
+
+      setTimeout(() => {
+        if (mapRef.current) mapRef.current.invalidateSize();
+      }, 150);
     } else {
       // Map already initialized, just update Rider Position marker!
       if (riderMarkerRef.current) {
         riderMarkerRef.current.setLatLng(riderCoords);
       }
     }
+
+    return () => {
+      if (mapRef.current) {
+        mapRef.current.remove();
+        mapRef.current = null;
+        riderMarkerRef.current = null;
+      }
+    };
   }, [leafletLoaded, liveOrder.riderLatitude, liveOrder.riderLongitude, status]);
 
   return (

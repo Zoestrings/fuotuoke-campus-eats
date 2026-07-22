@@ -89,7 +89,12 @@ export function setTokens(accessToken, refreshToken) {
 }
 
 const shouldUseMock = () => {
-  // If we are in production on Vercel and no production API URL is set, use mock fallback.
+  // Mock mode is only allowed in development builds.
+  const isDev = process.env.NODE_ENV === "development";
+  if (!isDev) return false;
+
+  // Within development, fall back to mock when no local API server is reachable
+  // (i.e. not running on localhost and no explicit API URL pointing to a real server).
   const isLocal = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
   const hasProdApi = process.env.REACT_APP_API_URL && !process.env.REACT_APP_API_URL.includes("localhost");
   return !isLocal && !hasProdApi;

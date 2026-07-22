@@ -53,15 +53,33 @@ export default function CartView({
   const [locLoading, setLocLoading] = useState(false);
   const [locError, setLocError] = useState("");
 
+  const [leafletReady, setLeafletReady] = useState(!!window.L);
+
+  // Poll until Leaflet script is loaded
+  useEffect(() => {
+    if (window.L) { setLeafletReady(true); return; }
+    const interval = setInterval(() => {
+      if (window.L) {
+        setLeafletReady(true);
+        clearInterval(interval);
+      }
+    }, 200);
+    return () => clearInterval(interval);
+  }, []);
+
   // ── Leaflet map initialisation ───────────────────────────
   useEffect(() => {
-    if (orderType !== "delivery") return;
+    if (orderType !== "delivery" || !leafletReady) return;
 
     const L = window.L;
-    if (!L) { console.warn("Leaflet not loaded."); return; }
+    if (!L) return;
 
     const container = document.getElementById("delivery-map");
-    if (!container || container._leaflet_id) return;
+    if (!container) return;
+
+    if (container._leaflet_id) {
+      container._leaflet_id = null;
+    }
 
     const initLat = lat || CANTEEN_COORDS.lat;
     const initLng = lng || CANTEEN_COORDS.lng;
@@ -105,6 +123,10 @@ export default function CartView({
     container.mapInstance = map;
     container.markerInstance = marker;
 
+    setTimeout(() => {
+      if (map) map.invalidateSize();
+    }, 150);
+
     return () => {
       if (container.mapInstance) {
         container.mapInstance.remove();
@@ -113,7 +135,7 @@ export default function CartView({
         delete container._leaflet_id;
       }
     };
-  }, [orderType]);
+  }, [orderType, leafletReady]);
 
   // ── Helper: pan map + move marker to new coords ──────────
   const updateMapView = (newLat, newLng, zoom = 17) => {
@@ -143,7 +165,7 @@ export default function CartView({
     fetchCurrentLocation();
   };
 
-  const fetchCurrentLocation = () => {
+  const fetchCurrentLocation = (highAccuracy = true) => {
     setLocLoading(true);
     setLocError("");
 
@@ -163,23 +185,32 @@ export default function CartView({
           const resolved = await GeocodingService.reverseGeocode(latitude, longitude);
           setAddress(resolved);
         } catch {
-          setLocError("Could not resolve address. Please type manually.");
+          setLocError("Could not resolve address. Please select a campus location.");
         } finally {
           setLocLoading(false);
         }
       },
       (error) => {
-        let msg = "Could not retrieve location. Enter address manually.";
+        // High accuracy timeout or unavailable -> fallback to standard accuracy
+        if (highAccuracy && (error.code === error.TIMEOUT || error.code === error.POSITION_UNAVAILABLE)) {
+          fetchCurrentLocation(false);
+          return;
+        }
+        let msg = "Could not retrieve location. Select a campus location above.";
         if (error.code === error.PERMISSION_DENIED)
-          msg = "Location permission denied. Enter your address manually.";
+          msg = "Location permission denied. Please pick a location from the list.";
         else if (error.code === error.POSITION_UNAVAILABLE)
           msg = "Your position is currently unavailable.";
         else if (error.code === error.TIMEOUT)
-          msg = "GPS request timed out. Try again.";
+          msg = "GPS request timed out. Please select a location from the list.";
         setLocError(msg);
         setLocLoading(false);
       },
-      { enableHighAccuracy: true, timeout: 8000 }
+      {
+        enableHighAccuracy: highAccuracy,
+        timeout: highAccuracy ? 6000 : 12000,
+        maximumAge: 10000
+      }
     );
   };
 

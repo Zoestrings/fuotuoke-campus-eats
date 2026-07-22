@@ -3,54 +3,78 @@
 // POST /api/auth/signup, /login, /refresh, /logout, GET /me
 // ================================================================
 
-const express = require("express");
-const jwt = require("jsonwebtoken");
-const rateLimit = require("express-rate-limit");
-const User = require("../models/User");
+const express    = require("express");
+const jwt        = require("jsonwebtoken");
+const rateLimit  = require("express-rate-limit");
+const User       = require("../models/User");
 const RefreshToken = require("../models/RefreshToken");
-const AuditLog = require("../models/AuditLog");
+const AuditLog   = require("../models/AuditLog");
 const { authenticate } = require("../middleware/auth");
 
 const router = express.Router();
 
-// Strict rate limiter for login attempts (max 5 requests per 15 minutes per IP)
+// ── JWT claim constants ──────────────────────────────────────────
+// Issuer and audience are validated on every verify() call.
+// This prevents tokens issued by one service from being accepted
+// by another service that shares the same secret.
+const JWT_ISSUER   = process.env.JWT_ISSUER   || "fuotuoke-campus-eats";
+const JWT_AUDIENCE = process.env.JWT_AUDIENCE || "fuo-app";
+
+// Strict rate limiter for login attempts (max 5 per 15 min per IP)
 const loginLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
+  windowMs: 15 * 60 * 1000,
   max: 5,
   message: { error: "Too many login attempts. Please try again after 15 minutes." },
   standardHeaders: true,
-  legacyHeaders: false,
+  legacyHeaders: false
 });
 
-// ── Helpers ──
+// ── Token helpers ────────────────────────────────────────────────
+
+/**
+ * Generate a short-lived access token.
+ * Includes issuer + audience claims to prevent cross-service token replay.
+ */
 const generateAccessToken = (user) => {
   return jwt.sign(
-    { 
-      id: user._id, 
-      userId: user.userId, 
-      role: user.role, 
+    {
+      id:     user._id,
+      userId: user.userId,
+      role:   user.role,
       status: user.status,
-      name: user.name,
-      email: user.email
+      name:   user.name,
+      email:  user.email
     },
     process.env.JWT_SECRET,
-    { expiresIn: process.env.JWT_EXPIRES_IN || "15m" }
+    {
+      expiresIn: process.env.JWT_EXPIRES_IN || "15m",
+      issuer:    JWT_ISSUER,
+      audience:  JWT_AUDIENCE
+    }
   );
 };
 
+/**
+ * Generate a long-lived refresh token.
+ * Uses a separate secret and includes a per-instance jti for rotation tracking.
+ */
 const generateRefreshToken = (user) => {
   const tokenInstanceId = require("crypto").randomBytes(16).toString("hex");
   return jwt.sign(
     { id: user._id, jti: tokenInstanceId },
     process.env.JWT_REFRESH_SECRET,
-    { expiresIn: process.env.JWT_REFRESH_EXPIRES_IN || "7d" }
+    {
+      expiresIn: process.env.JWT_REFRESH_EXPIRES_IN || "7d",
+      issuer:    JWT_ISSUER,
+      audience:  JWT_AUDIENCE
+    }
   );
 };
 
-// Parses a duration string like "7d", "24h", "30m" into milliseconds
+/** Parse duration strings like "7d", "24h", "30m" → milliseconds */
 const parseDurationMs = (str = "7d") => {
   const match = String(str).match(/^(\d+)([smhd])$/);
-  if (!match) return 7 * 24 * 60 * 60 * 1000; // default 7 days
+  if (!match) return 7 * 24 * 60 * 60 * 1000;
   const num = parseInt(match[1], 10);
   const unit = match[2];
   const multipliers = { s: 1000, m: 60000, h: 3600000, d: 86400000 };
@@ -68,7 +92,7 @@ const signupLimiter = rateLimit({
   max: 5,
   message: { error: "Too many accounts created from this IP. Please try again in an hour." },
   standardHeaders: true,
-  legacyHeaders: false,
+  legacyHeaders: false
 });
 
 // Input validation middleware for login
@@ -95,7 +119,7 @@ const validateLoginInput = (req, res, next) => {
   next();
 };
 
-// ── POST /api/auth/signup ──
+// ── POST /api/auth/signup ────────────────────────────────────────
 router.post("/signup", signupLimiter, async (req, res, next) => {
   try {
     const { id, password, role, name, email, canteen } = req.body;
@@ -104,41 +128,38 @@ router.post("/signup", signupLimiter, async (req, res, next) => {
       return res.status(400).json({ error: "All fields are required." });
     }
 
-    const cleanId = id.trim().toUpperCase();
+    const cleanId    = id.trim().toUpperCase();
     const cleanEmail = email.trim().toLowerCase();
 
-    // Check if user already exists
-    const existing = await User.findOne({ userId: cleanId, role });
+    // Check for existing account with this userId (globally unique)
+    const existing = await User.findOne({ userId: cleanId });
     if (existing) {
-      return res.status(409).json({ error: "An account with this ID and role already exists." });
+      return res.status(409).json({ error: "An account with this ID already exists." });
     }
 
-    // Create new user
     const user = await User.create({
-      userId: cleanId,
-      name: name.trim(),
-      email: cleanEmail,
+      userId:  cleanId,
+      name:    name.trim(),
+      email:   cleanEmail,
       password,
-      role: role || "student",
-      status: "active",
+      role:    role || "student",
+      status:  "active",
       canteen: role === "kitchen" ? canteen : null
     });
 
-    const accessToken = generateAccessToken(user);
+    const accessToken  = generateAccessToken(user);
     const refreshToken = generateRefreshToken(user);
 
-    // Save refresh token to DB for rotation
     await RefreshToken.create({
-      userId: user.userId,
-      token: refreshToken,
+      userId:    user.userId,
+      token:     refreshToken,
       expiresAt: getRefreshTokenExpiresAt()
     });
 
-    // Log the action
     await AuditLog.create({
-      user: user.userId,
+      user:   user.userId,
       action: `New ${user.role} account created`,
-      ip: req.ip
+      ip:     req.ip
     });
 
     res.status(201).json({
@@ -152,7 +173,7 @@ router.post("/signup", signupLimiter, async (req, res, next) => {
   }
 });
 
-// ── POST /api/auth/login ──
+// ── POST /api/auth/login ─────────────────────────────────────────
 router.post("/login", loginLimiter, validateLoginInput, async (req, res, next) => {
   try {
     const { id, password, role } = req.body;
@@ -169,27 +190,24 @@ router.post("/login", loginLimiter, validateLoginInput, async (req, res, next) =
       return res.status(403).json({ error: "This account has been suspended by Admin." });
     }
 
-    // Compare password with bcrypt
     const isMatch = await user.comparePassword(password);
     if (!isMatch) {
       return res.status(401).json({ error: "Invalid ID, password, or role." });
     }
 
-    const accessToken = generateAccessToken(user);
+    const accessToken  = generateAccessToken(user);
     const refreshToken = generateRefreshToken(user);
 
-    // Store refresh token in DB
     await RefreshToken.create({
-      userId: user.userId,
-      token: refreshToken,
+      userId:    user.userId,
+      token:     refreshToken,
       expiresAt: getRefreshTokenExpiresAt()
     });
 
-    // Log the action (no sensitive info logged)
     await AuditLog.create({
-      user: user.userId,
+      user:   user.userId,
       action: `${user.role} logged in`,
-      ip: req.ip
+      ip:     req.ip
     });
 
     res.json({
@@ -203,7 +221,7 @@ router.post("/login", loginLimiter, validateLoginInput, async (req, res, next) =
   }
 });
 
-// ── POST /api/auth/refresh ──
+// ── POST /api/auth/refresh ───────────────────────────────────────
 router.post("/refresh", async (req, res, next) => {
   try {
     const { refreshToken } = req.body;
@@ -213,7 +231,11 @@ router.post("/refresh", async (req, res, next) => {
 
     let decoded;
     try {
-      decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
+      // Verify issuer and audience on refresh tokens too
+      decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET, {
+        issuer:   JWT_ISSUER,
+        audience: JWT_AUDIENCE
+      });
     } catch (err) {
       return res.status(401).json({ error: "Invalid or expired refresh token." });
     }
@@ -221,21 +243,19 @@ router.post("/refresh", async (req, res, next) => {
     const existingToken = await RefreshToken.findOne({ token: refreshToken });
 
     if (!existingToken) {
-      // Token reuse detected! (token is cryptographically valid but not in DB)
-      // Revoke all tokens for this user family
+      // Token reuse detected — revoke all tokens for this user family
       const user = await User.findById(decoded.id);
       if (user) {
         await RefreshToken.deleteMany({ userId: user.userId });
         await AuditLog.create({
-          user: user.userId,
-          action: "Security Alert: Refresh token reuse detected. Revoking all tokens.",
-          ip: req.ip
+          user:   user.userId,
+          action: "Security Alert: Refresh token reuse detected. All tokens revoked.",
+          ip:     req.ip
         });
       }
       return res.status(401).json({ error: "Invalid or expired refresh token." });
     }
 
-    // Check expiration in database
     if (new Date(existingToken.expiresAt) < new Date()) {
       await RefreshToken.deleteOne({ token: refreshToken });
       return res.status(401).json({ error: "Invalid or expired refresh token." });
@@ -247,22 +267,20 @@ router.post("/refresh", async (req, res, next) => {
       return res.status(401).json({ error: "Invalid or expired refresh token." });
     }
 
-    // Rotate: delete the old one
+    // Rotate: delete old token, issue new pair
     await RefreshToken.deleteOne({ token: refreshToken });
 
-    // Generate new pair
-    const newAccessToken = generateAccessToken(user);
+    const newAccessToken  = generateAccessToken(user);
     const newRefreshToken = generateRefreshToken(user);
 
-    // Save new refresh token
     await RefreshToken.create({
-      userId: user.userId,
-      token: newRefreshToken,
+      userId:    user.userId,
+      token:     newRefreshToken,
       expiresAt: getRefreshTokenExpiresAt()
     });
 
     res.json({
-      accessToken: newAccessToken,
+      accessToken:  newAccessToken,
       refreshToken: newRefreshToken
     });
   } catch (error) {
@@ -270,7 +288,7 @@ router.post("/refresh", async (req, res, next) => {
   }
 });
 
-// ── POST /api/auth/logout ──
+// ── POST /api/auth/logout ────────────────────────────────────────
 router.post("/logout", async (req, res, next) => {
   try {
     const { refreshToken } = req.body;
@@ -283,7 +301,7 @@ router.post("/logout", async (req, res, next) => {
   }
 });
 
-// ── GET /api/auth/me ──
+// ── GET /api/auth/me ─────────────────────────────────────────────
 router.get("/me", authenticate, (req, res) => {
   res.json({ success: true, user: req.user.toJSON() });
 });

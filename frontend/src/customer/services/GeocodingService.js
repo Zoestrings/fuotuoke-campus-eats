@@ -1,31 +1,48 @@
-// ================================================================
-// FUOTUOKE Campus Eats — Customer Geocoding Service
-// ================================================================
+import { getFlatLocations } from "../CampusLocations";
 
 export class GeocodingService {
   /**
-   * Reverse geocodes coordinates (lat, lng) to a friendly street address.
-   * Uses OpenStreetMap Nominatim by default (completely free, no API keys).
-   *
-   * Switch to Google Maps later:
-   * Replace this method body with:
-   * ```javascript
-   * const apiKey = 'YOUR_GOOGLE_MAPS_API_KEY';
-   * const url = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${apiKey}`;
-   * const response = await fetch(url);
-   * const data = await response.json();
-   * if (data.status === 'OK' && data.results[0]) {
-   *   return data.results[0].formatted_address;
-   * }
-   * throw new Error(data.error_message || 'Geocoding failed');
-   * ```
+   * Finds the nearest FUO campus landmark to given coordinates.
+   */
+  static getNearestCampusLocation(lat, lng) {
+    const locations = getFlatLocations();
+    let closest = null;
+    let minDistance = Infinity;
+
+    locations.forEach(loc => {
+      const dist = this.calculateDistance(lat, lng, loc.lat, loc.lng);
+      if (dist < minDistance) {
+        minDistance = dist;
+        closest = loc;
+      }
+    });
+
+    return { location: closest, distanceKm: minDistance };
+  }
+
+  /**
+   * Reverse geocodes coordinates (lat, lng) to a friendly campus address.
+   * Uses local campus landmark matching first, with OpenStreetMap Nominatim enrichment.
    */
   static async reverseGeocode(lat, lng) {
+    const nearest = this.getNearestCampusLocation(lat, lng);
+    const distanceMeters = Math.round(nearest.distanceKm * 1000);
+
+    let campusLabel = "";
+    if (nearest.location && distanceMeters <= 400) {
+      campusLabel = distanceMeters < 50
+        ? `At ${nearest.location.name}`
+        : `Near ${nearest.location.name} (~${distanceMeters}m away)`;
+    }
+
     try {
       const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`;
 
       const response = await fetch(url, {
-        headers: { "Accept-Language": "en" }
+        headers: {
+          "Accept-Language": "en",
+          "User-Agent": "FUOTUOKECampusEats/1.0"
+        }
       });
 
       if (!response.ok) {
@@ -35,13 +52,14 @@ export class GeocodingService {
       const data = await response.json();
 
       if (data && data.display_name) {
-        return data.display_name;
+        const shortName = data.display_name.split(",").slice(0, 3).join(",").trim();
+        return campusLabel ? `${campusLabel} (${shortName})` : data.display_name;
       }
 
-      return `Location at (${lat.toFixed(5)}, ${lng.toFixed(5)})`;
+      return campusLabel || `FUO Campus spot (${lat.toFixed(5)}, ${lng.toFixed(5)})`;
     } catch (error) {
-      console.warn("Reverse geocoding failed, using coordinates fallback:", error);
-      return `Location at (${lat.toFixed(5)}, ${lng.toFixed(5)})`;
+      console.warn("Reverse geocoding API fallback:", error);
+      return campusLabel || `FUO Campus spot (${lat.toFixed(5)}, ${lng.toFixed(5)})`;
     }
   }
 

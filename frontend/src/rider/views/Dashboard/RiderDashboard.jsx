@@ -176,6 +176,8 @@ export default function RiderDashboard({ onLogoutSuccess }) {
       return;
     }
 
+    const watchOptions = { enableHighAccuracy: false, maximumAge: 5000, timeout: 15000 };
+
     const watchId = navigator.geolocation.watchPosition(
       async (position) => {
         const { latitude, longitude } = position.coords;
@@ -187,9 +189,9 @@ export default function RiderDashboard({ onLogoutSuccess }) {
         }
       },
       (error) => {
-        console.error("Geolocation error:", error);
+        console.warn("Rider geolocation warning:", error.message || error);
       },
-      { enableHighAccuracy: true, maximumAge: 10000, timeout: 5000 }
+      watchOptions
     );
 
     setActiveWatchers(prev => ({ ...prev, [orderId]: watchId }));
