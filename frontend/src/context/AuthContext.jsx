@@ -98,8 +98,8 @@ export const AuthProvider = ({ children }) => {
       }
     };
     loadProfile();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Run once on mount only
+  }, []); // Run once on mount only — exhaustive-deps intentionally suppressed
+
 
   const login = useCallback(async (id, password, role) => {
     try {
