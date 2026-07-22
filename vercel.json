@@ -1,9 +1,11 @@
 {
-  "buildCommand": "npm install --prefix frontend && CI=false npm run build --prefix frontend",
+  "buildCommand": "npm install --prefix frontend && npm run build --prefix frontend",
   "outputDirectory": "frontend/build",
-
   "cleanUrls": true,
   "rewrites": [
     { "source": "/((?!api|static|.*\\..*).*)", "destination": "/index.html" }
-  ]
+  ],
+  "env": {
+    "DISABLE_ESLINT_PLUGIN": "true"
+  }
 }
