@@ -2740,6 +2740,12 @@ a {
   color: rgba(255, 255, 255, .6);
 }
 
+.hp-menu-card-hover:hover {
+  transform: translateY(-5px);
+  border-color: rgba(232, 136, 26, 0.4) !important;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4), 0 0 20px rgba(232, 136, 26, 0.1);
+}
+
 /* ── Section Headers (shared) ─────────────────────── */
 .hp-section-header {
   text-align: center;
