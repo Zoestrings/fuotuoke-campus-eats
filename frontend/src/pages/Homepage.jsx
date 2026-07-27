@@ -1,7 +1,30 @@
-import React from "react";
-import { OUTLETS } from "../data";
+import React, { useState } from "react";
+import { MENU, OUTLETS } from "../data";
+
+const PLACEHOLDER_IMG = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='225' fill='%23222'%3E%3Crect width='400' height='225' fill='%231a1a1f'/%3E%3Ctext x='50%25' y='46%25' text-anchor='middle' fill='%23555' font-size='44' font-family='sans-serif'%3E🍲%3C/text%3E%3Ctext x='50%25' y='68%25' text-anchor='middle' fill='%23444' font-size='13' font-family='sans-serif'%3EFUOTUOKE Campus Eats%3C/text%3E%3C/svg%3E";
+
+const getRating = (id) => {
+  const ratings = [4.8, 4.5, 4.9, 4.6, 4.7, 4.9];
+  return ratings[id % ratings.length];
+};
+
+const getPrepTime = (id) => {
+  const times = ["15–20 min", "20–30 min", "10–15 min", "20–25 min", "15–25 min"];
+  return times[id % times.length];
+};
 
 export default function Homepage({ goTo }) {
+  const [selectedMeal, setSelectedMeal] = useState(null);
+  const [favs, setFavs] = useState({});
+
+  // Pick top 4-6 featured popular dishes to catch the user's eye
+  const featuredMeals = MENU.filter(m => m.popular).slice(0, 4);
+
+  const toggleFav = (e, id) => {
+    e.stopPropagation();
+    setFavs(prev => ({ ...prev, [id]: !prev[id] }));
+  };
+
   return (
     <div className="hp">
       {/* ── Navbar ─────────────────────────────────── */}
@@ -31,7 +54,6 @@ export default function Homepage({ goTo }) {
 
       {/* ── Hero Section ──────────────────────────── */}
       <section className="hp-hero">
-        {/* Decorative grid */}
         <div className="hp-hero-grid" aria-hidden="true" />
 
         <div className="hp-hero-inner">
@@ -69,6 +91,119 @@ export default function Homepage({ goTo }) {
             <span>{label}</span>
           </div>
         ))}
+      </section>
+
+      {/* ── Pure Food Cards Showcase (NO Browser/Filter Bar) ── */}
+      <section style={{ padding: "60px 5% 70px", background: "rgba(255, 255, 255, 0.02)", borderBottom: "1px solid rgba(255, 255, 255, .05)" }}>
+        <div className="hp-section-header" style={{ marginBottom: 32 }}>
+          <span className="hp-section-tag" style={{ color: "var(--gold)" }}>
+            <i className="bi bi-fire" style={{ marginRight: 4 }} /> Popular Dishes
+          </span>
+          <h2 className="hp-section-title">Campus Favorites</h2>
+          <p style={{ color: "rgba(255, 255, 255, 0.6)", fontSize: ".92rem", maxWidth: 520, margin: "8px auto 0" }}>
+            Freshly prepared meals from top FUOTUOKE canteens ready for pickup or delivery.
+          </p>
+        </div>
+
+        {/* 4-Card Jumia Food Style Grid */}
+        <div style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))",
+          gap: 20,
+          maxWidth: 1150,
+          margin: "0 auto"
+        }}>
+          {featuredMeals.map(item => {
+            const isFav = favs[item.id];
+            const canteenName = OUTLETS.find(o => o.id === item.outletId)?.name || "FUOTUOKE Cafeteria";
+            const rating = getRating(item.id);
+            const prepTime = getPrepTime(item.id);
+
+            return (
+              <div
+                key={item.id}
+                onClick={() => setSelectedMeal(item)}
+                className="jf-card"
+                style={{ cursor: "pointer" }}
+              >
+                {/* 16:9 Image */}
+                <div className="jf-card-img-container">
+                  {item.image ? (
+                    <img
+                      src={item.image}
+                      alt={item.name}
+                      className="jf-card-img"
+                      loading="lazy"
+                      onError={(e) => { e.target.onerror = null; e.target.src = PLACEHOLDER_IMG; }}
+                    />
+                  ) : (
+                    <div className="jf-card-img-placeholder">
+                      <span>{item.emoji || "🍲"}</span>
+                    </div>
+                  )}
+
+                  {/* Heart Icon */}
+                  <button
+                    className={`jf-heart-btn${isFav ? " active" : ""}`}
+                    onClick={(e) => toggleFav(e, item.id)}
+                  >
+                    <i className={`bi ${isFav ? "bi-heart-fill" : "bi-heart"}`} />
+                  </button>
+
+                  {/* Popular Badge */}
+                  <span className="jf-popular-badge">
+                    <i className="bi bi-fire" /> Popular
+                  </span>
+                </div>
+
+                {/* Card Body */}
+                <div className="jf-card-body">
+                  <div className="jf-title-price-row">
+                    <h4 className="jf-card-title">{item.name}</h4>
+                    <span className="jf-card-price" style={{ color: "var(--gold)" }}>
+                      ₦{item.price.toLocaleString()}
+                    </span>
+                  </div>
+
+                  <div className="jf-canteen-name">
+                    <i className="bi bi-shop" style={{ marginRight: 4 }} />
+                    {canteenName}
+                  </div>
+
+                  <div className="jf-meta-row">
+                    <span className="jf-meta-item jf-rating">
+                      <i className="bi bi-star-fill" style={{ color: "#f59e0b" }} />
+                      <strong>{rating.toFixed(1)}</strong>
+                    </span>
+                    <span className="jf-meta-dot">•</span>
+                    <span className="jf-meta-item">
+                      <i className="bi bi-clock-history" /> {prepTime}
+                    </span>
+                    <span className="jf-meta-dot">•</span>
+                    <span className="jf-meta-item">
+                      {item.cat}
+                    </span>
+                  </div>
+
+                  <p className="jf-card-desc">{item.desc}</p>
+
+                  <div className="jf-card-actions">
+                    <button
+                      className="jf-floating-add-btn staff"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedMeal(item);
+                      }}
+                      title="Add item"
+                    >
+                      <i className="bi bi-plus-lg" />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
       </section>
 
       {/* ── User Type Cards ───────────────────────── */}
@@ -169,6 +304,112 @@ export default function Homepage({ goTo }) {
           </div>
         </div>
       </section>
+
+      {/* ── Guest Login Prompt Modal ───────────────── */}
+      {selectedMeal && (
+        <div style={{
+          position: "fixed",
+          inset: 0,
+          background: "rgba(0, 0, 0, 0.75)",
+          backdropFilter: "blur(8px)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          zIndex: 3000,
+          padding: 20
+        }}>
+          <div className="animate-scale-in" style={{
+            background: "#18181b",
+            border: "1px solid rgba(255, 255, 255, 0.15)",
+            borderRadius: 20,
+            maxWidth: 420,
+            width: "100%",
+            padding: "26px 28px",
+            boxShadow: "0 20px 40px rgba(0,0,0,0.6)",
+            color: "#fff"
+          }}>
+            <div style={{ textAlign: "center", marginBottom: 20 }}>
+              <div style={{
+                width: 54,
+                height: 54,
+                borderRadius: "50%",
+                background: "rgba(232, 136, 26, 0.15)",
+                color: "var(--gold)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontSize: "1.5rem",
+                margin: "0 auto 12px",
+                border: "1px solid rgba(232, 136, 26, 0.3)"
+              }}>
+                <i className="bi bi-lock-fill" />
+              </div>
+              <h3 style={{ fontSize: "1.25rem", fontWeight: 800, marginBottom: 6 }}>
+                Sign In to Order
+              </h3>
+              <p style={{ color: "rgba(255, 255, 255, 0.65)", fontSize: ".86rem", lineHeight: 1.5, margin: 0 }}>
+                Log in or create a FUOTUOKE Campus Eats account to customize options and place your order.
+              </p>
+            </div>
+
+            {/* Meal summary */}
+            <div style={{
+              background: "rgba(255, 255, 255, 0.05)",
+              border: "1px solid rgba(255, 255, 255, 0.1)",
+              borderRadius: 12,
+              padding: "12px 14px",
+              display: "flex",
+              alignItems: "center",
+              gap: 12,
+              marginBottom: 22
+            }}>
+              {selectedMeal.image ? (
+                <img src={selectedMeal.image} alt={selectedMeal.name} style={{ width: 44, height: 44, borderRadius: 8, objectFit: "cover" }} />
+              ) : (
+                <span style={{ fontSize: "1.8rem" }}>{selectedMeal.emoji || "🍲"}</span>
+              )}
+              <div style={{ flex: 1, overflow: "hidden" }}>
+                <div style={{ fontWeight: 700, fontSize: ".9rem", color: "#fff", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                  {selectedMeal.name}
+                </div>
+                <div style={{ color: "var(--gold)", fontWeight: 800, fontSize: ".86rem" }}>
+                  ₦{selectedMeal.price.toLocaleString()}
+                </div>
+              </div>
+            </div>
+
+            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+              <button
+                className="btn btn-gold"
+                onClick={() => goTo("login")}
+                style={{ padding: "12px 0", width: "100%", fontSize: ".9rem", justifyContent: "center" }}
+              >
+                <i className="bi bi-box-arrow-in-right" /> Log In
+              </button>
+              <button
+                className="btn btn-ghost"
+                onClick={() => goTo("signup")}
+                style={{ padding: "12px 0", width: "100%", fontSize: ".9rem", justifyContent: "center", border: "1px solid rgba(255, 255, 255, 0.2)" }}
+              >
+                <i className="bi bi-person-plus" /> Create Account
+              </button>
+              <button
+                onClick={() => setSelectedMeal(null)}
+                style={{
+                  background: "transparent",
+                  border: "none",
+                  color: "rgba(255, 255, 255, 0.45)",
+                  fontSize: ".82rem",
+                  marginTop: 4,
+                  cursor: "pointer"
+                }}
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ── Footer ────────────────────────────────── */}
       <footer className="hp-footer">

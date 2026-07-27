@@ -2405,6 +2405,49 @@ a {
   text-align: center;
 }
 
+/* ── Homepage Specific Jumia Food Card Theme Blend ─────────── */
+.hp .jf-card {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+}
+
+.hp .jf-card:hover {
+  transform: translateY(-5px);
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(232, 136, 26, 0.5);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5), 0 0 24px rgba(232, 136, 26, 0.2);
+}
+
+.hp .jf-card-title {
+  color: #ffffff;
+}
+
+.hp .jf-canteen-name {
+  color: rgba(255, 255, 255, 0.65);
+}
+
+.hp .jf-meta-row {
+  color: rgba(255, 255, 255, 0.65);
+}
+
+.hp .jf-meta-item.jf-rating {
+  color: #ffffff;
+}
+
+.hp .jf-meta-dot {
+  color: rgba(255, 255, 255, 0.35);
+}
+
+.hp .jf-card-desc {
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.hp .jf-card-price {
+  color: var(--gold);
+}
+
 /* Qty controls */
 .mn-qty-controls {
   display: flex;
