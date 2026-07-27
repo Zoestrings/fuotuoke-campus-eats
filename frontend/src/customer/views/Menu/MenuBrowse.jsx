@@ -1,6 +1,5 @@
 import React, { useState, useMemo, memo, useCallback } from "react";
 import { OUTLETS } from "../../../data";
-import { Btn } from "../../../shared/ui";
 
 const CATS = ["All", "Rice", "Soup", "Mains", "Snacks", "Drinks"];
 
@@ -13,42 +12,38 @@ const CAT_ICONS = {
   Drinks: "bi-cup-straw",
 };
 
-/* ── Placeholder for broken / missing images ─────────── */
-const PLACEHOLDER_IMG = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='300' fill='%23222'%3E%3Crect width='400' height='300' rx='0' fill='%231a1a1f'/%3E%3Ctext x='50%25' y='48%25' text-anchor='middle' fill='%23555' font-size='48' font-family='sans-serif'%3E🍽️%3C/text%3E%3Ctext x='50%25' y='66%25' text-anchor='middle' fill='%23444' font-size='13' font-family='sans-serif'%3ENo Image%3C/text%3E%3C/svg%3E";
+const CAT_EMOJIS = {
+  All: "🍽️",
+  Rice: "🍚",
+  Soup: "🍲",
+  Mains: "🥘",
+  Snacks: "🥨",
+  Drinks: "🥤",
+};
 
-/* ── Generate a stable "rating" from item id ─────────── */
+/* ── Placeholder for missing / broken images ─────────── */
+const PLACEHOLDER_IMG = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='225' fill='%23222'%3E%3Crect width='400' height='225' fill='%231a1a1f'/%3E%3Ctext x='50%25' y='46%25' text-anchor='middle' fill='%23555' font-size='44' font-family='sans-serif'%3E🍲%3C/text%3E%3Ctext x='50%25' y='68%25' text-anchor='middle' fill='%23444' font-size='13' font-family='sans-serif'%3EFUOTUOKE Campus Eats%3C/text%3E%3C/svg%3E";
+
+/* ── Generate stable "rating" and prep time ───────────── */
 const getRating = (id) => {
-  const ratings = [4.2, 4.5, 4.8, 4.0, 4.3, 4.7, 4.1, 4.6, 4.9, 4.4];
+  const ratings = [4.8, 4.5, 4.9, 4.6, 4.7, 4.4, 4.8, 4.7, 4.9, 4.5];
   return ratings[id % ratings.length];
 };
 
-const getReviewCount = (id) => {
-  const counts = [24, 57, 89, 12, 45, 72, 33, 66, 91, 18];
-  return counts[id % counts.length];
+const getPrepTime = (id) => {
+  const times = ["15–20 min", "20–30 min", "10–15 min", "20–25 min", "15–25 min"];
+  return times[id % times.length];
 };
 
-/* ── Star Rating Component ───────────────────────────── */
-const StarRating = ({ rating }) => {
-  const fullStars = Math.floor(rating);
-  const hasHalf = rating - fullStars >= 0.3;
-  return (
-    <span className="mn-stars">
-      {[...Array(5)].map((_, i) => (
-        <i
-          key={i}
-          className={`bi ${i < fullStars ? "bi-star-fill" : i === fullStars && hasHalf ? "bi-star-half" : "bi-star"}`}
-        />
-      ))}
-      <span className="mn-rating-num">{rating.toFixed(1)}</span>
-    </span>
-  );
-};
-
-/* ── Menu Card Component ─────────────────────────────── */
+/* ════════════════════════════════════════════════════════
+   Jumia Food Style Menu Card Component
+   ════════════════════════════════════════════════════════ */
 const MenuCard = memo(({ item, isStaff, qty, onCustomize, onAdd, onRemove }) => {
+  const [isFav, setIsFav] = useState(false);
   const rating = getRating(item.id);
-  const reviews = getReviewCount(item.id);
-  const isAvailable = true; // All items available by default
+  const prepTime = getPrepTime(item.id);
+  const catEmoji = CAT_EMOJIS[item.cat] || "🍲";
+  const canteenName = OUTLETS.find((o) => o.id === item.outletId)?.name || "FUOTUOKE Cafeteria";
 
   const handleImgError = useCallback((e) => {
     e.target.onerror = null;
@@ -58,94 +53,110 @@ const MenuCard = memo(({ item, isStaff, qty, onCustomize, onAdd, onRemove }) => 
   return (
     <div
       onClick={() => onCustomize(item)}
-      className={`mn-card${isStaff ? " staff" : ""}`}
+      className={`jf-card${isStaff ? " staff" : ""}`}
     >
-      {/* Image area */}
-      <div className="mn-card-img-wrap">
+      {/* ── 16:9 Food Image Header ───────────────────────── */}
+      <div className="jf-card-img-container">
         {item.image ? (
           <img
             src={item.image}
             alt={item.name}
-            className="mn-card-img"
+            className="jf-card-img"
             loading="lazy"
             onError={handleImgError}
           />
-        ) : item.emoji ? (
-          <div className="mn-card-img-placeholder">
-            <span className="mn-card-emoji">{item.emoji}</span>
-          </div>
         ) : (
-          <img
-            src={PLACEHOLDER_IMG}
-            alt={item.name}
-            className="mn-card-img"
-          />
+          <div className="jf-card-img-placeholder">
+            <span>{item.emoji || catEmoji}</span>
+          </div>
         )}
 
-        {/* Category badge */}
-        <span className="mn-card-cat-badge">
-          <i className={`bi ${CAT_ICONS[item.cat] || "bi-tag"}`} /> {item.cat}
-        </span>
+        {/* Favorite (Heart) Top-Left */}
+        <button
+          className={`jf-heart-btn${isFav ? " active" : ""}`}
+          onClick={(e) => {
+            e.stopPropagation();
+            setIsFav(!isFav);
+          }}
+          title={isFav ? "Remove from favorites" : "Save to favorites"}
+        >
+          <i className={`bi ${isFav ? "bi-heart-fill" : "bi-heart"}`} />
+        </button>
 
-        {/* Popular badge */}
+        {/* Popular Badge Top-Right */}
         {item.popular && (
-          <span className={`mn-card-popular-badge${isStaff ? " staff" : ""}`}>
+          <span className={`jf-popular-badge${isStaff ? " staff" : ""}`}>
             <i className="bi bi-fire" /> Popular
-          </span>
-        )}
-
-        {/* Availability */}
-        {isAvailable && (
-          <span className="mn-card-avail-badge">
-            <span className="mn-avail-dot" /> Available
           </span>
         )}
       </div>
 
-      {/* Body */}
-      <div className="mn-card-body">
-        <h4 className="mn-card-title">{item.name}</h4>
-        <p className="mn-card-desc">{item.desc}</p>
-
-        {/* Rating */}
-        <div className="mn-card-rating-row">
-          <StarRating rating={rating} />
-          <span className="mn-review-count">({reviews})</span>
-        </div>
-
-        {/* Extras hint */}
-        {item.extras && item.extras.length > 0 && (
-          <div className="mn-card-extras-hint">
-            <i className="bi bi-plus-circle" />
-            {item.extras.length} add-on{item.extras.length > 1 ? "s" : ""} available
-          </div>
-        )}
-
-        {/* Price + Cart Controls */}
-        <div className="mn-card-footer" onClick={(e) => e.stopPropagation()}>
-          <span className={`mn-card-price${isStaff ? " staff" : ""}`}>
+      {/* ── Card Body Content ────────────────────────────── */}
+      <div className="jf-card-body">
+        {/* Title & Price (Same Line) */}
+        <div className="jf-title-price-row">
+          <h4 className="jf-card-title">{item.name}</h4>
+          <span className={`jf-card-price${isStaff ? " staff" : ""}`}>
             ₦{item.price.toLocaleString()}
           </span>
+        </div>
 
+        {/* Restaurant / Canteen Name */}
+        <div className="jf-canteen-name">
+          <i className="bi bi-shop" style={{ marginRight: 4 }} />
+          {canteenName}
+        </div>
+
+        {/* Rating, Prep Time, Category Row */}
+        <div className="jf-meta-row">
+          <span className="jf-meta-item jf-rating">
+            <i className="bi bi-star-fill" style={{ color: "#f59e0b" }} />
+            <strong>{rating.toFixed(1)}</strong>
+          </span>
+          <span className="jf-meta-dot">•</span>
+          <span className="jf-meta-item">
+            <i className="bi bi-clock-history" /> {prepTime}
+          </span>
+          <span className="jf-meta-dot">•</span>
+          <span className="jf-meta-item">
+            <span>{catEmoji}</span> {item.cat}
+          </span>
+        </div>
+
+        {/* Description (2 lines max with ellipsis) */}
+        <p className="jf-card-desc">{item.desc}</p>
+
+        {/* Floating (+) Add Button / Qty Control (Bottom-Right) */}
+        <div className="jf-card-actions" onClick={(e) => e.stopPropagation()}>
           {qty === 0 ? (
             <button
-              className={`mn-add-btn${isStaff ? " staff" : ""}`}
-              onClick={(e) => { e.stopPropagation(); onCustomize(item); }}
+              className={`jf-floating-add-btn${isStaff ? " staff" : ""}`}
+              onClick={(e) => {
+                e.stopPropagation();
+                onCustomize(item);
+              }}
+              title="Add to cart"
             >
-              <i className="bi bi-cart-plus" /> Add
+              <i className="bi bi-plus-lg" />
             </button>
           ) : (
-            <div className="mn-qty-controls">
+            <div className="jf-qty-pill">
               <button
-                className={`mn-qty-btn${isStaff ? " staff" : ""}`}
-                onClick={(e) => { e.stopPropagation(); onRemove(item.id); }}
+                className={`jf-qty-btn${isStaff ? " staff" : ""}`}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onRemove(item.id);
+                }}
               >
                 <i className="bi bi-dash" />
               </button>
-              <span className="mn-qty-num">{qty}</span>
+              <span className="jf-qty-val">{qty}</span>
               <button
-                className={`mn-qty-btn mn-qty-btn-fill${isStaff ? " staff" : ""}`}
-                onClick={(e) => { e.stopPropagation(); onAdd(item); }}
+                className={`jf-qty-btn jf-qty-btn-add${isStaff ? " staff" : ""}`}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onAdd(item);
+                }}
               >
                 <i className="bi bi-plus" />
               </button>
@@ -320,7 +331,10 @@ function MenuBrowse({
                     </div>
                     <div className="mn-pop-info">
                       <h4 className="mn-pop-name">{item.name}</h4>
-                      <StarRating rating={getRating(item.id)} />
+                      <div className="jf-meta-item jf-rating" style={{ fontSize: ".72rem", marginBottom: 4 }}>
+                        <i className="bi bi-star-fill" style={{ color: "#f59e0b" }} />
+                        <strong>{getRating(item.id).toFixed(1)}</strong>
+                      </div>
                       <div className="mn-pop-footer" onClick={(e) => e.stopPropagation()}>
                         <span className={`mn-pop-price${isStaff ? " staff" : ""}`}>₦{item.price.toLocaleString()}</span>
                         {qty === 0 ? (

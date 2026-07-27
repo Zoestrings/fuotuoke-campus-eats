@@ -2102,80 +2102,99 @@ a {
   gap: 18px;
 }
 
-/* ── Menu Card ─────────────────────────────────────────── */
-.mn-card {
+/* ═══════════════════════════════════════════════════════════
+   JUMIA FOOD STYLE MENU CARDS (jf-* prefix)
+   ═══════════════════════════════════════════════════════════ */
+
+.jf-card {
   background: var(--bg-card);
-  border-radius: 16px;
+  border-radius: 20px;
   border: 1px solid var(--border);
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.05);
   cursor: pointer;
-  transition: all 0.25s ease;
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease, border-color 0.25s ease;
   overflow: hidden;
   display: flex;
   flex-direction: column;
-}
-
-.mn-card:hover {
-  transform: translateY(-3px);
-  border-color: var(--primary);
-  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.08);
-}
-
-.mn-card.staff:hover {
-  border-color: var(--gold);
-  box-shadow: 0 12px 28px rgba(232, 136, 26, 0.08);
-}
-
-/* Image wrap */
-.mn-card-img-wrap {
   position: relative;
-  height: 180px;
-  overflow: hidden;
-  background: linear-gradient(135deg, #f5f0ea 0%, #ebe4d8 100%);
 }
 
-.mn-card-img {
+.jf-card:hover {
+  transform: translateY(-5px);
+  border-color: var(--primary);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
+}
+
+.jf-card.staff:hover {
+  border-color: var(--gold);
+  box-shadow: 0 12px 32px rgba(232, 136, 26, 0.12);
+}
+
+/* 16:9 Image aspect ratio */
+.jf-card-img-container {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  background: linear-gradient(135deg, #1e1e24 0%, #2a2a32 100%);
+  border-radius: 18px 18px 0 0;
+}
+
+.jf-card-img {
   width: 100%;
   height: 100%;
   object-fit: cover;
   transition: transform 0.4s ease;
 }
 
-.mn-card:hover .mn-card-img {
-  transform: scale(1.05);
+.jf-card:hover .jf-card-img {
+  transform: scale(1.06);
 }
 
-.mn-card-img-placeholder {
+.jf-card-img-placeholder {
   width: 100%;
   height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #f5f0ea 0%, #ebe4d8 100%);
-}
-
-.mn-card-emoji {
   font-size: 3rem;
+  background: linear-gradient(135deg, #1a1a20 0%, #262630 100%);
 }
 
-/* Category badge on image */
-.mn-card-cat-badge {
+/* Heart Icon (Top-Left) */
+.jf-heart-btn {
   position: absolute;
-  bottom: 10px;
+  top: 10px;
   left: 10px;
-  background: rgba(0, 0, 0, 0.6);
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.45);
   backdrop-filter: blur(8px);
-  color: rgba(255, 255, 255, 0.9);
-  font-size: 0.7rem;
-  font-weight: 700;
-  padding: 4px 10px;
-  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #fff;
   display: flex;
   align-items: center;
-  gap: 4px;
+  justify-content: center;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  z-index: 2;
 }
 
-/* Popular badge on image */
-.mn-card-popular-badge {
+.jf-heart-btn:hover {
+  transform: scale(1.12);
+  background: rgba(0, 0, 0, 0.65);
+}
+
+.jf-heart-btn.active {
+  background: rgba(239, 68, 68, 0.9);
+  color: #fff;
+  border-color: rgba(239, 68, 68, 0.4);
+}
+
+/* Popular Badge (Top-Right) */
+.jf-popular-badge {
   position: absolute;
   top: 10px;
   right: 10px;
@@ -2184,169 +2203,206 @@ a {
   font-size: 0.68rem;
   font-weight: 800;
   padding: 4px 10px;
-  border-radius: 8px;
+  border-radius: 20px;
   display: flex;
   align-items: center;
   gap: 4px;
   text-transform: uppercase;
-  letter-spacing: 0.3px;
+  letter-spacing: 0.4px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  z-index: 2;
 }
 
-.mn-card-popular-badge.staff {
-  background: linear-gradient(135deg, var(--gold) 0%, #c27803 100%);
+.jf-popular-badge.staff {
+  background: linear-gradient(135deg, var(--gold) 0%, #d97706 100%);
 }
 
-/* Availability badge */
-.mn-card-avail-badge {
-  position: absolute;
-  top: 10px;
-  left: 10px;
-  background: rgba(16, 185, 129, 0.15);
-  backdrop-filter: blur(8px);
-  color: #10b981;
-  font-size: 0.66rem;
-  font-weight: 700;
-  padding: 4px 10px;
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  border: 1px solid rgba(16, 185, 129, 0.2);
-}
-
-.mn-avail-dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: #10b981;
-  animation: mn-pulse 2s infinite;
-}
-
-@keyframes mn-pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.4; }
-}
-
-/* Card body */
-.mn-card-body {
+/* Card Body */
+.jf-card-body {
   padding: 16px;
   display: flex;
   flex-direction: column;
   flex: 1;
+  position: relative;
 }
 
-.mn-card-title {
-  font-size: 0.95rem;
-  font-weight: 700;
-  color: var(--text-dark);
-  margin-bottom: 6px;
-  line-height: 1.3;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-.mn-card-desc {
-  font-size: 0.8rem;
-  color: var(--text-light);
-  line-height: 1.5;
-  margin-bottom: 10px;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-/* Rating */
-.mn-card-rating-row {
+/* Title & Price Row */
+.jf-title-price-row {
   display: flex;
-  align-items: center;
-  gap: 4px;
-  margin-bottom: 8px;
-}
-
-.mn-stars {
-  display: inline-flex;
-  align-items: center;
-  gap: 1px;
-}
-
-.mn-stars i {
-  font-size: 0.7rem;
-  color: #f59e0b;
-}
-
-.mn-rating-num {
-  font-size: 0.75rem;
-  font-weight: 700;
-  color: var(--text-dark);
-  margin-left: 4px;
-}
-
-.mn-review-count {
-  font-size: 0.72rem;
-  color: var(--text-light);
-}
-
-/* Extras hint */
-.mn-card-extras-hint {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 0.74rem;
-  color: var(--primary);
-  font-weight: 600;
-  margin-bottom: 12px;
-}
-
-/* Footer */
-.mn-card-footer {
-  display: flex;
-  align-items: center;
   justify-content: space-between;
-  border-top: 1px solid var(--border);
-  padding-top: 12px;
-  margin-top: auto;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 3px;
 }
 
-.mn-card-price {
-  font-weight: 800;
+.jf-card-title {
+  font-family: var(--font-display);
   font-size: 1.05rem;
-  color: var(--primary);
+  font-weight: 800;
+  color: var(--text-dark);
+  line-height: 1.25;
+  margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
-.mn-card-price.staff {
+.jf-card-price {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  font-weight: 900;
+  color: var(--primary);
+  white-space: nowrap;
+}
+
+.jf-card-price.staff {
   color: var(--gold);
 }
 
-/* Add button */
-.mn-add-btn {
+/* Restaurant / Canteen Name */
+.jf-canteen-name {
+  font-size: 0.78rem;
+  color: var(--text-light);
+  font-weight: 500;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+}
+
+/* Meta Row (Rating, Prep Time, Category) */
+.jf-meta-row {
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 8px 16px;
-  border-radius: 10px;
+  font-size: 0.76rem;
+  color: var(--text-light);
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+
+.jf-meta-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-weight: 600;
+}
+
+.jf-meta-item.jf-rating {
+  color: var(--text-dark);
+}
+
+.jf-meta-dot {
+  color: rgba(150, 150, 150, 0.4);
+  font-size: 0.7rem;
+}
+
+/* Description (2 lines max with ellipsis) */
+.jf-card-desc {
+  font-size: 0.78rem;
+  color: var(--text-light);
+  line-height: 1.45;
+  margin-bottom: 14px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Bottom Actions container */
+.jf-card-actions {
+  margin-top: auto;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  padding-top: 4px;
+}
+
+/* Floating (+) Add Button */
+.jf-floating-add-btn {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
   border: none;
   background: var(--primary);
   color: #fff;
-  font-size: 0.82rem;
-  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(26, 92, 54, 0.3);
+  transition: transform 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.jf-floating-add-btn:hover {
+  transform: scale(1.1);
+  box-shadow: 0 6px 18px rgba(26, 92, 54, 0.45);
+}
+
+.jf-floating-add-btn:active {
+  transform: scale(0.95);
+}
+
+.jf-floating-add-btn.staff {
+  background: var(--gold);
+  box-shadow: 0 4px 14px rgba(232, 136, 26, 0.3);
+}
+
+.jf-floating-add-btn.staff:hover {
+  box-shadow: 0 6px 18px rgba(232, 136, 26, 0.45);
+}
+
+/* Qty pill controls when item is added */
+.jf-qty-pill {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--bg-main);
+  border: 1.5px solid var(--primary);
+  border-radius: 25px;
+  padding: 3px 6px;
+}
+
+.jf-card.staff .jf-qty-pill {
+  border-color: var(--gold);
+}
+
+.jf-qty-btn {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: none;
+  background: transparent;
+  color: var(--primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
   cursor: pointer;
   transition: all 0.15s ease;
 }
 
-.mn-add-btn:hover {
-  transform: scale(1.04);
-  box-shadow: 0 4px 12px rgba(26, 92, 54, 0.25);
+.jf-qty-btn.staff {
+  color: var(--gold);
 }
 
-.mn-add-btn.staff {
+.jf-qty-btn-add {
+  background: var(--primary);
+  color: #fff;
+}
+
+.jf-qty-btn-add.staff {
   background: var(--gold);
+  color: #fff;
 }
 
-.mn-add-btn.staff:hover {
-  box-shadow: 0 4px 12px rgba(232, 136, 26, 0.25);
+.jf-qty-val {
+  font-weight: 800;
+  font-size: 0.85rem;
+  color: var(--text-dark);
+  min-width: 16px;
+  text-align: center;
 }
 
 /* Qty controls */
