@@ -482,6 +482,30 @@ export const MENU = [
     extras: [
       { name: "Protein Boost", price: 1500 }
     ]
+  },
+  {
+    id: 39,
+    name: "Fresh Fruit Juice",
+    price: 1500,
+    cat: "Drinks",
+    emoji: "",
+    image: "https://images.unsplash.com/photo-1600271886742-f049cd451bba?auto=format&fit=crop&w=600&q=80",
+    desc: "Freshly squeezed orange, pineapple, or watermelon juice",
+    popular: true,
+    extras: [
+      { name: "Large Cup", price: 2000 }
+    ]
+  },
+  {
+    id: 40,
+    name: "Iced Tea (Lemon/Peach)",
+    price: 700,
+    cat: "Drinks",
+    emoji: "",
+    image: "https://images.unsplash.com/photo-1556679343-c7306c1976bc?auto=format&fit=crop&w=600&q=80",
+    desc: "Refreshing iced tea with a choice of lemon or peach flavour",
+    popular: false,
+    extras: []
   }
 ];
 
