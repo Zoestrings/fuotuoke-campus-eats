@@ -90,7 +90,7 @@ export default function CustomerDashboard({ onLogoutSuccess }) {
           ? "Credit Card"
           : paymentMethod === "transfer"
           ? "Bank Transfer"
-          : "Pay on Delivery";
+          : "Cash";
 
         const res = await confirmPayment(methodLabel);
         if (res && res.success) {
@@ -467,7 +467,7 @@ export default function CustomerDashboard({ onLogoutSuccess }) {
                 </div>
                 <div onClick={() => setPaymentMethod("cash")} className={`pay-method-card${paymentMethod === "cash" ? (isStaff ? " active-gold" : " active-primary") : ""}`}>
                   <i className="bi bi-cash-stack pay-method-icon" style={{ color: "var(--gold)" }} />
-                  <span className="pay-method-label">Pay on Delivery</span>
+                  <span className="pay-method-label">Cash</span>
                 </div>
               </div>
 
@@ -506,7 +506,7 @@ export default function CustomerDashboard({ onLogoutSuccess }) {
 
               {paymentMethod === "cash" && (
                 <div className="pay-details-box" style={{ textAlign: "center" }}>
-                  <p className="pay-details-title">Pay on Delivery / Pickup</p>
+                  <p className="pay-details-title">Cash Payment / Pickup</p>
                   <p style={{ fontSize: ".84rem", color: "var(--text-light)", margin: 0, lineHeight: 1.5 }}>
                     Pay cash directly to the rider upon delivery or at the canteen counter during pickup.
                   </p>

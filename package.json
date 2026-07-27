@@ -1,0 +1,14 @@
+{
+  "name": "fuotuoke-campus-eats-root",
+  "version": "1.0.0",
+  "private": true,
+  "description": "FUOTUOKE Campus Eats root scripts wrapper",
+  "scripts": {
+    "start": "npm start --prefix frontend",
+    "dev": "npm start --prefix frontend",
+    "build": "npm run build --prefix frontend",
+    "backend": "npm start --prefix backend",
+    "backend:dev": "npm run dev --prefix backend",
+    "frontend": "npm start --prefix frontend"
+  }
+}
