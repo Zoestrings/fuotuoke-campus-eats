@@ -452,7 +452,7 @@ export default function CustomerDashboard({ onLogoutSuccess }) {
             </div>
             <div className="pay-modal-body">
               <p className="pay-details-title">Payment Method</p>
-              <div className="pay-method-row" style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 8 }}>
+              <div className="pay-method-row">
                 <div onClick={() => setPaymentMethod("paystack")} className={`pay-method-card${paymentMethod === "paystack" ? (isStaff ? " active-gold" : " active-primary") : ""}`}>
                   <i className="bi bi-shield-check pay-method-icon" style={{ color: "#10b981" }} />
                   <span className="pay-method-label">Paystack Online</span>
