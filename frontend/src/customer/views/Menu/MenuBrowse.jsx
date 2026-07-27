@@ -22,7 +22,7 @@ const CAT_EMOJIS = {
 };
 
 /* ── Placeholder for missing / broken images ─────────── */
-const PLACEHOLDER_IMG = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='225' fill='%23222'%3E%3Crect width='400' height='225' fill='%231a1a1f'/%3E%3Ctext x='50%25' y='46%25' text-anchor='middle' fill='%23555' font-size='44' font-family='sans-serif'%3E🍲%3C/text%3E%3Ctext x='50%25' y='68%25' text-anchor='middle' fill='%23444' font-size='13' font-family='sans-serif'%3EFUOTUOKE Campus Eats%3C/text%3E%3C/svg%3E";
+const PLACEHOLDER_IMG = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='300' fill='%23222'%3E%3Crect width='400' height='300' fill='%231a1a1f'/%3E%3Ctext x='50%25' y='46%25' text-anchor='middle' fill='%23555' font-size='44' font-family='sans-serif'%3E🍲%3C/text%3E%3Ctext x='50%25' y='68%25' text-anchor='middle' fill='%23444' font-size='13' font-family='sans-serif'%3EFUOTUOKE Campus Eats%3C/text%3E%3C/svg%3E";
 
 /* ── Generate stable "rating" and prep time ───────────── */
 const getRating = (id) => {
@@ -39,7 +39,6 @@ const getPrepTime = (id) => {
 const getItemImages = (item) => {
   if (item.images && item.images.length > 0) return item.images;
   if (!item.image) return [];
-  // Standard 2-photo gallery for manual swiping
   return [
     item.image,
     "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=600&q=80",
@@ -48,7 +47,7 @@ const getItemImages = (item) => {
 };
 
 /* ════════════════════════════════════════════════════════
-   Swipeable Image Gallery Component (Jumia / Airbnb Style)
+   Swipeable Image Gallery Component (Hero-Style Background)
    ════════════════════════════════════════════════════════ */
 const FoodImageGallery = ({ item, isStaff, isFav, toggleFav }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -127,6 +126,9 @@ const FoodImageGallery = ({ item, isStaff, isFav, toggleFav }) => {
         </div>
       )}
 
+      {/* Dark gradient overlay for text legibility */}
+      <div className="jf-card-gradient" />
+
       {/* Favorite (Heart) Top-Left */}
       <button
         className={`jf-heart-btn${isFav ? " active" : ""}`}
@@ -179,7 +181,7 @@ const FoodImageGallery = ({ item, isStaff, isFav, toggleFav }) => {
 };
 
 /* ════════════════════════════════════════════════════════
-   Jumia Food Style Menu Card Component
+   Hero-Style Immersive Menu Card Component
    ════════════════════════════════════════════════════════ */
 const MenuCard = memo(({ item, isStaff, qty, onCustomize, onAdd, onRemove }) => {
   const [isFav, setIsFav] = useState(false);
@@ -198,7 +200,7 @@ const MenuCard = memo(({ item, isStaff, qty, onCustomize, onAdd, onRemove }) => 
       onClick={() => onCustomize(item)}
       className={`jf-card${isStaff ? " staff" : ""}`}
     >
-      {/* ── 16:9 Swipeable Food Image Gallery ────────────── */}
+      {/* ── Full Hero Image Background + Manual Swipe Gallery ── */}
       <FoodImageGallery
         item={item}
         isStaff={isStaff}
@@ -206,7 +208,7 @@ const MenuCard = memo(({ item, isStaff, qty, onCustomize, onAdd, onRemove }) => 
         toggleFav={toggleFav}
       />
 
-      {/* ── Card Body Content ────────────────────────────── */}
+      {/* ── Hero Overlaid Content Body ───────────────────── */}
       <div className="jf-card-body">
         {/* Title & Price (Same Line) */}
         <div className="jf-title-price-row">
