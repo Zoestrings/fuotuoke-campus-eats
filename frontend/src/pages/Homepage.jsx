@@ -17,8 +17,8 @@ export default function Homepage({ goTo }) {
   const [selectedMeal, setSelectedMeal] = useState(null);
   const [favs, setFavs] = useState({});
 
-  // Pick top 4-6 featured popular dishes to catch the user's eye
-  const featuredMeals = MENU.filter(m => m.popular).slice(0, 4);
+  // Display all menu items on homepage
+  const featuredMeals = MENU;
 
   const toggleFav = (e, id) => {
     e.stopPropagation();
@@ -93,15 +93,15 @@ export default function Homepage({ goTo }) {
         ))}
       </section>
 
-      {/* ── Pure Food Cards Showcase (NO Browser/Filter Bar) ── */}
+      {/* ── Pure Food Cards Showcase (All Meals) ────── */}
       <section style={{ padding: "60px 5% 70px", background: "rgba(255, 255, 255, 0.02)", borderBottom: "1px solid rgba(255, 255, 255, .05)" }}>
         <div className="hp-section-header" style={{ marginBottom: 32 }}>
           <span className="hp-section-tag" style={{ color: "var(--gold)" }}>
-            <i className="bi bi-fire" style={{ marginRight: 4 }} /> Popular Dishes
+            <i className="bi bi-egg-fried" style={{ marginRight: 4 }} /> Campus Menu
           </span>
-          <h2 className="hp-section-title">Campus Favorites</h2>
-          <p style={{ color: "rgba(255, 255, 255, 0.6)", fontSize: ".92rem", maxWidth: 520, margin: "8px auto 0" }}>
-            Freshly prepared meals from top FUOTUOKE canteens ready for pickup or delivery.
+          <h2 className="hp-section-title">Explore All Foods & Drinks</h2>
+          <p style={{ color: "rgba(255, 255, 255, 0.6)", fontSize: ".92rem", maxWidth: 540, margin: "8px auto 0" }}>
+            Browse our full selection of freshly prepared meals, snacks, and cold beverages.
           </p>
         </div>
 
