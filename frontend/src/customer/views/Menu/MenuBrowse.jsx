@@ -35,6 +35,149 @@ const getPrepTime = (id) => {
   return times[id % times.length];
 };
 
+/* ── Helper to build multi-photo gallery for each food ─── */
+const getItemImages = (item) => {
+  if (item.images && item.images.length > 0) return item.images;
+  if (!item.image) return [];
+  // Standard 2-photo gallery for manual swiping
+  return [
+    item.image,
+    "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=600&q=80",
+    "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?auto=format&fit=crop&w=600&q=80"
+  ];
+};
+
+/* ════════════════════════════════════════════════════════
+   Swipeable Image Gallery Component (Jumia / Airbnb Style)
+   ════════════════════════════════════════════════════════ */
+const FoodImageGallery = ({ item, isStaff, isFav, toggleFav }) => {
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [touchStart, setTouchStart] = useState(null);
+  const [touchEnd, setTouchEnd] = useState(null);
+
+  const images = useMemo(() => getItemImages(item), [item]);
+  const minSwipeDistance = 35;
+
+  const handleTouchStart = (e) => {
+    setTouchEnd(null);
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+
+  const handleTouchMove = (e) => {
+    setTouchEnd(e.targetTouches[0].clientX);
+  };
+
+  const handleTouchEnd = () => {
+    if (!touchStart || !touchEnd) return;
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > minSwipeDistance;
+    const isRightSwipe = distance < -minSwipeDistance;
+
+    if (isLeftSwipe && currentIndex < images.length - 1) {
+      setCurrentIndex((prev) => prev + 1);
+    }
+    if (isRightSwipe && currentIndex > 0) {
+      setCurrentIndex((prev) => prev - 1);
+    }
+  };
+
+  const prevImage = (e) => {
+    e.stopPropagation();
+    if (currentIndex > 0) {
+      setCurrentIndex((prev) => prev - 1);
+    }
+  };
+
+  const nextImage = (e) => {
+    e.stopPropagation();
+    if (currentIndex < images.length - 1) {
+      setCurrentIndex((prev) => prev + 1);
+    }
+  };
+
+  return (
+    <div
+      className="jf-gallery-wrap"
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
+    >
+      {images.length > 0 ? (
+        <div
+          className="jf-gallery-track"
+          style={{ transform: `translateX(-${currentIndex * 100}%)` }}
+        >
+          {images.map((img, idx) => (
+            <img
+              key={idx}
+              src={img}
+              alt={`${item.name} ${idx + 1}`}
+              className="jf-gallery-img"
+              loading="lazy"
+              onError={(e) => {
+                e.target.onerror = null;
+                e.target.src = PLACEHOLDER_IMG;
+              }}
+            />
+          ))}
+        </div>
+      ) : (
+        <div className="jf-card-img-placeholder">
+          <span>{item.emoji || "🍲"}</span>
+        </div>
+      )}
+
+      {/* Favorite (Heart) Top-Left */}
+      <button
+        className={`jf-heart-btn${isFav ? " active" : ""}`}
+        onClick={toggleFav}
+        title={isFav ? "Remove from favorites" : "Save to favorites"}
+      >
+        <i className={`bi ${isFav ? "bi-heart-fill" : "bi-heart"}`} />
+      </button>
+
+      {/* Popular Badge Top-Right */}
+      {item.popular && (
+        <span className={`jf-popular-badge${isStaff ? " staff" : ""}`}>
+          <i className="bi bi-fire" /> Popular
+        </span>
+      )}
+
+      {/* Desktop Prev / Next Arrows */}
+      {images.length > 1 && (
+        <>
+          {currentIndex > 0 && (
+            <button className="jf-gallery-arrow left" onClick={prevImage}>
+              <i className="bi bi-chevron-left" />
+            </button>
+          )}
+          {currentIndex < images.length - 1 && (
+            <button className="jf-gallery-arrow right" onClick={nextImage}>
+              <i className="bi bi-chevron-right" />
+            </button>
+          )}
+        </>
+      )}
+
+      {/* Pagination Dots */}
+      {images.length > 1 && (
+        <div className="jf-gallery-dots">
+          {images.map((_, idx) => (
+            <span
+              key={idx}
+              className={`jf-dot${idx === currentIndex ? " active" : ""}`}
+              onClick={(e) => {
+                e.stopPropagation();
+                setCurrentIndex(idx);
+              }}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
 /* ════════════════════════════════════════════════════════
    Jumia Food Style Menu Card Component
    ════════════════════════════════════════════════════════ */
@@ -45,51 +188,23 @@ const MenuCard = memo(({ item, isStaff, qty, onCustomize, onAdd, onRemove }) => 
   const catEmoji = CAT_EMOJIS[item.cat] || "🍲";
   const canteenName = OUTLETS.find((o) => o.id === item.outletId)?.name || "FUOTUOKE Cafeteria";
 
-  const handleImgError = useCallback((e) => {
-    e.target.onerror = null;
-    e.target.src = PLACEHOLDER_IMG;
-  }, []);
+  const toggleFav = (e) => {
+    e.stopPropagation();
+    setIsFav((prev) => !prev);
+  };
 
   return (
     <div
       onClick={() => onCustomize(item)}
       className={`jf-card${isStaff ? " staff" : ""}`}
     >
-      {/* ── 16:9 Food Image Header ───────────────────────── */}
-      <div className="jf-card-img-container">
-        {item.image ? (
-          <img
-            src={item.image}
-            alt={item.name}
-            className="jf-card-img"
-            loading="lazy"
-            onError={handleImgError}
-          />
-        ) : (
-          <div className="jf-card-img-placeholder">
-            <span>{item.emoji || catEmoji}</span>
-          </div>
-        )}
-
-        {/* Favorite (Heart) Top-Left */}
-        <button
-          className={`jf-heart-btn${isFav ? " active" : ""}`}
-          onClick={(e) => {
-            e.stopPropagation();
-            setIsFav(!isFav);
-          }}
-          title={isFav ? "Remove from favorites" : "Save to favorites"}
-        >
-          <i className={`bi ${isFav ? "bi-heart-fill" : "bi-heart"}`} />
-        </button>
-
-        {/* Popular Badge Top-Right */}
-        {item.popular && (
-          <span className={`jf-popular-badge${isStaff ? " staff" : ""}`}>
-            <i className="bi bi-fire" /> Popular
-          </span>
-        )}
-      </div>
+      {/* ── 16:9 Swipeable Food Image Gallery ────────────── */}
+      <FoodImageGallery
+        item={item}
+        isStaff={isStaff}
+        isFav={isFav}
+        toggleFav={toggleFav}
+      />
 
       {/* ── Card Body Content ────────────────────────────── */}
       <div className="jf-card-body">

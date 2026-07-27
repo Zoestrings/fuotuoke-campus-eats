@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { MENU, OUTLETS } from "../data";
 
 const PLACEHOLDER_IMG = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='225' fill='%23222'%3E%3Crect width='400' height='225' fill='%231a1a1f'/%3E%3Ctext x='50%25' y='46%25' text-anchor='middle' fill='%23555' font-size='44' font-family='sans-serif'%3E🍲%3C/text%3E%3Ctext x='50%25' y='68%25' text-anchor='middle' fill='%23444' font-size='13' font-family='sans-serif'%3EFUOTUOKE Campus Eats%3C/text%3E%3C/svg%3E";
@@ -13,11 +13,149 @@ const getPrepTime = (id) => {
   return times[id % times.length];
 };
 
+const getItemImages = (item) => {
+  if (item.images && item.images.length > 0) return item.images;
+  if (!item.image) return [];
+  return [
+    item.image,
+    "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=600&q=80",
+    "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?auto=format&fit=crop&w=600&q=80"
+  ];
+};
+
+/* ── Swipeable Image Gallery for Homepage ── */
+const FoodImageGallery = ({ item, isFav, toggleFav }) => {
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [touchStart, setTouchStart] = useState(null);
+  const [touchEnd, setTouchEnd] = useState(null);
+
+  const images = useMemo(() => getItemImages(item), [item]);
+  const minSwipeDistance = 35;
+
+  const handleTouchStart = (e) => {
+    setTouchEnd(null);
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+
+  const handleTouchMove = (e) => {
+    setTouchEnd(e.targetTouches[0].clientX);
+  };
+
+  const handleTouchEnd = () => {
+    if (!touchStart || !touchEnd) return;
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > minSwipeDistance;
+    const isRightSwipe = distance < -minSwipeDistance;
+
+    if (isLeftSwipe && currentIndex < images.length - 1) {
+      setCurrentIndex((prev) => prev + 1);
+    }
+    if (isRightSwipe && currentIndex > 0) {
+      setCurrentIndex((prev) => prev - 1);
+    }
+  };
+
+  const prevImage = (e) => {
+    e.stopPropagation();
+    if (currentIndex > 0) {
+      setCurrentIndex((prev) => prev - 1);
+    }
+  };
+
+  const nextImage = (e) => {
+    e.stopPropagation();
+    if (currentIndex < images.length - 1) {
+      setCurrentIndex((prev) => prev + 1);
+    }
+  };
+
+  return (
+    <div
+      className="jf-gallery-wrap"
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
+    >
+      {images.length > 0 ? (
+        <div
+          className="jf-gallery-track"
+          style={{ transform: `translateX(-${currentIndex * 100}%)` }}
+        >
+          {images.map((img, idx) => (
+            <img
+              key={idx}
+              src={img}
+              alt={`${item.name} ${idx + 1}`}
+              className="jf-gallery-img"
+              loading="lazy"
+              onError={(e) => {
+                e.target.onerror = null;
+                e.target.src = PLACEHOLDER_IMG;
+              }}
+            />
+          ))}
+        </div>
+      ) : (
+        <div className="jf-card-img-placeholder">
+          <span>{item.emoji || "🍲"}</span>
+        </div>
+      )}
+
+      {/* Favorite (Heart) Top-Left */}
+      <button
+        className={`jf-heart-btn${isFav ? " active" : ""}`}
+        onClick={toggleFav}
+        title={isFav ? "Remove from favorites" : "Save to favorites"}
+      >
+        <i className={`bi ${isFav ? "bi-heart-fill" : "bi-heart"}`} />
+      </button>
+
+      {/* Popular Badge Top-Right */}
+      {item.popular && (
+        <span className="jf-popular-badge">
+          <i className="bi bi-fire" /> Popular
+        </span>
+      )}
+
+      {/* Desktop Prev / Next Arrows */}
+      {images.length > 1 && (
+        <>
+          {currentIndex > 0 && (
+            <button className="jf-gallery-arrow left" onClick={prevImage}>
+              <i className="bi bi-chevron-left" />
+            </button>
+          )}
+          {currentIndex < images.length - 1 && (
+            <button className="jf-gallery-arrow right" onClick={nextImage}>
+              <i className="bi bi-chevron-right" />
+            </button>
+          )}
+        </>
+      )}
+
+      {/* Pagination Dots */}
+      {images.length > 1 && (
+        <div className="jf-gallery-dots">
+          {images.map((_, idx) => (
+            <span
+              key={idx}
+              className={`jf-dot${idx === currentIndex ? " active" : ""}`}
+              onClick={(e) => {
+                e.stopPropagation();
+                setCurrentIndex(idx);
+              }}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
 export default function Homepage({ goTo }) {
   const [selectedMeal, setSelectedMeal] = useState(null);
   const [favs, setFavs] = useState({});
 
-  // Display all menu items on homepage
   const featuredMeals = MENU;
 
   const toggleFav = (e, id) => {
@@ -93,7 +231,7 @@ export default function Homepage({ goTo }) {
         ))}
       </section>
 
-      {/* ── Pure Food Cards Showcase (All Meals) ────── */}
+      {/* ── Pure Food Cards Showcase (All Meals with Swipe Gallery) ────── */}
       <section style={{ padding: "60px 5% 70px", background: "rgba(255, 255, 255, 0.02)", borderBottom: "1px solid rgba(255, 255, 255, .05)" }}>
         <div className="hp-section-header" style={{ marginBottom: 32 }}>
           <span className="hp-section-tag" style={{ color: "var(--gold)" }}>
@@ -101,7 +239,7 @@ export default function Homepage({ goTo }) {
           </span>
           <h2 className="hp-section-title">Explore All Foods & Drinks</h2>
           <p style={{ color: "rgba(255, 255, 255, 0.6)", fontSize: ".92rem", maxWidth: 540, margin: "8px auto 0" }}>
-            Browse our full selection of freshly prepared meals, snacks, and cold beverages.
+            Swipe food photos on any card to see different views. Log in to order.
           </p>
         </div>
 
@@ -126,35 +264,12 @@ export default function Homepage({ goTo }) {
                 className="jf-card"
                 style={{ cursor: "pointer" }}
               >
-                {/* 16:9 Image */}
-                <div className="jf-card-img-container">
-                  {item.image ? (
-                    <img
-                      src={item.image}
-                      alt={item.name}
-                      className="jf-card-img"
-                      loading="lazy"
-                      onError={(e) => { e.target.onerror = null; e.target.src = PLACEHOLDER_IMG; }}
-                    />
-                  ) : (
-                    <div className="jf-card-img-placeholder">
-                      <span>{item.emoji || "🍲"}</span>
-                    </div>
-                  )}
-
-                  {/* Heart Icon */}
-                  <button
-                    className={`jf-heart-btn${isFav ? " active" : ""}`}
-                    onClick={(e) => toggleFav(e, item.id)}
-                  >
-                    <i className={`bi ${isFav ? "bi-heart-fill" : "bi-heart"}`} />
-                  </button>
-
-                  {/* Popular Badge */}
-                  <span className="jf-popular-badge">
-                    <i className="bi bi-fire" /> Popular
-                  </span>
-                </div>
+                {/* 16:9 Swipeable Gallery */}
+                <FoodImageGallery
+                  item={item}
+                  isFav={isFav}
+                  toggleFav={(e) => toggleFav(e, item.id)}
+                />
 
                 {/* Card Body */}
                 <div className="jf-card-body">
