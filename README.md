@@ -1,4 +1,4 @@
-# 🎓 FUOTUOKE Campus Eats — Campus Food Ordering & Delivery Ecosystem
+# FUOTUOKE Campus Eats — Campus Food Ordering & Delivery Ecosystem
 
 ![FUOTUOKE Campus Eats Banner](public/FUO_Logo.png)
 
@@ -8,32 +8,32 @@ The system unifies campus dining operations into a single cohesive platform conn
 
 ---
 
-## 📋 Table of Contents
-- [🌟 Key Highlights & System Features](#-key-highlights--system-features)
-- [🏗️ System Architecture & Workflow](#️-system-architecture--workflow)
-- [💻 Technology Stack](#-technology-stack)
-- [📂 Comprehensive Directory Structure](#-comprehensive-directory-structure)
-- [📡 Complete Backend REST API Reference](#-complete-backend-rest-api-reference)
-- [🗄️ Database Models & Schema Specifications](#️-database-models--schema-specifications)
-- [⚡ Quick Start & Installation Guide](#-quick-start--installation-guide)
-- [💳 Payment Processing & Gateways](#-payment-processing--gateways)
-- [🔐 Default Seed Credentials](#-default-seed-credentials)
-- [🛡️ Security & Performance Optimizations](#️-security--performance-optimizations)
-- [🌐 Production Deployment Guide (Vercel & Cloud)](#-production-deployment-guide-vercel--cloud)
-- [🔮 Future Roadmap](#-future-roadmap)
-- [🤝 Contributing & License](#-contributing--license)
+## Table of Contents
+- [Key Highlights & System Features](#key-highlights--system-features)
+- [System Architecture & Workflow](#system-architecture--workflow)
+- [Technology Stack](#technology-stack)
+- [Comprehensive Directory Structure](#comprehensive-directory-structure)
+- [Complete Backend REST API Reference](#complete-backend-rest-api-reference)
+- [Database Models & Schema Specifications](#database-models--schema-specifications)
+- [Quick Start & Installation Guide](#quick-start--installation-guide)
+- [Payment Processing & Gateways](#payment-processing--gateways)
+- [Default Seed Credentials](#default-seed-credentials)
+- [Security & Performance Optimizations](#security--performance-optimizations)
+- [Production Deployment Guide (Vercel & Cloud)](#production-deployment-guide-vercel--cloud)
+- [Future Roadmap](#future-roadmap)
+- [Contributing & License](#contributing--license)
 
 ---
 
-## 🌟 Key Highlights & System Features
+## Key Highlights & System Features
 
-### 👥 1. Multi-Role User Dashboard Architecture
+### 1. Multi-Role User Dashboard Architecture
 * **Customer Dashboard (Students & Staff)**:
   * **Interactive Menu Browse**: Filter meals by campus cafeteria outlet or food category (*Rice, Soup, Mains, Snacks, Drinks*).
   * **Single Primary Image Display**: Clean, high-impact food card visual hierarchy featuring rating badges, preparation times, category icons, and price indicators.
   * **Custom Option Selection**: Add extra meat, swallow options, drinks, and special instructions.
   * **Cart & Checkout**: Instant cart calculation, Faculty Delivery or Canteen Pickup selection, and address input.
-  * **Live Order Tracking**: Visual progress bar tracking order states (*Pending → Confirmed → Preparing → Out for Delivery → Delivered*).
+  * **Live Order Tracking**: Visual progress bar tracking order states (*Pending -> Confirmed -> Preparing -> Out for Delivery -> Delivered*).
   * **Order History & Favorites**: Quick access to past receipts and one-tap bookmarking for favorite meals.
 
 * **Kitchen Canteen Vendor Portal**:
@@ -52,7 +52,7 @@ The system unifies campus dining operations into a single cohesive platform conn
 
 ---
 
-### 💳 2. Payment Method Flexibility
+### 2. Payment Method Flexibility
 Supports three distinct checkout payment options:
 1. **Credit / Debit Card**: Online payment workflow simulation with instant validation.
 2. **Direct Bank Transfer**: Direct bank transfer details displaying the official cafeteria account (First Bank Nigeria) with manual or automated reference tagging.
@@ -60,15 +60,15 @@ Supports three distinct checkout payment options:
 
 ---
 
-### ⚡ 3. UI/UX & Responsive Engineering
-* **Mobile & PC Optimized Layouts**: Tailored styling using media queries for Phones (≤480px), Tablets (768px–1024px), and Desktops (>1024px).
+### 3. UI/UX & Responsive Engineering
+* **Mobile & PC Optimized Layouts**: Tailored styling using media queries for Phones (<=480px), Tablets (768px–1024px), and Desktops (>1024px).
 * **Zero Mobile Tap Lag**: Touch responsiveness optimized using `touch-action: manipulation` and `-webkit-tap-highlight-color: transparent`.
 * **Hardware Accelerated Render Pipeline**: Smooth 60fps transitions using GPU acceleration (`will-change: transform`, `transform: translate3d(0,0,0)`).
 * **Glassmorphic Aesthetics**: Modern dark/light theme options, warm green/gold color palettes, customized typography (*DM Sans*, *Plus Jakarta Sans*), and subtle micro-animations.
 
 ---
 
-## 🏗️ System Architecture & Workflow
+## System Architecture & Workflow
 
 The platform operates on a decoupled client-server architecture with an asynchronous state pipeline:
 
@@ -87,7 +87,7 @@ flowchart TD
 
 ---
 
-## 💻 Technology Stack
+## Technology Stack
 
 ### **Frontend Stack**
 * **Core**: React.js (v18.x), JavaScript (ES6+)
@@ -107,7 +107,7 @@ flowchart TD
 
 ---
 
-## 📂 Comprehensive Directory Structure
+## Comprehensive Directory Structure
 
 ```text
 fuotuoke-campus-eats/
@@ -160,16 +160,16 @@ fuotuoke-campus-eats/
 
 ---
 
-## 📡 Complete Backend REST API Reference
+## Complete Backend REST API Reference
 
-### 🔐 Authentication Routes (`/api/auth`)
+### Authentication Routes (`/api/auth`)
 | Method | Endpoint | Access | Description |
 | :--- | :--- | :--- | :--- |
 | `POST` | `/api/auth/register` | Public | Register a new Student or Staff customer account |
 | `POST` | `/api/auth/login` | Public | Authenticate user & receive JWT token |
 | `GET` | `/api/auth/me` | Authenticated | Fetch current logged-in user profile details |
 
-### 🍲 Menu & Dishes Routes (`/api/menu`)
+### Menu & Dishes Routes (`/api/menu`)
 | Method | Endpoint | Access | Description |
 | :--- | :--- | :--- | :--- |
 | `GET` | `/api/menu` | Public | Fetch all menu items (filterable by category or outlet) |
@@ -178,7 +178,7 @@ fuotuoke-campus-eats/
 | `PUT` | `/api/menu/:id` | Admin / Vendor | Update an existing meal item |
 | `DELETE` | `/api/menu/:id` | Admin / Vendor | Delete a meal item |
 
-### 🛍️ Order Management Routes (`/api/orders`)
+### Order Management Routes (`/api/orders`)
 | Method | Endpoint | Access | Description |
 | :--- | :--- | :--- | :--- |
 | `GET` | `/api/orders` | Authenticated | Retrieve customer order history or kitchen feed |
@@ -186,7 +186,7 @@ fuotuoke-campus-eats/
 | `GET` | `/api/orders/:id` | Authenticated | Fetch specific order details |
 | `PUT` | `/api/orders/:id/status` | Admin/Vendor/Rider | Update order state (*Preparing, Ready, Out for Delivery, Delivered*) |
 
-### ⚙️ System Settings & Audit (`/api/settings` & `/api/audit`)
+### System Settings & Audit (`/api/settings` & `/api/audit`)
 | Method | Endpoint | Access | Description |
 | :--- | :--- | :--- | :--- |
 | `GET` | `/api/settings` | Admin | Fetch system configuration parameters |
@@ -195,7 +195,7 @@ fuotuoke-campus-eats/
 
 ---
 
-## 🗄️ Database Models & Schema Specifications
+## Database Models & Schema Specifications
 
 ### `User` Table Model
 ```sql
@@ -230,7 +230,7 @@ CREATE TABLE orders (
 
 ---
 
-## ⚡ Quick Start & Installation Guide
+## Quick Start & Installation Guide
 
 ### Prerequisites
 * **Node.js**: v16.x or higher
@@ -267,7 +267,7 @@ npm run frontend
 
 ---
 
-## 🔐 Default Seed Credentials
+## Default Seed Credentials
 
 Use these credentials to log in and test different portal roles in sandbox mode:
 
@@ -280,7 +280,7 @@ Use these credentials to log in and test different portal roles in sandbox mode:
 
 ---
 
-## 💳 Payment Processing & Gateways
+## Payment Processing & Gateways
 
 1. **Credit Card**: Direct form validation checking 16-digit card numbers, cardholder names, expiry dates, and CVVs.
 2. **Bank Transfer**: Transfers directed to **First Bank Nigeria** (`Account No: 1234567890`, Account Name: *FUOTUOKE Campus Eats Ltd.*).
@@ -288,7 +288,7 @@ Use these credentials to log in and test different portal roles in sandbox mode:
 
 ---
 
-## 🛡️ Security & Performance Optimizations
+## Security & Performance Optimizations
 
 * **Security**:
   * Bcrypt password hashing (10 salt rounds).
@@ -304,7 +304,7 @@ Use these credentials to log in and test different portal roles in sandbox mode:
 
 ---
 
-## 🌐 Production Deployment Guide (Vercel & Cloud)
+## Production Deployment Guide (Vercel & Cloud)
 
 The project includes a root `vercel.json` deployment manifest.
 
@@ -321,7 +321,7 @@ The project includes a root `vercel.json` deployment manifest.
 
 ---
 
-## 🔮 Future Roadmap
+## Future Roadmap
 - [ ] **WebSocket Push Notifications**: Real-time push updates for kitchen order acceptance and rider tracking via Socket.io.
 - [ ] **Interactive Campus Map**: Live GPS rider location mapping on interactive FUOTUOKE campus blueprints.
 - [ ] **Student Meal Wallet**: Pre-funded digital student account wallet for instant one-click cafeteria checkout.
@@ -329,7 +329,7 @@ The project includes a root `vercel.json` deployment manifest.
 
 ---
 
-## 🤝 Contributing & License
+## Contributing & License
 
 Developed for the **Federal University Otuoke (FUOTUOKE)** Campus Community.  
 *Knowledge · Excellence · Service*  
