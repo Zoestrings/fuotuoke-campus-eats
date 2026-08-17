@@ -10,7 +10,6 @@ import NotificationsList from "../Notifications/NotificationsList";
 import { OUTLETS } from "../../../data";
 import { Btn, Badge } from "../../../shared/ui";
 import { useToast } from "../../../context/ToastContext";
-import { PaymentService } from "../../services/PaymentService";
 
 export default function CustomerDashboard({ onLogoutSuccess }) {
   const { showToast } = useToast();
@@ -48,7 +47,7 @@ export default function CustomerDashboard({ onLogoutSuccess }) {
   const [drawerOpen, setDrawerOpen] = useState(false);
 
   // Payment modal state
-  const [paymentMethod, setPaymentMethod] = useState("paystack");
+  const [paymentMethod, setPaymentMethod] = useState("card");
   const [cardNumber, setCardNumber]       = useState("");
   const [cardName, setCardName]           = useState("");
   const [cardExpiry, setCardExpiry]       = useState("");
@@ -65,41 +64,19 @@ export default function CustomerDashboard({ onLogoutSuccess }) {
 
     setIsProcessingPay(true);
     try {
-      if (paymentMethod === "paystack") {
-        const payRes = await PaymentService.initializePayment(
-          pendingOrder?.id || Date.now(),
-          user?.email || "customer@fuotuoke.edu.ng",
-          pendingOrder?.total || 0
-        );
+      const methodLabel = paymentMethod === "card"
+        ? "Credit Card"
+        : paymentMethod === "transfer"
+        ? "Bank Transfer"
+        : "Cash";
 
-        if (payRes.success && payRes.authorization_url) {
-          if (payRes.isMock) {
-            const res = await confirmPayment("Paystack Online", payRes.reference);
-            if (res && res.success) {
-              showToast("Paystack Payment Successful! Order placed.", "success");
-            }
-          } else {
-            window.location.href = payRes.authorization_url;
-            return;
-          }
-        } else {
-          showToast(payRes.error || "Failed to initialize Paystack payment.", "error");
-        }
-      } else {
-        const methodLabel = paymentMethod === "card"
-          ? "Credit Card"
-          : paymentMethod === "transfer"
-          ? "Bank Transfer"
-          : "Cash";
-
-        const res = await confirmPayment(methodLabel);
-        if (res && res.success) {
-          setCardNumber("");
-          setCardName("");
-          setCardExpiry("");
-          setCardCVV("");
-          showToast(`Order placed successfully with ${methodLabel}!`, "success");
-        }
+      const res = await confirmPayment(methodLabel);
+      if (res && res.success) {
+        setCardNumber("");
+        setCardName("");
+        setCardExpiry("");
+        setCardCVV("");
+        showToast(`Order placed successfully with ${methodLabel}!`, "success");
       }
     } catch (e) {
       showToast(e.message || "Payment process failed.", "error");
@@ -453,13 +430,9 @@ export default function CustomerDashboard({ onLogoutSuccess }) {
             <div className="pay-modal-body">
               <p className="pay-details-title">Payment Method</p>
               <div className="pay-method-row">
-                <div onClick={() => setPaymentMethod("paystack")} className={`pay-method-card${paymentMethod === "paystack" ? (isStaff ? " active-gold" : " active-primary") : ""}`}>
-                  <i className="bi bi-shield-check pay-method-icon" style={{ color: "#10b981" }} />
-                  <span className="pay-method-label">Paystack Online</span>
-                </div>
                 <div onClick={() => setPaymentMethod("card")} className={`pay-method-card${paymentMethod === "card" ? (isStaff ? " active-gold" : " active-primary") : ""}`}>
                   <i className="bi bi-credit-card pay-method-icon" />
-                  <span className="pay-method-label">Direct Card</span>
+                  <span className="pay-method-label">Credit Card</span>
                 </div>
                 <div onClick={() => setPaymentMethod("transfer")} className={`pay-method-card${paymentMethod === "transfer" ? (isStaff ? " active-gold" : " active-primary") : ""}`}>
                   <i className="bi bi-bank pay-method-icon" />
@@ -470,15 +443,6 @@ export default function CustomerDashboard({ onLogoutSuccess }) {
                   <span className="pay-method-label">Cash</span>
                 </div>
               </div>
-
-              {paymentMethod === "paystack" && (
-                <div className="pay-details-box" style={{ textAlign: "center" }}>
-                  <p className="pay-details-title">Paystack Gateway Checkout</p>
-                  <p style={{ fontSize: ".84rem", color: "var(--text-light)", margin: 0, lineHeight: 1.5 }}>
-                    Secure transaction via Paystack. Supports <strong>Card, USSD, and Bank Transfer</strong>.
-                  </p>
-                </div>
-              )}
 
               {paymentMethod === "card" && (
                 <div className="pay-details-box">
