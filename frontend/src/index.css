@@ -104,10 +104,31 @@ img {
 [class*="anim"],
 [class*="modal"],
 [class*="drawer"],
-[class*="toast"] {
+[class*="toast"],
+.navbar,
+.bottom-tab-bar,
+.mn-floating-cart-wrap,
+.floating-cart-wrap {
   will-change: transform;
-  transform: translateZ(0);
+  transform: translate3d(0, 0, 0);
   backface-visibility: hidden;
+}
+
+/* Touch responsiveness and tap speed on mobile browsers */
+button,
+a,
+input,
+select,
+textarea,
+.btn,
+.jf-card,
+.mn-cat-btn,
+.mn-outlet-chip,
+.mn-order-btn,
+.bottom-tab-item,
+.mn-pop-card {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
 }
 
 /* Respect user preference for reduced motion */
@@ -6407,22 +6428,56 @@ a {
     grid-template-columns: 1fr;
   }
 
-  /* Menu grid — 2 col minimum */
+  /* Menu grid — 2 columns sharp grid on mobile phones */
+  .mn-grid,
   .menu-grid {
-    grid-template-columns: repeat(auto-fill, minmax(145px, 1fr));
+    grid-template-columns: repeat(2, 1fr);
     gap: 10px;
   }
 
-  /* Floating cart — tighter */
-  .floating-cart-wrap {
-    bottom: 76px;
-    right: 14px;
+  /* Compact card styling for phones */
+  .jf-card {
+    height: 340px;
   }
 
-  .floating-cart-btn {
+  .jf-card-body {
+    padding: 12px 14px;
+  }
+
+  .jf-card-title {
+    font-size: 0.94rem;
+  }
+
+  .jf-card-price {
+    font-size: 0.96rem;
+  }
+
+  .jf-card-desc {
+    font-size: 0.74rem;
+    margin-bottom: 10px;
+    -webkit-line-clamp: 2;
+  }
+
+  .jf-meta-row {
+    font-size: 0.7rem;
+    gap: 4px;
+    margin-bottom: 6px;
+  }
+
+  /* Floating cart — tighter for mobile */
+  .floating-cart-wrap,
+  .mn-floating-cart-wrap {
+    bottom: 76px;
+    right: 12px;
+    left: 12px;
+  }
+
+  .floating-cart-btn,
+  .mn-floating-cart {
     padding: 10px 14px;
     font-size: 0.8rem;
     gap: 8px;
+    width: 100%;
   }
 
   /* Modal padding */
@@ -6465,9 +6520,15 @@ a {
 }
 
 /* ══════════════════════════════════════════════════════
-   TABLET (769px – 1024px) — Minor tweaks
+   TABLET & MEDIUM SCREENS (769px – 1024px)
    ══════════════════════════════════════════════════════ */
 @media (min-width: 769px) and (max-width: 1024px) {
+  .mn-grid,
+  .menu-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+  }
+
   .analytics-grid {
     grid-template-columns: repeat(2, 1fr);
   }
