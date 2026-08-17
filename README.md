@@ -1,218 +1,263 @@
-# FUOTUOKE Campus Eats — Campus Food Ordering & Delivery Ecosystem
+# FUOTUOKE Campus Eats
 
-![FUOTUOKE Campus Eats Banner](public/FUO_Logo.png)
+[![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)](https://github.com/Zoestrings/fuotuoke-campus-eats)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![Node.js](https://img.shields.io/badge/node.js-v16%2B-green.svg)](https://nodejs.org)
+[![React](https://img.shields.io/badge/react-v18.x-blue.svg)](https://reactjs.org)
+[![Express](https://img.shields.io/badge/express-v4.x-lightgrey.svg)](https://expressjs.com)
+[![Deployment](https://img.shields.io/badge/deployment-vercel-black.svg)](https://vercel.com)
 
-**FUOTUOKE Campus Eats** is an enterprise-grade, full-stack digital dining platform and campus food delivery system engineered specifically for the **Federal University Otuoke (FUOTUOKE)** community in Bayelsa State, Nigeria.
-
-The system unifies campus dining operations into a single cohesive platform connecting **Students, University Staff, Cafeteria Kitchen Staff, Delivery Riders, and System Administrators**. It eliminates long cafeteria queue times, streamlines faculty deliveries, automates order dispatching, and supports multi-channel payment reconciliation.
+**FUOTUOKE Campus Eats** is an enterprise-grade digital dining and food logistics platform designed for the **Federal University Otuoke (FUOTUOKE)** in Bayelsa State, Nigeria. The platform unifies campus food vendors, students, academic/administrative staff, delivery personnel, and system administrators under a secure, role-based architecture.
 
 ---
 
 ## Table of Contents
-- [Key Highlights & System Features](#key-highlights--system-features)
-- [System Architecture & Workflow](#system-architecture--workflow)
+
+- [Executive Summary](#executive-summary)
+- [System Architecture](#system-architecture)
+- [Role-Based Control Access (RBAC)](#role-based-control-access-rbac)
 - [Technology Stack](#technology-stack)
-- [Comprehensive Directory Structure](#comprehensive-directory-structure)
-- [Complete Backend REST API Reference](#complete-backend-rest-api-reference)
-- [Database Models & Schema Specifications](#database-models--schema-specifications)
-- [Quick Start & Installation Guide](#quick-start--installation-guide)
-- [Payment Processing & Gateways](#payment-processing--gateways)
-- [Default Seed Credentials](#default-seed-credentials)
-- [Security & Performance Optimizations](#security--performance-optimizations)
-- [Production Deployment Guide (Vercel & Cloud)](#production-deployment-guide-vercel--cloud)
-- [Future Roadmap](#future-roadmap)
-- [Contributing & License](#contributing--license)
+- [Directory Structure](#directory-structure)
+- [Environment Configuration](#environment-configuration)
+- [API Reference Specification](#api-reference-specification)
+- [Database Schema & Models](#database-schema--models)
+- [Installation & Local Setup](#installation--local-setup)
+- [Payment Gateways & Options](#payment-gateways--options)
+- [Security & Compliance](#security--compliance)
+- [Production Deployment](#production-deployment)
+- [License](#license)
 
 ---
 
-## Key Highlights & System Features
+## Executive Summary
 
-### 1. Multi-Role User Dashboard Architecture
-* **Customer Dashboard (Students & Staff)**:
-  * **Interactive Menu Browse**: Filter meals by campus cafeteria outlet or food category (*Rice, Soup, Mains, Snacks, Drinks*).
-  * **Single Primary Image Display**: Clean, high-impact food card visual hierarchy featuring rating badges, preparation times, category icons, and price indicators.
-  * **Custom Option Selection**: Add extra meat, swallow options, drinks, and special instructions.
-  * **Cart & Checkout**: Instant cart calculation, Faculty Delivery or Canteen Pickup selection, and address input.
-  * **Live Order Tracking**: Visual progress bar tracking order states (*Pending -> Confirmed -> Preparing -> Out for Delivery -> Delivered*).
-  * **Order History & Favorites**: Quick access to past receipts and one-tap bookmarking for favorite meals.
+FUOTUOKE Campus Eats addresses logistics bottlenecks in university dining by digitizing cafeteria operations, automating food dispatch, and providing real-time order tracking.
 
-* **Kitchen Canteen Vendor Portal**:
-  * Real-time order processing feed categorized by cafeteria outlet.
-  * One-click order state updates (*Accept Order*, *Mark Preparing*, *Ready for Pickup*, *Dispatch to Rider*).
-  * Outlet selection toggle (*Main Cafeteria, East Campus Canteen, Science Complex Bukka, PG Lounge*).
-
-* **Delivery Rider Portal**:
-  * Active dispatch queue displaying faculty delivery destinations, customer phone contacts, and order contents.
-  * Status updates for order pickup and successful delivery confirmation.
-
-* **System Administration Console**:
-  * Global configuration control (*Toggle Maintenance Mode*, *Enable/Disable New Registrations*, *Update Delivery Fees*, *Support Hotline*).
-  * Comprehensive Security Audit Logging tracking user actions, IP addresses, and timestamps.
-  * User account management and sales performance analytics.
+### Primary Objectives
+- **Queue Reduction**: Enables online pre-ordering for counter pickup or faculty building delivery.
+- **Multi-Vendor Management**: Aggregates disparate campus cafeteria outlets into a central catalog.
+- **Operational Auditing**: Implements administrative logging for all financial transactions and operational parameter changes.
+- **High-Availability Data Layer**: Uses MySQL for persistent storage with an automated, zero-config JSON fallback for local offline development.
 
 ---
 
-### 2. Payment Method Flexibility
-Supports three distinct checkout payment options:
-1. **Credit / Debit Card**: Online payment workflow simulation with instant validation.
-2. **Direct Bank Transfer**: Direct bank transfer details displaying the official cafeteria account (First Bank Nigeria) with manual or automated reference tagging.
-3. **Cash on Delivery / Pickup**: Pay cash upon rider arrival at faculty blocks or at counter pickup.
+## System Architecture
 
----
-
-### 3. UI/UX & Responsive Engineering
-* **Mobile & PC Optimized Layouts**: Tailored styling using media queries for Phones (<=480px), Tablets (768px–1024px), and Desktops (>1024px).
-* **Zero Mobile Tap Lag**: Touch responsiveness optimized using `touch-action: manipulation` and `-webkit-tap-highlight-color: transparent`.
-* **Hardware Accelerated Render Pipeline**: Smooth 60fps transitions using GPU acceleration (`will-change: transform`, `transform: translate3d(0,0,0)`).
-* **Glassmorphic Aesthetics**: Modern dark/light theme options, warm green/gold color palettes, customized typography (*DM Sans*, *Plus Jakarta Sans*), and subtle micro-animations.
-
----
-
-## System Architecture & Workflow
-
-The platform operates on a decoupled client-server architecture with an asynchronous state pipeline:
+The application uses a decoupled client-server architecture. The React frontend interacts with the Express REST API via authenticated JWT Bearer HTTP requests.
 
 ```mermaid
 flowchart TD
-    A[Customer Student / Staff] -->|1. Browse & Add to Cart| B(MenuBrowse View)
-    B -->|2. Select Delivery/Pickup & Pay| C{Checkout Modal}
-    C -->|Credit Card / Transfer / Cash| D[Express.js REST API]
-    D -->|3. Save Order & Notify| E[(Database Layer: MySQL / JSON)]
-    E -->|4. Push Order| F[Vendor Kitchen Dashboard]
-    F -->|5. Accept & Prepare Meal| G[Mark Ready / Dispatched]
-    G -->|6. Assign Delivery| H[Rider Portal]
-    H -->|7. Deliver to Faculty| I[Completed & Verified]
-    D -->|8. Update Status| J[Customer Live Order Tracker]
+    subgraph Client ["Client Layer (React.js)"]
+        A[Customer Portal]
+        B[Kitchen Vendor Portal]
+        C[Rider Dispatch Portal]
+        D[Admin Console]
+    end
+
+    subgraph API ["API & Business Logic (Express.js)"]
+        E[JWT Auth Middleware]
+        F[Order Processing Engine]
+        G[Payment Validation Subsystem]
+        H[Audit Logging Service]
+    end
+
+    subgraph Storage ["Data Layer"]
+        I[(MySQL Primary Database)]
+        J[(JSON Self-Healing Database)]
+    end
+
+    A -->|HTTPS / REST| E
+    B -->|HTTPS / REST| E
+    C -->|HTTPS / REST| E
+    D -->|HTTPS / REST| E
+
+    E --> F
+    E --> G
+    E --> H
+
+    F --> I
+    F -.->|Fallback| J
 ```
+
+---
+
+## Role-Based Control Access (RBAC)
+
+The application enforces fine-grained access control across five distinct user roles:
+
+| Role | Access Level | Responsibilities & Capabilities |
+| :--- | :--- | :--- |
+| **Student** | Customer | Browse menus, place orders, track live status, select pickup or faculty delivery. |
+| **Staff** | Customer (Priority) | Access staff-tailored ordering flows, priority support, and campus delivery options. |
+| **Kitchen Staff** | Vendor | View active incoming orders for specific outlets, accept orders, update preparation states. |
+| **Rider** | Logistics | View assigned delivery queues, access drop-off locations, confirm order delivery. |
+| **Administrator** | Global Control | Manage users, configure system parameters (fees, maintenance mode), inspect audit trails. |
 
 ---
 
 ## Technology Stack
 
-### **Frontend Stack**
-* **Core**: React.js (v18.x), JavaScript (ES6+)
-* **Routing**: React Router v6 (Protected Route Guards)
-* **State Management**: React Context API (`AuthContext`, `ToastContext`, Custom Controllers)
-* **Styling**: Custom CSS3 System (CSS Variables, Flexbox/Grid, Glassmorphic UI)
-* **Icons & Assets**: Bootstrap Icons (`bi-*`), Google Web Fonts
+### Frontend Application
+- **Framework**: React.js (v18.x)
+- **Routing**: React Router v6 (Guarded Route HOCs)
+- **State Management**: React Context API (`AuthContext`, `ToastContext`, Custom Controllers)
+- **Styling Engine**: Custom CSS System (CSS Variables, Flexbox/Grid, Glassmorphic Panels)
+- **Typography & Icons**: *DM Sans*, *Plus Jakarta Sans*, Bootstrap Icons
 
-### **Backend Stack**
-* **Runtime & Framework**: Node.js, Express.js API
-* **Security & Auth**: JWT (JSON Web Tokens), Bcryptjs (Password Hashing, 10 rounds), Helmet Security Headers, CORS Policy Engine, Express Rate Limiter
-* **Utilities**: Compression, Dotenv Environment Configuration
+### Backend Service
+- **Runtime**: Node.js (v16+)
+- **HTTP Server**: Express.js (v4.x)
+- **Authentication**: JWT (JSON Web Tokens), Bcryptjs (10 Hashing Rounds)
+- **Security Middleware**: Helmet, CORS, Express Rate Limit
 
-### **Database Layer**
-* **Primary Database**: **MySQL 8.0+** relational database
-* **Self-Healing Fallback**: Transparent, zero-setup **JSON Database Emulator** (`backend/config/database.json`) automatically engaged if no local MySQL daemon is running on port 3306.
+### Database Subsystem
+- **Production Storage**: MySQL 8.0+
+- **Development Storage**: Embedded JSON SQL Emulator (`backend/config/database.json`)
 
 ---
 
-## Comprehensive Directory Structure
+## Directory Structure
 
 ```text
 fuotuoke-campus-eats/
-├── .vscode/                      # VS Code Workspace & CSS Linter Settings
+├── .vscode/                      # Editor & Linter Configurations
 │   └── settings.json
-├── backend/                      # Node.js + Express backend API
-│   ├── config/                   # DB Config, Schema SQL, & JSON Fallback
+├── backend/                      # Node.js + Express API Server
+│   ├── config/                   # Database Drivers & SQL Schemas
 │   │   ├── database.js
 │   │   ├── database.json
 │   │   └── schema.sql
-│   ├── middleware/               # Auth Guard, Role Check, Error Handling
+│   ├── middleware/               # Auth Guards & Rate Limiters
 │   │   └── auth.js
-│   ├── models/                   # SQL / JSON Data Models
+│   ├── models/                   # SQL/JSON Data Access Layer
 │   │   ├── AuditLog.js
 │   │   ├── MenuItem.js
 │   │   ├── Order.js
 │   │   ├── Settings.js
 │   │   └── User.js
-│   ├── routes/                   # API Controllers & Endpoint Routes
+│   ├── routes/                   # REST API Controllers
 │   │   ├── audit.js
 │   │   ├── auth.js
 │   │   ├── menu.js
 │   │   ├── orders.js
 │   │   ├── payments.js
 │   │   └── settings.js
-│   ├── seed.js                   # Seeder Script for Database Initialization
-│   ├── server.js                 # Primary Express API Entry Point
+│   ├── seed.js                   # Seeding Script
+│   ├── server.js                 # HTTP Server Entrypoint
 │   └── package.json
-├── frontend/                     # React.js Client Application
-│   ├── public/                   # Static HTML, Favicons, & Images
+├── frontend/                     # React Client Application
+│   ├── public/                   # Static HTML Assets & Media
 │   └── src/
-│       ├── admin/                # Admin Console Views & Controllers
-│       ├── components/           # Navbar, Footer, & Common Modals
-│       ├── context/              # Toast & Auth State Providers
-│       ├── customer/             # Customer Portal Views
-│       │   ├── controllers/      # Customer State Engine
-│       │   ├── models/           # Frontend UserModel Data Standard
-│       │   ├── services/         # Payment & API Services
-│       │   └── views/            # MenuBrowse, Cart, Orders, Profile
-│       ├── rider/                # Delivery Rider Dashboard
-│       ├── vendor/               # Cafeteria Kitchen Dashboard
-│       ├── shared/               # UI Atoms, Sound Utils, Mock API Fallback
-│       ├── App.js                # App Router Engine
-│       ├── index.css             # Main Design System & Responsive Styles
-│       └── index.js              # React Root Mounting
-├── vercel.json                   # Production Deployment Build Spec
-├── package.json                  # Monorepo Concurrently Command Wrapper
-└── README.md                     # Platform Documentation Manual
+│       ├── admin/                # Administrative Portal Views
+│       ├── components/           # Core Component Library
+│       ├── context/              # Context State Providers
+│       ├── customer/             # Customer Ordering Workflows
+│       ├── rider/                # Delivery Logistics Views
+│       ├── vendor/               # Cafeteria Management Views
+│       ├── shared/               # Shared Utilities & Base Elements
+│       ├── App.js                # App Routing Configuration
+│       ├── index.css             # Global CSS Design Tokens
+│       └── index.js              # Application Entrypoint
+├── vercel.json                   # Deployment Infrastructure Configuration
+├── package.json                  # Workspace Scripts Manifest
+└── README.md                     # Technical Documentation
 ```
 
 ---
 
-## Complete Backend REST API Reference
+## Environment Configuration
 
-### Authentication Routes (`/api/auth`)
-| Method | Endpoint | Access | Description |
-| :--- | :--- | :--- | :--- |
-| `POST` | `/api/auth/register` | Public | Register a new Student or Staff customer account |
-| `POST` | `/api/auth/login` | Public | Authenticate user & receive JWT token |
-| `GET` | `/api/auth/me` | Authenticated | Fetch current logged-in user profile details |
+Create a `.env` file in the `backend/` directory using the parameters defined below:
 
-### Menu & Dishes Routes (`/api/menu`)
-| Method | Endpoint | Access | Description |
+| Variable Name | Type | Default Value | Description |
 | :--- | :--- | :--- | :--- |
-| `GET` | `/api/menu` | Public | Fetch all menu items (filterable by category or outlet) |
-| `GET` | `/api/menu/:id` | Public | Fetch single meal item details |
-| `POST` | `/api/menu` | Admin / Vendor | Create a new meal item |
-| `PUT` | `/api/menu/:id` | Admin / Vendor | Update an existing meal item |
-| `DELETE` | `/api/menu/:id` | Admin / Vendor | Delete a meal item |
-
-### Order Management Routes (`/api/orders`)
-| Method | Endpoint | Access | Description |
-| :--- | :--- | :--- | :--- |
-| `GET` | `/api/orders` | Authenticated | Retrieve customer order history or kitchen feed |
-| `POST` | `/api/orders` | Customer | Place a new meal order |
-| `GET` | `/api/orders/:id` | Authenticated | Fetch specific order details |
-| `PUT` | `/api/orders/:id/status` | Admin/Vendor/Rider | Update order state (*Preparing, Ready, Out for Delivery, Delivered*) |
-
-### System Settings & Audit (`/api/settings` & `/api/audit`)
-| Method | Endpoint | Access | Description |
-| :--- | :--- | :--- | :--- |
-| `GET` | `/api/settings` | Admin | Fetch system configuration parameters |
-| `PUT` | `/api/settings` | Admin | Update system fees, maintenance mode, and support contact |
-| `GET` | `/api/audit` | Admin | View security audit logs and user activity |
+| `PORT` | Number | `5000` | HTTP port binding for the Express server. |
+| `NODE_ENV` | String | `development` | Environment mode (`development` or `production`). |
+| `CLIENT_URL` | String | `http://localhost:3000` | Allowed CORS origin for client requests. |
+| `DB_HOST` | String | `localhost` | MySQL hostname endpoint. |
+| `DB_PORT` | Number | `3306` | MySQL port binding. |
+| `DB_USER` | String | `root` | Database username. |
+| `DB_PASSWORD` | String | `""` | Database user password. |
+| `DB_NAME` | String | `fuotuoke_campus_eats` | Target SQL schema name. |
+| `JWT_SECRET` | String | *Required* | Secret key for signing access tokens. |
+| `JWT_EXPIRES_IN` | String | `1d` | Token validity duration. |
 
 ---
 
-## Database Models & Schema Specifications
+## API Reference Specification
 
-### `User` Table Model
+### Authentication Endpoint Group (`/api/auth`)
+
+#### `POST /api/auth/register`
+Creates a new customer account.
+
+**Request Payload:**
+```json
+{
+  "name": "Jane Doe",
+  "email": "student@fuotuoke.edu.ng",
+  "identifier": "FUO/22/CSI/18843",
+  "password": "SecurePassword123#",
+  "phone": "+2348000000000"
+}
+```
+
+**Response (201 Created):**
+```json
+{
+  "success": true,
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6...",
+  "user": {
+    "id": 1,
+    "name": "Jane Doe",
+    "email": "student@fuotuoke.edu.ng",
+    "role": "student"
+  }
+}
+```
+
+#### `POST /api/auth/login`
+Authenticates a user and issues a Bearer JWT.
+
+---
+
+### Order Management Endpoint Group (`/api/orders`)
+
+#### `POST /api/orders`
+Submits a new order. *(Requires Authorization Header)*
+
+**Request Payload:**
+```json
+{
+  "outletId": "main-cafeteria",
+  "items": [
+    { "id": 1, "name": "Jollof Rice & Chicken", "price": 1500, "qty": 1 }
+  ],
+  "total": 1500,
+  "deliveryType": "delivery",
+  "location": "Faculty of Science, Block B",
+  "paymentMethod": "Credit Card"
+}
+```
+
+---
+
+## Database Schema & Models
+
 ```sql
+-- Users Table
 CREATE TABLE users (
   id INT AUTO_INCREMENT PRIMARY KEY,
   name VARCHAR(255) NOT NULL,
   email VARCHAR(255) UNIQUE NOT NULL,
-  identifier VARCHAR(100) NOT NULL, -- Matriculation No or Staff ID
+  identifier VARCHAR(100) NOT NULL,
   password VARCHAR(255) NOT NULL,
   role ENUM('student', 'staff', 'kitchen', 'rider', 'admin') DEFAULT 'student',
   phone VARCHAR(50),
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
-```
 
-### `Order` Table Model
-```sql
+-- Orders Table
 CREATE TABLE orders (
   id VARCHAR(100) PRIMARY KEY,
   user_id INT NOT NULL,
@@ -230,108 +275,80 @@ CREATE TABLE orders (
 
 ---
 
-## Quick Start & Installation Guide
+## Installation & Local Setup
 
-### Prerequisites
-* **Node.js**: v16.x or higher
-* **npm**: v8.x or higher
+### 1. Requirements
+- Node.js (v16.0.0 or higher)
+- npm (v8.0.0 or higher)
+- MySQL Server (v8.0+, optional fallback available)
 
----
+### 2. Concurrent Startup Procedure
 
-### Single-Command Development Startup
-
-To run both the **Backend API Server** and the **React Client Application** concurrently in a single terminal with color-coded console logs:
+Execute the monorepo dev script to start both services concurrently:
 
 ```bash
-# 1. Install dependencies across root, backend, and frontend
+# Clone the repository
+git clone https://github.com/Zoestrings/fuotuoke-campus-eats.git
+cd fuotuoke-campus-eats
+
+# Install workspace dependencies
 npm install
 
-# 2. Launch both servers concurrently
+# Start API and Client concurrently
 npm run dev:all
 ```
 
-* **Frontend Web App**: `http://localhost:3000`
-* **Backend API**: `http://localhost:5000`
-
----
-
-### Separate Terminal Startup
-
-```bash
-# Terminal 1: Backend Server
-npm run backend:dev
-
-# Terminal 2: Frontend React Application
-npm run frontend
-```
+- **Frontend Client**: `http://localhost:3000`
+- **Backend API**: `http://localhost:5000`
 
 ---
 
 ## Default Seed Credentials
 
-Use these credentials to log in and test different portal roles in sandbox mode:
+For evaluation and testing, the seeder provides pre-configured credentials:
 
-| Portal Role | User ID / Username | Password | Access Portal |
+| Role | Identifier / User ID | Password | Target Route |
 | :--- | :--- | :--- | :--- |
 | **System Administrator** | `zoehackz001` | `72364231Zoe@` | `/staff_login` |
-| **Kitchen Vendor Staff** | `zoehackz001` | `72364231Zoe@` | `/staff_login` |
+| **Kitchen Vendor** | `zoehackz001` | `72364231Zoe@` | `/staff_login` |
 | **Delivery Rider** | `zoehackz001` | `72364231Zoe@` | `/staff_login` |
-| **Student / Staff Customer** | `FUO/22/CSI/18843` | `72364231Zoe@` | `/login` |
+| **Student Customer** | `FUO/22/CSI/18843` | `72364231Zoe@` | `/login` |
 
 ---
 
-## Payment Processing & Gateways
+## Payment Gateways & Options
 
-1. **Credit Card**: Direct form validation checking 16-digit card numbers, cardholder names, expiry dates, and CVVs.
-2. **Bank Transfer**: Transfers directed to **First Bank Nigeria** (`Account No: 1234567890`, Account Name: *FUOTUOKE Campus Eats Ltd.*).
-3. **Cash**: Cash collection handled at delivery destination or canteen pickup counter.
-
----
-
-## Security & Performance Optimizations
-
-* **Security**:
-  * Bcrypt password hashing (10 salt rounds).
-  * JWT auth guard protecting all administrative & order mutation endpoints.
-  * Express rate limiting to prevent brute-force login attempts.
-  * Helmet HTTP response security headers.
-  * Administrative security audit trail logging IP address, user ID, and action.
-
-* **Performance**:
-  * GPU accelerated element rendering (`transform: translate3d(0, 0, 0)`).
-  * CSS `touch-action: manipulation` eliminating 300ms mobile tap delays.
-  * Responsive layout grid adaptivity (`.mn-grid` switching between 4 cols desktop, 3 cols tablet, and 2 cols mobile).
+The application supports three validated payment channels:
+1. **Credit / Debit Card**: Online payment workflow simulation with instant validation.
+2. **Direct Bank Transfer**: Account details routed to First Bank Nigeria (`Account No: 1234567890`).
+3. **Cash on Delivery / Pickup**: Manual payment collection at point of delivery or counter.
 
 ---
 
-## Production Deployment Guide (Vercel & Cloud)
+## Security & Compliance
 
-The project includes a root `vercel.json` deployment manifest.
-
-### Deployment on Vercel:
-1. Push repository code to GitHub (`origin/main`).
-2. Import project into **Vercel Dashboard**.
-3. Configure Build Settings:
-   * **Framework Preset**: Create React App
-   * **Build Command**: `npm run build`
-   * **Output Directory**: `frontend/build`
-4. Environment Variables:
-   * `REACT_APP_API_URL` = `https://your-api-domain.com`
-5. Click **Deploy**!
+- **Authentication Guard**: JWT tokens required for restricted REST endpoints.
+- **Data Hashing**: Passwords stored using Bcrypt salted hashes (10 rounds).
+- **Traffic Control**: Rate limiting enabled via `express-rate-limit`.
+- **Audit Compliance**: System mutation events logged with user ID, action, timestamp, and client IP address.
 
 ---
 
-## Future Roadmap
-- [ ] **WebSocket Push Notifications**: Real-time push updates for kitchen order acceptance and rider tracking via Socket.io.
-- [ ] **Interactive Campus Map**: Live GPS rider location mapping on interactive FUOTUOKE campus blueprints.
-- [ ] **Student Meal Wallet**: Pre-funded digital student account wallet for instant one-click cafeteria checkout.
-- [ ] **SMS Order Alerts**: Automated SMS notification dispatch to student mobile numbers.
+## Production Deployment
+
+This repository includes a native `vercel.json` deployment manifest.
+
+### Deployment to Vercel
+1. Link your GitHub repository (`Zoestrings/fuotuoke-campus-eats`) to Vercel.
+2. Set Build Command: `npm run build`
+3. Set Output Directory: `frontend/build`
+4. Add environment variables in the Vercel console (`REACT_APP_API_URL`).
+5. Trigger build.
 
 ---
 
-## Contributing & License
+## License
 
-Developed for the **Federal University Otuoke (FUOTUOKE)** Campus Community.  
-*Knowledge · Excellence · Service*  
+Distributed under the MIT License. See `LICENSE` for details.
 
-© 2026 FUOTUOKE Campus Eats. All rights reserved.
+© 2026 Federal University Otuoke (FUOTUOKE) Campus Eats. All rights reserved.
