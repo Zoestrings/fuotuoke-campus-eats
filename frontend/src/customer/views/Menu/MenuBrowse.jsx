@@ -344,14 +344,6 @@ function MenuBrowse({
                   : "Select a canteen below, then choose your meals"}
               </p>
             </div>
-            <div className="mn-header-stats">
-              <span className="mn-stat-chip">
-                <i className="bi bi-shop" /> {OUTLETS.length} Outlets
-              </span>
-              <span className="mn-stat-chip">
-                <i className="bi bi-egg-fried" /> {menuItems.length} Items
-              </span>
-            </div>
           </div>
         </div>
 

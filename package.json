@@ -6,9 +6,13 @@
   "scripts": {
     "start": "npm start --prefix frontend",
     "dev": "npm start --prefix frontend",
+    "dev:all": "concurrently --names \"BACKEND,FRONTEND\" --prefix-colors \"cyan,magenta\" \"npm run dev --prefix backend\" \"npm start --prefix frontend\"",
     "build": "cd frontend && npm install && npm run build",
     "backend": "npm start --prefix backend",
     "backend:dev": "npm run dev --prefix backend",
     "frontend": "npm start --prefix frontend"
+  },
+  "devDependencies": {
+    "concurrently": "^10.0.5"
   }
 }
