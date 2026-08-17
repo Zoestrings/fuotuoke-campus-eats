@@ -1,163 +1,337 @@
-# 🎓 FUOTUOKE Campus Eats — Campus Food Ordering & Delivery Platform
+# 🎓 FUOTUOKE Campus Eats — Campus Food Ordering & Delivery Ecosystem
 
-**FUOTUOKE Campus Eats** is a modern, full-stack, responsive web application and digital dining ecosystem designed specifically for the **Federal University Otuoke (FUOTUOKE)** campus community in Bayelsa State, Nigeria. 
+![FUOTUOKE Campus Eats Banner](public/FUO_Logo.png)
 
-The platform bridges the gap between campus food canteens, students, faculty staff, delivery riders, and university administration by offering real-time ordering, menu browsing, order tracking, multi-payment support, and automated workflow dispatch.
+**FUOTUOKE Campus Eats** is an enterprise-grade, full-stack digital dining platform and campus food delivery system engineered specifically for the **Federal University Otuoke (FUOTUOKE)** community in Bayelsa State, Nigeria.
+
+The system unifies campus dining operations into a single cohesive platform connecting **Students, University Staff, Cafeteria Kitchen Staff, Delivery Riders, and System Administrators**. It eliminates long cafeteria queue times, streamlines faculty deliveries, automates order dispatching, and supports multi-channel payment reconciliation.
+
+---
+
+## 📋 Table of Contents
+- [🌟 Key Highlights & System Features](#-key-highlights--system-features)
+- [🏗️ System Architecture & Workflow](#️-system-architecture--workflow)
+- [💻 Technology Stack](#-technology-stack)
+- [📂 Comprehensive Directory Structure](#-comprehensive-directory-structure)
+- [📡 Complete Backend REST API Reference](#-complete-backend-rest-api-reference)
+- [🗄️ Database Models & Schema Specifications](#️-database-models--schema-specifications)
+- [⚡ Quick Start & Installation Guide](#-quick-start--installation-guide)
+- [💳 Payment Processing & Gateways](#-payment-processing--gateways)
+- [🔐 Default Seed Credentials](#-default-seed-credentials)
+- [🛡️ Security & Performance Optimizations](#️-security--performance-optimizations)
+- [🌐 Production Deployment Guide (Vercel & Cloud)](#-production-deployment-guide-vercel--cloud)
+- [🔮 Future Roadmap](#-future-roadmap)
+- [🤝 Contributing & License](#-contributing--license)
 
 ---
 
 ## 🌟 Key Highlights & System Features
 
-### 👥 Multi-Role User Portals
-* **Student & Staff Customers**: Seamlessly browse canteen menus by outlet or food category (Rice, Soup, Mains, Snacks, Drinks), customize meal options, search dishes, track active orders live, view order history, and save favorite dishes.
-* **Cafeteria / Kitchen Vendors**: Real-time kitchen dashboard to manage incoming orders, mark preparation progress (*Pending → Confirmed → Preparing → Ready / Out for Delivery → Completed*), and filter orders by cafeteria outlet.
-* **Delivery Riders**: Dedicated dispatch view to accept deliveries, view faculty drop-off locations, and update order delivery statuses.
-* **System Administration**: High-level administrative console for managing system settings (delivery fee, maintenance mode, user registrations, support contact), user accounts, sales analytics, and security audit logs.
+### 👥 1. Multi-Role User Dashboard Architecture
+* **Customer Dashboard (Students & Staff)**:
+  * **Interactive Menu Browse**: Filter meals by campus cafeteria outlet or food category (*Rice, Soup, Mains, Snacks, Drinks*).
+  * **Single Primary Image Display**: Clean, high-impact food card visual hierarchy featuring rating badges, preparation times, category icons, and price indicators.
+  * **Custom Option Selection**: Add extra meat, swallow options, drinks, and special instructions.
+  * **Cart & Checkout**: Instant cart calculation, Faculty Delivery or Canteen Pickup selection, and address input.
+  * **Live Order Tracking**: Visual progress bar tracking order states (*Pending → Confirmed → Preparing → Out for Delivery → Delivered*).
+  * **Order History & Favorites**: Quick access to past receipts and one-tap bookmarking for favorite meals.
 
-### 💳 Payment Gateways & Options
-Supports 3 flexible and secure checkout methods:
-1. **Credit / Debit Card**: Instant online card transaction checkout simulation.
-2. **Direct Bank Transfer**: Direct transfer option with automated order confirmation to official university cafeteria bank accounts (First Bank Nigeria).
-3. **Cash on Delivery / Pickup**: Pay cash upon delivery at faculty buildings or counter pickup.
+* **Kitchen Canteen Vendor Portal**:
+  * Real-time order processing feed categorized by cafeteria outlet.
+  * One-click order state updates (*Accept Order*, *Mark Preparing*, *Ready for Pickup*, *Dispatch to Rider*).
+  * Outlet selection toggle (*Main Cafeteria, East Campus Canteen, Science Complex Bukka, PG Lounge*).
 
-### 🚀 Performance & UI Excellence
-* **Single Primary Image Showcase**: Optimized food card layout with crisp imagery, rating badges, prep times, category emojis, and price highlights.
-* **Mobile-First & PC Responsive Design**: Custom glassmorphism UI with hardware acceleration (`will-change: transform`, `transform: translate3d`), mobile bottom navigation tab bar, desktop top bar, touch manipulation optimization (`touch-action: manipulation`), and zero tap delay on mobile devices.
-* **Instant Hot-Reloading**: Single-command execution launching backend API and frontend dev server concurrently with color-coded console logs.
+* **Delivery Rider Portal**:
+  * Active dispatch queue displaying faculty delivery destinations, customer phone contacts, and order contents.
+  * Status updates for order pickup and successful delivery confirmation.
 
----
-
-## 🛠️ Technology Stack
-
-| Layer | Technologies & Tools |
-| :--- | :--- |
-| **Frontend Framework** | React.js (v18+), React Router v6 |
-| **Styling & UI System** | Custom Vanilla CSS (Design Tokens, Glassmorphic Panels, CSS Variables, Hardware Acceleration) |
-| **Icons & Typography** | Bootstrap Icons, Google Fonts (*DM Sans*, *Plus Jakarta Sans*) |
-| **Backend API** | Node.js, Express.js REST API |
-| **Security & Auth** | JWT (JSON Web Tokens), Bcryptjs password hashing, Helmet headers, CORS, Express Rate Limit |
-| **Database & Storage** | **MySQL** with automatic self-healing **JSON-file SQL fallback database** (`backend/config/database.json`) |
-| **Dev Tools** | Nodemon, Concurrently, Vercel Deployment Suite |
+* **System Administration Console**:
+  * Global configuration control (*Toggle Maintenance Mode*, *Enable/Disable New Registrations*, *Update Delivery Fees*, *Support Hotline*).
+  * Comprehensive Security Audit Logging tracking user actions, IP addresses, and timestamps.
+  * User account management and sales performance analytics.
 
 ---
 
-## 📁 Repository Directory Architecture
+### 💳 2. Payment Method Flexibility
+Supports three distinct checkout payment options:
+1. **Credit / Debit Card**: Online payment workflow simulation with instant validation.
+2. **Direct Bank Transfer**: Direct bank transfer details displaying the official cafeteria account (First Bank Nigeria) with manual or automated reference tagging.
+3. **Cash on Delivery / Pickup**: Pay cash upon rider arrival at faculty blocks or at counter pickup.
 
-```text
-fuotuoke-campus-eats/
-├── .vscode/                      # Editor settings (CSS linting, formatting rules)
-├── backend/                      # Node.js + Express.js API Server
-├── frontend/                     # React.js Client Application
-│   ├── public/                   # Static public assets (Logos, favicons)
-│   └── src/
-│       ├── admin/                # System Administrator dashboard & controllers
-│       ├── components/           # Reusable UI components & modals
-│       ├── context/              # Toast notifications & Auth context
-│       ├── customer/             # Customer (Student/Staff) ordering views
-│       │   ├── views/
-│       │   │   ├── Authentication/  # Login & Signup screens
-│       │   │   ├── Cart/            # Shopping cart & checkout view
-│       │   │   ├── Dashboard/       # Main customer dashboard & payment modal
-│       │   │   ├── Menu/            # MenuBrowse (Food Cards) & MealDetail modals
-│       │   │   ├── Notifications/   # Customer notifications list
-│       │   │   ├── Orders/          # OrdersList & Live TrackOrder views
-│       │   │   └── Profile/         # User profile settings
-│       ├── rider/                # Delivery Rider portal & controls
-│       ├── vendor/               # Kitchen Canteen Vendor management views
-│       ├── shared/               # Shared API utilities & sound effects
-│       ├── index.css             # Main Design System & Responsive CSS Styles
-│       ├── App.js                # Root Application Routing & State Engine
-│       └── data.js               # Campus Outlets, Food Items, & Sample Data
-├── vercel.json                   # Vercel Production Build & Rewrite Config
-└── package.json                  # Root Monorepo Scripts Wrapper
+---
+
+### ⚡ 3. UI/UX & Responsive Engineering
+* **Mobile & PC Optimized Layouts**: Tailored styling using media queries for Phones (≤480px), Tablets (768px–1024px), and Desktops (>1024px).
+* **Zero Mobile Tap Lag**: Touch responsiveness optimized using `touch-action: manipulation` and `-webkit-tap-highlight-color: transparent`.
+* **Hardware Accelerated Render Pipeline**: Smooth 60fps transitions using GPU acceleration (`will-change: transform`, `transform: translate3d(0,0,0)`).
+* **Glassmorphic Aesthetics**: Modern dark/light theme options, warm green/gold color palettes, customized typography (*DM Sans*, *Plus Jakarta Sans*), and subtle micro-animations.
+
+---
+
+## 🏗️ System Architecture & Workflow
+
+The platform operates on a decoupled client-server architecture with an asynchronous state pipeline:
+
+```mermaid
+flowchart TD
+    A[Customer Student / Staff] -->|1. Browse & Add to Cart| B(MenuBrowse View)
+    B -->|2. Select Delivery/Pickup & Pay| C{Checkout Modal}
+    C -->|Credit Card / Transfer / Cash| D[Express.js REST API]
+    D -->|3. Save Order & Notify| E[(Database Layer: MySQL / JSON)]
+    E -->|4. Push Order| F[Vendor Kitchen Dashboard]
+    F -->|5. Accept & Prepare Meal| G[Mark Ready / Dispatched]
+    G -->|6. Assign Delivery| H[Rider Portal]
+    H -->|7. Deliver to Faculty| I[Completed & Verified]
+    D -->|8. Update Status| J[Customer Live Order Tracker]
 ```
 
 ---
 
-## ⚡ Quick Start & Local Setup
+## 💻 Technology Stack
 
-### 1. Prerequisites
-* **Node.js**: v16.x or higher
-* **npm**: v8.x or higher
-* **MySQL Database**: Optional *(If MySQL is not running on port 3306, the server seamlessly uses its built-in persistent JSON database emulator)*.
+### **Frontend Stack**
+* **Core**: React.js (v18.x), JavaScript (ES6+)
+* **Routing**: React Router v6 (Protected Route Guards)
+* **State Management**: React Context API (`AuthContext`, `ToastContext`, Custom Controllers)
+* **Styling**: Custom CSS3 System (CSS Variables, Flexbox/Grid, Glassmorphic UI)
+* **Icons & Assets**: Bootstrap Icons (`bi-*`), Google Web Fonts
+
+### **Backend Stack**
+* **Runtime & Framework**: Node.js, Express.js API
+* **Security & Auth**: JWT (JSON Web Tokens), Bcryptjs (Password Hashing, 10 rounds), Helmet Security Headers, CORS Policy Engine, Express Rate Limiter
+* **Utilities**: Compression, Dotenv Environment Configuration
+
+### **Database Layer**
+* **Primary Database**: **MySQL 8.0+** relational database
+* **Self-Healing Fallback**: Transparent, zero-setup **JSON Database Emulator** (`backend/config/database.json`) automatically engaged if no local MySQL daemon is running on port 3306.
 
 ---
 
-### 2. Single-Command Launch (Backend + Frontend)
+## 📂 Comprehensive Directory Structure
 
-Run both the **Express Backend Server** and **React Frontend Client** simultaneously in one terminal window with color-coded logs:
+```text
+fuotuoke-campus-eats/
+├── .vscode/                      # VS Code Workspace & CSS Linter Settings
+│   └── settings.json
+├── backend/                      # Node.js + Express backend API
+│   ├── config/                   # DB Config, Schema SQL, & JSON Fallback
+│   │   ├── database.js
+│   │   ├── database.json
+│   │   └── schema.sql
+│   ├── middleware/               # Auth Guard, Role Check, Error Handling
+│   │   └── auth.js
+│   ├── models/                   # SQL / JSON Data Models
+│   │   ├── AuditLog.js
+│   │   ├── MenuItem.js
+│   │   ├── Order.js
+│   │   ├── Settings.js
+│   │   └── User.js
+│   ├── routes/                   # API Controllers & Endpoint Routes
+│   │   ├── audit.js
+│   │   ├── auth.js
+│   │   ├── menu.js
+│   │   ├── orders.js
+│   │   ├── payments.js
+│   │   └── settings.js
+│   ├── seed.js                   # Seeder Script for Database Initialization
+│   ├── server.js                 # Primary Express API Entry Point
+│   └── package.json
+├── frontend/                     # React.js Client Application
+│   ├── public/                   # Static HTML, Favicons, & Images
+│   └── src/
+│       ├── admin/                # Admin Console Views & Controllers
+│       ├── components/           # Navbar, Footer, & Common Modals
+│       ├── context/              # Toast & Auth State Providers
+│       ├── customer/             # Customer Portal Views
+│       │   ├── controllers/      # Customer State Engine
+│       │   ├── models/           # Frontend UserModel Data Standard
+│       │   ├── services/         # Payment & API Services
+│       │   └── views/            # MenuBrowse, Cart, Orders, Profile
+│       ├── rider/                # Delivery Rider Dashboard
+│       ├── vendor/               # Cafeteria Kitchen Dashboard
+│       ├── shared/               # UI Atoms, Sound Utils, Mock API Fallback
+│       ├── App.js                # App Router Engine
+│       ├── index.css             # Main Design System & Responsive Styles
+│       └── index.js              # React Root Mounting
+├── vercel.json                   # Production Deployment Build Spec
+├── package.json                  # Monorepo Concurrently Command Wrapper
+└── README.md                     # Platform Documentation Manual
+```
+
+---
+
+## 📡 Complete Backend REST API Reference
+
+### 🔐 Authentication Routes (`/api/auth`)
+| Method | Endpoint | Access | Description |
+| :--- | :--- | :--- | :--- |
+| `POST` | `/api/auth/register` | Public | Register a new Student or Staff customer account |
+| `POST` | `/api/auth/login` | Public | Authenticate user & receive JWT token |
+| `GET` | `/api/auth/me` | Authenticated | Fetch current logged-in user profile details |
+
+### 🍲 Menu & Dishes Routes (`/api/menu`)
+| Method | Endpoint | Access | Description |
+| :--- | :--- | :--- | :--- |
+| `GET` | `/api/menu` | Public | Fetch all menu items (filterable by category or outlet) |
+| `GET` | `/api/menu/:id` | Public | Fetch single meal item details |
+| `POST` | `/api/menu` | Admin / Vendor | Create a new meal item |
+| `PUT` | `/api/menu/:id` | Admin / Vendor | Update an existing meal item |
+| `DELETE` | `/api/menu/:id` | Admin / Vendor | Delete a meal item |
+
+### 🛍️ Order Management Routes (`/api/orders`)
+| Method | Endpoint | Access | Description |
+| :--- | :--- | :--- | :--- |
+| `GET` | `/api/orders` | Authenticated | Retrieve customer order history or kitchen feed |
+| `POST` | `/api/orders` | Customer | Place a new meal order |
+| `GET` | `/api/orders/:id` | Authenticated | Fetch specific order details |
+| `PUT` | `/api/orders/:id/status` | Admin/Vendor/Rider | Update order state (*Preparing, Ready, Out for Delivery, Delivered*) |
+
+### ⚙️ System Settings & Audit (`/api/settings` & `/api/audit`)
+| Method | Endpoint | Access | Description |
+| :--- | :--- | :--- | :--- |
+| `GET` | `/api/settings` | Admin | Fetch system configuration parameters |
+| `PUT` | `/api/settings` | Admin | Update system fees, maintenance mode, and support contact |
+| `GET` | `/api/audit` | Admin | View security audit logs and user activity |
+
+---
+
+## 🗄️ Database Models & Schema Specifications
+
+### `User` Table Model
+```sql
+CREATE TABLE users (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(255) NOT NULL,
+  email VARCHAR(255) UNIQUE NOT NULL,
+  identifier VARCHAR(100) NOT NULL, -- Matriculation No or Staff ID
+  password VARCHAR(255) NOT NULL,
+  role ENUM('student', 'staff', 'kitchen', 'rider', 'admin') DEFAULT 'student',
+  phone VARCHAR(50),
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+```
+
+### `Order` Table Model
+```sql
+CREATE TABLE orders (
+  id VARCHAR(100) PRIMARY KEY,
+  user_id INT NOT NULL,
+  outlet_id VARCHAR(50) NOT NULL,
+  items JSON NOT NULL,
+  total DECIMAL(10, 2) NOT NULL,
+  status ENUM('Pending', 'Confirmed', 'Preparing', 'Ready', 'Out for Delivery', 'Delivered', 'Cancelled') DEFAULT 'Pending',
+  delivery_type ENUM('pickup', 'delivery') DEFAULT 'pickup',
+  location VARCHAR(255),
+  payment_method VARCHAR(50) NOT NULL,
+  payment_ref VARCHAR(100),
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+```
+
+---
+
+## ⚡ Quick Start & Installation Guide
+
+### Prerequisites
+* **Node.js**: v16.x or higher
+* **npm**: v8.x or higher
+
+---
+
+### Single-Command Development Startup
+
+To run both the **Backend API Server** and the **React Client Application** concurrently in a single terminal with color-coded console logs:
 
 ```bash
-# Install all dependencies at root, backend, and frontend
+# 1. Install dependencies across root, backend, and frontend
 npm install
 
-# Start both Backend API and React App concurrently
+# 2. Launch both servers concurrently
 npm run dev:all
 ```
 
 * **Frontend Web App**: `http://localhost:3000`
-* **Backend API Server**: `http://localhost:5000`
+* **Backend API**: `http://localhost:5000`
 
 ---
 
-### 3. Individual Script Commands
-
-If you prefer running backend and frontend in separate terminals:
+### Separate Terminal Startup
 
 ```bash
-# Run Frontend Only
-npm run frontend
-
-# Run Backend API Only (with Nodemon auto-restart)
+# Terminal 1: Backend Server
 npm run backend:dev
 
-# Seed / Reset Database Records
-npm run seed --prefix backend
-
-# Production Build Test
-npm run build
+# Terminal 2: Frontend React Application
+npm run frontend
 ```
 
 ---
 
-## 🔐 Default Demo Credentials
+## 🔐 Default Seed Credentials
 
-Use the following credentials to access the different actor roles during testing:
+Use these credentials to log in and test different portal roles in sandbox mode:
 
-| Role | Username / ID | Password | Portal Login Path |
+| Portal Role | User ID / Username | Password | Access Portal |
 | :--- | :--- | :--- | :--- |
-| **System Administrator** | `zoehackz001` | `72364231Zoe@` | Staff Portal (`/staff_login`) |
-| **Cafeteria Kitchen Vendor** | `zoehackz001` | `72364231Zoe@` | Staff Portal (`/staff_login`) |
-| **Delivery Rider** | `zoehackz001` | `72364231Zoe@` | Staff Portal (`/staff_login`) |
-| **Student / Staff Customer** | `FUO/22/CSI/18843` | `72364231Zoe@` | Main Customer Login (`/login`) |
+| **System Administrator** | `zoehackz001` | `72364231Zoe@` | `/staff_login` |
+| **Kitchen Vendor Staff** | `zoehackz001` | `72364231Zoe@` | `/staff_login` |
+| **Delivery Rider** | `zoehackz001` | `72364231Zoe@` | `/staff_login` |
+| **Student / Staff Customer** | `FUO/22/CSI/18843` | `72364231Zoe@` | `/login` |
 
 ---
 
-## 🏬 Campus Cafeteria Outlets
+## 💳 Payment Processing & Gateways
 
-The platform aggregates meals from all primary food outlets across the FUOTUOKE campuses:
-1. **FUOTUOKE Main Cafeteria** — Central Campus Student Bukka
-2. **East Campus Canteen** — Faculty of Engineering & Science Complex
-3. **Science Complex Bukka** — Quick Bites & Cold Drinks
-4. **Post-Graduate Diner** — Executive Staff & PG Student Lounge
+1. **Credit Card**: Direct form validation checking 16-digit card numbers, cardholder names, expiry dates, and CVVs.
+2. **Bank Transfer**: Transfers directed to **First Bank Nigeria** (`Account No: 1234567890`, Account Name: *FUOTUOKE Campus Eats Ltd.*).
+3. **Cash**: Cash collection handled at delivery destination or canteen pickup counter.
 
 ---
 
-## 🌐 Production Deployment (Vercel)
+## 🛡️ Security & Performance Optimizations
 
-The repository is pre-configured with a `vercel.json` deployment manifest.
+* **Security**:
+  * Bcrypt password hashing (10 salt rounds).
+  * JWT auth guard protecting all administrative & order mutation endpoints.
+  * Express rate limiting to prevent brute-force login attempts.
+  * Helmet HTTP response security headers.
+  * Administrative security audit trail logging IP address, user ID, and action.
 
-### Deployment Steps:
-1. Push your repository code to GitHub (`origin/main`).
-2. Connect your repository to **Vercel**.
-3. Set the build parameters:
+* **Performance**:
+  * GPU accelerated element rendering (`transform: translate3d(0, 0, 0)`).
+  * CSS `touch-action: manipulation` eliminating 300ms mobile tap delays.
+  * Responsive layout grid adaptivity (`.mn-grid` switching between 4 cols desktop, 3 cols tablet, and 2 cols mobile).
+
+---
+
+## 🌐 Production Deployment Guide (Vercel & Cloud)
+
+The project includes a root `vercel.json` deployment manifest.
+
+### Deployment on Vercel:
+1. Push repository code to GitHub (`origin/main`).
+2. Import project into **Vercel Dashboard**.
+3. Configure Build Settings:
+   * **Framework Preset**: Create React App
    * **Build Command**: `npm run build`
    * **Output Directory**: `frontend/build`
-4. Deploy! Vercel automatically routes static assets and SPA rewrites seamlessly.
+4. Environment Variables:
+   * `REACT_APP_API_URL` = `https://your-api-domain.com`
+5. Click **Deploy**!
 
 ---
 
-## 📝 License & Attribution
+## 🔮 Future Roadmap
+- [ ] **WebSocket Push Notifications**: Real-time push updates for kitchen order acceptance and rider tracking via Socket.io.
+- [ ] **Interactive Campus Map**: Live GPS rider location mapping on interactive FUOTUOKE campus blueprints.
+- [ ] **Student Meal Wallet**: Pre-funded digital student account wallet for instant one-click cafeteria checkout.
+- [ ] **SMS Order Alerts**: Automated SMS notification dispatch to student mobile numbers.
 
-Designed & Developed for **Federal University Otuoke (FUOTUOKE)** Campus Community.  
-*Knowledge · Excellence · Service*
+---
+
+## 🤝 Contributing & License
+
+Developed for the **Federal University Otuoke (FUOTUOKE)** Campus Community.  
+*Knowledge · Excellence · Service*  
+
+© 2026 FUOTUOKE Campus Eats. All rights reserved.
