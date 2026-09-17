@@ -82,7 +82,7 @@ export default function MealsManagement({ menuItems = [], onDelete, onLoadDemo, 
             <label className="form-label">Fallback Emoji</label>
             <input
               type="text"
-              placeholder="e.g. 🍛"
+              placeholder="e.g."
               value={newItemEmoji}
               onChange={e => setNewItemEmoji(e.target.value)}
               className="form-input"

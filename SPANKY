@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Bank of Spanky</title>
+<style>
+  :root{
+    --ivory:#faf9f6;
+    --paper:#ffffff;
+    --ink:#1a1a1a;
+    --ink-soft:#4a4a4a;
+    --line:#dcd8cf;
+    --warm-grey:#8c8577;
+    --spanky-pink:#e8a0b4;
+    --spanky-pink-deep:#c97a90;
+  }
+
+  *{box-sizing:border-box;margin:0;padding:0;}
+
+  body{
+    background:var(--ivory);
+    color:var(--ink);
+    font-family:'Georgia','Times New Roman',serif;
+    line-height:1.55;
+  }
+
+  a{color:inherit;text-decoration:none;}
+  .wrap{max-width:1180px;margin:0 auto;padding:0 40px;}
+  img{display:block; max-width:100%; height:auto;}
+
+  /* ---------- NAV ---------- */
+  header{
+    position:sticky; top:0; z-index:50;
+    background:rgba(250,249,246,0.96);
+    border-bottom:1px solid var(--line);
+  }
+  nav{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:16px 40px;
+    max-width:1180px; margin:0 auto;
+  }
+  .brand{
+    display:flex; align-items:center; gap:12px;
+    font-size:1.2rem;
+    letter-spacing:0.1em;
+    font-weight:400;
+  }
+  .brand img{
+    height:38px; width:auto;
+  }
+  .navlinks{
+    display:none;
+    gap:34px;
+    font-size:0.78rem;
+    letter-spacing:0.08em;
+    color:var(--ink);
+  }
+  @media(min-width:900px){.navlinks{display:flex;}}
+  .navlinks a{
+    padding-bottom:4px;
+    border-bottom:1px solid transparent;
+    transition:border-color 0.2s ease;
+  }
+  .navlinks a:hover{border-color:var(--spanky-pink-deep);}
+  .navicons{
+    display:flex; gap:20px; font-size:0.78rem; letter-spacing:0.05em; color:var(--ink-soft);
+  }
+
+  /* thin pink rule under header, nod to the brand's own palette */
+  .pink-rule{
+    height:2px;
+    background:linear-gradient(90deg, transparent, var(--spanky-pink), transparent);
+  }
+
+  /* ---------- HERO ---------- */
+  .hero{
+    padding:80px 0 100px;
+    border-bottom:1px solid var(--line);
+  }
+  .hero-grid{
+    display:grid; grid-template-columns:1fr; gap:56px; align-items:center;
+  }
+  @media(min-width:900px){
+    .hero-grid{grid-template-columns:1fr 1fr;}
+  }
+  .hero-tag{
+    font-size:0.72rem;
+    letter-spacing:0.18em;
+    color:var(--spanky-pink-deep);
+    margin-bottom:22px;
+  }
+  .hero h1{
+    font-size:clamp(2.2rem, 5vw, 3.6rem);
+    font-weight:400;
+    letter-spacing:0.01em;
+    line-height:1.1;
+    margin-bottom:26px;
+  }
+  .hero .sub{
+    color:var(--ink-soft);
+    font-size:1.02rem;
+    line-height:1.75;
+    max-width:44ch;
+    margin-bottom:38px;
+  }
+  .cta-row{
+    display:flex; gap:18px; flex-wrap:wrap;
+  }
+  .btn{
+    padding:15px 30px;
+    font-family:inherit;
+    font-size:0.76rem;
+    letter-spacing:0.1em;
+    cursor:pointer;
+    border-radius:0;
+  }
+  .btn-primary{
+    background:var(--ink); color:var(--paper); border:1px solid var(--ink);
+    transition:background 0.2s ease, color 0.2s ease;
+  }
+  .btn-primary:hover{background:var(--spanky-pink-deep); border-color:var(--spanky-pink-deep);}
+  .btn-secondary{
+    background:transparent; color:var(--ink); border:1px solid var(--ink);
+    transition:background 0.2s ease, color 0.2s ease;
+  }
+  .btn-secondary:hover{background:var(--ink); color:var(--paper);}
+
+  .hero-media{
+    position:relative;
+    aspect-ratio:4/5;
+    background:var(--paper);
+    border:1px solid var(--line);
+    overflow:hidden;
+  }
+  .hero-media img{
+    width:100%; height:100%; object-fit:cover;
+  }
+  .rarity-badge{
+    position:absolute; top:18px; left:18px;
+    background:var(--paper);
+    border:1px solid var(--ink);
+    font-size:0.68rem; letter-spacing:0.06em;
+    padding:6px 12px;
+    z-index:2;
+  }
+  .rarity-badge.two{top:auto; bottom:18px; left:auto; right:18px;}
+
+  /* video banner strip, from the brand's own SPANK-BANG asset */
+  .video-strip{
+    border-bottom:1px solid var(--line);
+    background:var(--paper);
+  }
+  .video-strip video{
+    width:100%; display:block; max-height:520px; object-fit:cover;
+  }
+
+  /* ---------- SECTION SHELL ---------- */
+  section{
+    padding:100px 0;
+    border-bottom:1px solid var(--line);
+  }
+  .section-eyebrow{
+    font-size:0.72rem; letter-spacing:0.16em; color:var(--spanky-pink-deep);
+    margin-bottom:18px;
+  }
+  .section-head{
+    max-width:680px;
+    margin-bottom:60px;
+  }
+  .section-head h2{
+    font-size:clamp(1.8rem,3.4vw,2.4rem);
+    font-weight:400;
+    margin-bottom:20px;
+  }
+  .section-head p{
+    color:var(--ink-soft);
+    font-size:0.98rem;
+    line-height:1.75;
+    max-width:60ch;
+  }
+
+  /* ---------- ORIGINAL SITE CATEGORY TILES (kept, restyled) ---------- */
+  .cat-grid{
+    display:grid; grid-template-columns:1fr;
+    border-top:1px solid var(--line);
+  }
+  @media(min-width:760px){
+    .cat-grid{grid-template-columns:repeat(4,1fr);}
+  }
+  .cat-card{
+    border-bottom:1px solid var(--line);
+    padding:0 0 36px;
+  }
+  @media(min-width:760px){
+    .cat-card{border-right:1px solid var(--line); padding:0 28px 36px;}
+    .cat-card:last-child{border-right:none;}
+  }
+  .cat-card img{
+    width:100%; aspect-ratio:1/1; object-fit:cover;
+    margin-bottom:22px;
+    border-bottom:1px solid var(--line);
+  }
+  .cat-card h3{
+    font-size:1rem; font-weight:400; letter-spacing:0.03em; margin-bottom:10px;
+    padding:0 28px;
+  }
+  @media(min-width:760px){.cat-card h3{padding:0;}}
+  .cat-card p{
+    color:var(--ink-soft); font-size:0.88rem; margin-bottom:18px;
+    padding:0 28px;
+  }
+  @media(min-width:760px){.cat-card p{padding:0;}}
+  .text-link{
+    font-size:0.74rem; letter-spacing:0.1em;
+    border-bottom:1px solid var(--spanky-pink-deep);
+    padding:0 28px 3px;
+  }
+  @media(min-width:760px){.text-link{padding:0 0 3px;}}
+
+  /* ---------- MERCH PIPELINE ---------- */
+  .pipeline{
+    display:grid; grid-template-columns:1fr;
+    border-top:1px solid var(--line);
+  }
+  @media(min-width:760px){
+    .pipeline{grid-template-columns:repeat(3,1fr);}
+  }
+  .pipeline-step{
+    padding:40px 36px 40px 0;
+    border-bottom:1px solid var(--line);
+  }
+  @media(min-width:760px){
+    .pipeline-step{border-right:1px solid var(--line); padding:40px 36px;}
+    .pipeline-step:last-child{border-right:none;}
+  }
+  .pipeline-step .num{
+    font-size:0.75rem; letter-spacing:0.1em; color:var(--spanky-pink-deep);
+    margin-bottom:16px;
+  }
+  .pipeline-step h3{
+    font-size:1.05rem; font-weight:400; margin-bottom:12px;
+  }
+  .pipeline-step p{
+    color:var(--ink-soft); font-size:0.9rem; line-height:1.7;
+  }
+
+  /* ---------- ACCESS GRID ---------- */
+  .access-grid{
+    display:grid; grid-template-columns:1fr;
+    border-top:1px solid var(--line);
+  }
+  @media(min-width:760px){
+    .access-grid{grid-template-columns:repeat(3,1fr);}
+  }
+  .access-card{
+    padding:40px 36px 40px 0;
+    border-bottom:1px solid var(--line);
+  }
+  @media(min-width:760px){
+    .access-card{border-right:1px solid var(--line); padding:40px 36px;}
+    .access-card:last-child{border-right:none;}
+  }
+  .access-card h3{
+    font-size:1.02rem; font-weight:400; margin-bottom:14px;
+  }
+  .access-card p{
+    color:var(--ink-soft); font-size:0.9rem; line-height:1.75;
+  }
+
+  /* ---------- BLUEPRINT / ALLOCATION ---------- */
+  .alloc-row{
+    display:grid; grid-template-columns:1fr;
+    gap:8px 40px;
+    padding:32px 0;
+    border-top:1px solid var(--line);
+    align-items:baseline;
+  }
+  .alloc-row.last{border-bottom:1px solid var(--line);}
+  @media(min-width:700px){
+    .alloc-row{grid-template-columns:260px 1fr;}
+  }
+  .alloc-row h3{
+    font-size:1.02rem; font-weight:400;
+  }
+  .alloc-row p{
+    color:var(--ink-soft); font-size:0.92rem; line-height:1.75;
+  }
+
+  .disclosure{
+    margin-top:32px;
+    padding:20px 24px;
+    border:1px solid var(--line);
+    border-left:3px solid var(--spanky-pink);
+    font-size:0.82rem;
+    color:var(--ink-soft);
+    max-width:680px;
+    line-height:1.7;
+  }
+
+  /* ---------- ORIGINAL SITE: WHO IS SPANKY ---------- */
+  .story{
+    text-align:center;
+  }
+  .story .section-eyebrow{text-align:center;}
+  .story h2{
+    font-size:clamp(1.7rem,3.4vw,2.3rem); font-weight:400; margin:0 auto 22px; max-width:20ch;
+  }
+  .story p{
+    max-width:56ch; margin:0 auto 28px; color:var(--ink-soft); font-size:0.98rem; line-height:1.75;
+  }
+
+  /* ---------- ORIGINAL SITE: NEWSLETTER ---------- */
+  .newsletter{
+    text-align:center;
+    background:linear-gradient(180deg, var(--ivory), #fdf3f6);
+  }
+  .newsletter h2{
+    font-size:clamp(1.5rem,3vw,2rem); font-weight:400; margin-bottom:14px;
+  }
+  .newsletter p{color:var(--ink-soft); margin-bottom:34px;}
+  .newsletter-form{
+    display:flex; justify-content:center;
+    max-width:440px; margin:0 auto;
+    border:1px solid var(--ink);
+  }
+  .newsletter-form input{
+    flex:1; padding:15px 18px; border:none; background:transparent;
+    font-family:inherit; font-size:0.9rem; color:var(--ink);
+  }
+  .newsletter-form input:focus{outline:none;}
+  .newsletter-form button{
+    padding:15px 26px; background:var(--ink); color:var(--paper);
+    border:none; font-family:inherit; font-size:0.76rem; letter-spacing:0.1em; cursor:pointer;
+  }
+  .newsletter-form button:hover{background:var(--spanky-pink-deep);}
+
+  /* ---------- FOOTER ---------- */
+  footer{
+    padding:56px 0 36px;
+    text-align:center;
+  }
+  .footer-links{
+    display:flex; flex-wrap:wrap; justify-content:center; gap:28px;
+    font-size:0.76rem; letter-spacing:0.06em; color:var(--ink-soft);
+    margin-bottom:28px;
+  }
+  .footer-links a:hover{color:var(--spanky-pink-deep);}
+  footer .brand{justify-content:center; margin-bottom:18px;}
+  footer p.notice{
+    font-size:0.72rem; color:var(--warm-grey);
+    max-width:60ch; margin:0 auto;
+    line-height:1.7;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <nav>
+    <div class="navlinks">
+      <a href="#claim">Claim</a>
+      <a href="#access">Access</a>
+      <a href="#blueprint">Blueprint</a>
+    </div>
+    <div class="brand">
+      <img src="https://mediumturquoise-grasshopper-556994.hostingersite.com/wp-content/uploads/2026/07/cropped-LOGO.png" alt="OGSPANKY logo">
+      Bank of Spanky
+    </div>
+    <div class="navicons">
+      <a href="https://ogspanky.com" target="_blank" rel="noopener">Store</a>
+      <a href="#">Discord</a>
+    </div>
+  </nav>
+</header>
+<div class="pink-rule"></div>
+
+<section class="hero">
+  <div class="wrap hero-grid">
+    <div>
+      <div class="hero-tag">An Exclusive Digital Asset Collective</div>
+      <h1>The Bank of Spanky</h1>
+      <p class="sub">Every deposit builds the vault. A media network and holder collective backed by real-world merchandise and community equity.</p>
+      <div class="cta-row">
+        <button class="btn btn-primary">Mint on GraveMint / Enter Whitelist</button>
+        <button class="btn btn-secondary">Join Holder Discord</button>
+      </div>
+    </div>
+    <div class="hero-media">
+      <div class="rarity-badge">Legendary Vault Keeper</div>
+      <div class="rarity-badge two">#0007 / 1 of 1</div>
+      <img src="https://mediumturquoise-grasshopper-556994.hostingersite.com/wp-content/uploads/2026/08/WELCOME.png" alt="Bank of Spanky welcome art">
+    </div>
+  </div>
+</section>
+
+<div class="video-strip">
+  <video controls muted playsinline poster="https://mediumturquoise-grasshopper-556994.hostingersite.com/wp-content/uploads/2026/08/banner-we-earn-we-spanky.png">
+    <source src="https://mediumturquoise-grasshopper-556994.hostingersite.com/wp-content/uploads/2026/09/SPANK-BANG.mp4" type="video/mp4">
+  </video>
+</div>
+
+<section id="tiles">
+  <div class="wrap">
+    <div class="section-eyebrow">From the Original Site</div>
+    <div class="section-head">
+      <h2>OG Merch, Collection &amp; Coin</h2>
+      <p>The four original entry points into the Bank of Spanky ecosystem, carried over from the live site.</p>
+    </div>
+    <div class="cat-grid">
+      <div class="cat-card">
+        <img src="https://mediumturquoise-grasshopper-556994.hostingersite.com/wp-content/uploads/2026/08/tab02.png" alt="OG Merch">
+        <h3>OG Merch</h3>
+        <p>Drip hard. Stay Spanky. Merch for the real degens.</p>
+        <a class="text-link" href="#">Shop Now</a>
+      </div>
+      <div class="cat-card">
+        <img src="https://mediumturquoise-grasshopper-556994.hostingersite.com/wp-content/uploads/2026/08/tab01.png" alt="OG Collection">
+        <h3>OG Collection</h3>
+        <p>A 333-NFT collection living on the Solana blockchain.</p>
+        <a class="text-link" href="#">View Collection</a>
+      </div>
+      <div class="cat-card">
+        <img src="https://mediumturquoise-grasshopper-556994.hostingersite.com/wp-content/uploads/2026/08/tab04.png" alt="$SPANKY">
+        <h3>$SPANKY</h3>
+        <p>Get early access to Spanky World's hottest coins.</p>
+        <a class="text-link" href="#">Join $DNC</a>
+      </div>
+      <div class="cat-card">
+        <img src="https://mediumturquoise-grasshopper-556994.hostingersite.com/wp-content/uploads/2026/08/tab03.png" alt="Real Cash">
+        <h3>Real Cash</h3>
+        <p>Get rewarded in cash for every single word you put out about Spanky.</p>
+        <a class="text-link" href="#">Claim Cash</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="claim">
+  <div class="wrap">
+    <div class="section-eyebrow">Merch &amp; Physical NFT Claim Pipeline</div>
+    <div class="section-head">
+      <h2>Claim Your Piece of the Vault</h2>
+      <p>Every piece of official Bank of Spanky physical merchandise comes embedded with an exclusive digital claim. Order any qualifying shirt, hat, pin, or limited release, scan the integrated verification QR code on arrival, and receive a free companion NFT directly into your Solana wallet.</p>
+    </div>
+    <div class="pipeline">
+      <div class="pipeline-step">
+        <div class="num">01</div>
+        <h3>Shop the Store</h3>
+        <p>Select from official apparel and drops.</p>
+      </div>
+      <div class="pipeline-step">
+        <div class="num">02</div>
+        <h3>Scan the Tag</h3>
+        <p>Use your phone camera on the physical item's authenticated label.</p>
+      </div>
+      <div class="pipeline-step">
+        <div class="num">03</div>
+        <h3>Buy Merch, Mint for Free</h3>
+        <p>Connect your Phantom/Solflare wallet to claim your digital collectible without mint fees.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="access">
+  <div class="wrap">
+    <div class="section-eyebrow">Token-Gated Community Ecosystem</div>
+    <div class="section-head">
+      <h2>Verified Access Only</h2>
+    </div>
+    <div class="access-grid">
+      <div class="access-card">
+        <h3>Spanky School &amp; Alpha Network</h3>
+        <p>Direct access to market insights, trading strategies, content creation workshops, and behind-the-scenes brand operations.</p>
+      </div>
+      <div class="access-card">
+        <h3>Merch Allocations &amp; Whitelist Priority</h3>
+        <p>First-in-line access to limited-edition physical drops, private collection tiers, and future token distributions.</p>
+      </div>
+      <div class="access-card">
+        <h3>Token-Gated Discord &amp; Telegram Hubs</h3>
+        <p>Automated wallet-verification bot clearance to unlock VIP channels, community voting, and private voice hangouts.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="blueprint">
+  <div class="wrap">
+    <div class="section-eyebrow">Project Utility &amp; Capital Allocation</div>
+    <div class="section-head">
+      <h2>The Blueprint</h2>
+    </div>
+    <div class="alloc-rows">
+      <div class="alloc-row">
+        <h3>Liquidity &amp; Token Reserve</h3>
+        <p>Mint revenue fuels future memecoin liquidity pool pairing and secondary supply floor stabilization.</p>
+      </div>
+      <div class="alloc-row">
+        <h3>Content Production</h3>
+        <p>High-velocity video editing, multi-platform media clipping, and organic marketing pushes.</p>
+      </div>
+      <div class="alloc-row last">
+        <h3>Merch Inventory</h3>
+        <p>Continuous production of high-grade physical goods and packaging.</p>
+      </div>
+    </div>
+    <div class="disclosure">
+      Digital collectibles and any associated tokens carry financial risk and no return is guaranteed. This page is for informational purposes and is not investment advice.
+    </div>
+  </div>
+</section>
+
+<section class="story">
+  <div class="wrap">
+    <div class="section-eyebrow">Who Is Spanky</div>
+    <h2>A Movement, Not Just a Brand</h2>
+    <p>A lifestyle for every real degen who dares to dream bigger, flex harder, and never play small.</p>
+    <a class="text-link" href="#" style="padding:0 0 3px;">Read the Story</a>
+  </div>
+</section>
+
+<section class="newsletter">
+  <div class="wrap">
+    <h2>Join the OG Family</h2>
+    <p>Pink and rabbit-themed updates, drops, and news — straight to your inbox.</p>
+    <form class="newsletter-form">
+      <input type="email" placeholder="Email address">
+      <button type="submit">Sign Up</button>
+    </form>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="brand" style="display:flex; justify-content:center; gap:12px;">
+      <img src="https://mediumturquoise-grasshopper-556994.hostingersite.com/wp-content/uploads/2026/07/cropped-LOGO.png" alt="OGSPANKY logo" style="height:30px;">
+      Bank of Spanky
+    </div>
+    <div class="footer-links">
+      <a href="#">Mint Portal</a>
+      <a href="https://ogspanky.com" target="_blank" rel="noopener">Physical Store</a>
+      <a href="#">Whitepaper / Manifesto</a>
+      <a href="#">Discord</a>
+      <a href="#">Telegram</a>
+      <a href="#">X (Twitter)</a>
+    </div>
+    <p class="notice">© Bank of Spanky. All rights reserved. Verify all links only through official channels.</p>
+  </div>
+</footer>
+
+</body>
+</html>
